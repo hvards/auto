@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Auto": {
+      "commandName": "Project",
+      "commandLineArgs": "home.txt general.txt work.txt",
+      "nativeDebugging": true
+    }
+  }
+}

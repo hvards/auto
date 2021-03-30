@@ -1,4 +1,5 @@
-﻿using Auto.helpers;
+﻿using System.Linq;
+using Auto.helpers;
 using System.Threading;
 using System.Windows.Forms;
 using static Auto.Constants;
@@ -22,31 +23,33 @@ namespace Auto.tasks
 
         private static void SendKeys(string input)
         {
-            for (int i = 0; i < input.Length; i++)
+            for (var i = 0; i < input.Length; i++)
             {
-                if (input[i].Equals('{')) // variable name inside {}
+                string str;
+                switch (input[i])
                 {
-                    int startPos = i + 1;
-                    while (!input[i].Equals('}'))
-                        i++;
-                    var str = input[startPos..i];
-                    KeyboardHelper.SendChar(str);
+                    case '{':
+                        str = GetKey(input, i + 1);
+                        KeyboardHelper.SendChar(str);
+                        i += str.Length + 1;
+                        break;
+                    case '[':
+                        // KeyDown: [1:key], KeyUp: [0:key]
+                        str = GetKey(input, i+3);
+                        if (input[i + 2].Equals('!'))
+                            Thread.Sleep(int.Parse(str));
+                        else
+                            KeyboardHelper.SendChar(str, short.Parse(input[i + 1].ToString()) == 1 ? WM_KEYDOWN : WM_KEYUP);
+                        i += str.Length + 3;
+                        break;
+                    default:
+                        KeyboardHelper.SendChar(input[i].ToString());
+                        break;
                 }
-                else if (input[i].Equals('['))
-                {
-                    // KeyDown: [1:key], KeyUp: [0:key]
-                    int startPos = i + 1;
-                    while (!input[i].Equals(']'))
-                        i++;
-                    var str = input[(startPos+2)..i];
-                    if (input[startPos + 1].Equals('!'))
-                        Thread.Sleep(int.Parse(str));
-                    else
-                        KeyboardHelper.SendChar(str, short.Parse(input[startPos].ToString()) == 1 ? WM_KEYDOWN : WM_KEYUP);
-                }
-                else 
-                    KeyboardHelper.SendChar(input[i].ToString());
             }
         }
+
+        private static string GetKey(string input, int startPos) =>
+            string.Concat(input[startPos..].TakeWhile(c => !(c.Equals(']') || c.Equals('}'))));
     }
 }

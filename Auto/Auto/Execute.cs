@@ -3,6 +3,7 @@ using Auto.scripts;
 using Auto.tasks;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using static Auto.Constants;
@@ -53,7 +54,10 @@ namespace Auto
                         StartProgram.Start(args[0], args.Length > 1 ? args[1] : null);
                         break;
                     case "DeleteClipboard":
-                        ClipboardHelper.StartResetClipboardThread();
+                        ClipboardHelper.DeleteClipboard();
+                        break;
+                    case "SqlQuery":
+                        NotepadHelper.OpenWithText(SqlHelper.RunSqlQuery(args[0], args[1], args[2], args[3]));
                         break;
                     case "Fast":
                         break;
@@ -61,19 +65,20 @@ namespace Auto
             }
             catch (Exception e)
             {
-                Log.Error($"Error ececuting command: {script.Command},{script.Macro},{script.KeyCombo}:\n{e}");
+                Log.Error($"Error executing command: {script.Command},{script.Macro},{script.KeyCombo}:\n{e}");
             }
         }
 
-        private static string[] TransformArguments(string[] args)
+        private static string[] TransformArguments(IReadOnlyList<string> args)
         {
-            // Do not update args
-            string[] a = new string[args.Length];
+            var a = new string[args.Count];
             for (var i = 0; i < a.Length; i++)
             {
                 a[i] = args[i];
                 if (a[i].Contains("{:highlighted}"))
-                    a[i] = a[i].Replace("{:highlighted}", ClipboardHelper.GetHighlightedText());
+                    a[i] = a[i].Replace("{:highlighted}", ClipboardHelper.GetClipboardText(true));
+                if (a[i].Contains("{:clipboard}"))
+                    a[i] = a[i].Replace("{:clipboard}", ClipboardHelper.GetClipboardText());
             }
             return a;
         }

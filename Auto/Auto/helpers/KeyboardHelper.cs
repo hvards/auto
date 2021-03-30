@@ -8,17 +8,17 @@ namespace Auto.helpers
 {
     public static class KeyboardHelper
     {
-        private static readonly HashSet<string> lShiftKeys = new HashSet<string>() { "§", "!", "\"", "#", "¤", "%", "&", "/", "(", ")", "=", "?", "`", "^", "*", "_", ":", ";" };
-        private static readonly HashSet<string> altgrKeys = new HashSet<string>() { "@", "£", "$", "€", "{", "[", "]", "}", "´", "~", "€" };
-        private static readonly Dictionary<string, ushort> dict = new Dictionary<string, ushort>() { { "enter", (ushort)Keys.Enter }, { "left", (ushort)Keys.Left }, { "up", (ushort)Keys.Up }, { "right", (ushort)Keys.Right }, { "down", (ushort)Keys.Down }, { "LCtrl", (ushort)Keys.LControlKey }, { "tab", (ushort)Keys.Tab } };
+        private static readonly HashSet<string> LShiftKeys = new HashSet<string>() { "§", "!", "\"", "#", "¤", "%", "&", "/", "(", ")", "=", "?", "`", "^", "*", "_", ":", ";" };
+        private static readonly HashSet<string> AltGrKeys = new HashSet<string>() { "@", "£", "$", "€", "{", "[", "]", "}", "´", "~", "€" };
+        private static readonly Dictionary<string, ushort> KeyMap = new Dictionary<string, ushort>() { { "enter", (ushort)Keys.Enter }, { "left", (ushort)Keys.Left }, { "up", (ushort)Keys.Up }, { "right", (ushort)Keys.Right }, { "down", (ushort)Keys.Down }, { "LCtrl", (ushort)Keys.LControlKey }, { "tab", (ushort)Keys.Tab } };
 
         public static void SendChar(string ch, IntPtr? action = null)
         {
-            if (lShiftKeys.Contains(ch))
+            if (LShiftKeys.Contains(ch))
                 SendWithLShift((ushort)VkKeyScan(ch[0]));
-            else if (altgrKeys.Contains(ch))
+            else if (AltGrKeys.Contains(ch))
                 SendWithAltGr((ushort)VkKeyScan(ch[0]));
-            else if (dict.TryGetValue(ch, out ushort val))
+            else if (KeyMap.TryGetValue(ch, out var val))
                 ClickKey(val, action);
             else if (char.IsUpper(ch[0]))
                 SendWithLShift((ushort)VkKeyScan(ch[0]));
@@ -32,7 +32,7 @@ namespace Auto.helpers
 
         private static void SendKeyboardInput(Input[] kbInputs) => SendInput((uint)kbInputs.Length, kbInputs, Marshal.SizeOf(typeof(Input)));
 
-        private static void SendWithAltGr(ushort vk) => SendKeyboardInput(new Input[]{
+        private static void SendWithAltGr(ushort vk) => SendKeyboardInput(new []{
             GetKeyboardInput(162, true), GetKeyboardInput(165, true), GetKeyboardInput(vk, true), 
             GetKeyboardInput(vk, false), GetKeyboardInput(165, false), GetKeyboardInput(162, false)
         });
@@ -42,9 +42,9 @@ namespace Auto.helpers
         private static void SendWithLCtrl (ushort vk) => SendKeyboardInput(GetKeyboardInputArr(vk, 0xA2));
 
         private static Input[] GetKeyboardInputArr(ushort vk, ushort modifier = 0, IntPtr? action = null) => action == null ? modifier == 0 
-                ? new Input[] { GetKeyboardInput(vk, true), GetKeyboardInput(vk, false) } 
-                : new Input[] { GetKeyboardInput(modifier, true), GetKeyboardInput(vk, true), GetKeyboardInput(vk, false), GetKeyboardInput(modifier, false) }
-                : new Input[] { GetKeyboardInput(vk, (int)action == (int)WM_KEYDOWN) };
+                ? new[] { GetKeyboardInput(vk, true), GetKeyboardInput(vk, false) } 
+                : new[] { GetKeyboardInput(modifier, true), GetKeyboardInput(vk, true), GetKeyboardInput(vk, false), GetKeyboardInput(modifier, false) }
+                : new[] { GetKeyboardInput(vk, (int)action == (int)WM_KEYDOWN) };
 
         private static Input GetKeyboardInput(ushort vk, bool down) => new Input
         {

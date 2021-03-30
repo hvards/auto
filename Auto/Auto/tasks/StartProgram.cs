@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
 
-namespace Auto.scripts
+namespace Auto.tasks
 {
-    class StartProgram
+    internal class StartProgram
     {
         public static void Start(string program, string args)
         {

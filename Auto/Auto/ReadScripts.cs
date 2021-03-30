@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -23,7 +24,7 @@ namespace Auto
                         var temp = line.Split('|');
                         var command = temp[0];
                         var args = temp[3].Split(';');
-                        var macro = temp[1].Length > 0 ? temp[1].Split(';').Select(c => (ushort)KeyMap[c]).ToArray() : new ushort[0];
+                        var macro = temp[1].Length > 0 ? temp[1].Split(';').Select(c => (ushort)KeyMap[c]).ToArray() : Array.Empty<ushort>();
                         var combo = temp[2].Length > 0 ? temp[2].Split(';').Select(c => (ushort)KeyMap[c]).ToHashSet() : new HashSet<ushort>();
                         scripts.Add(new Script { Command = command, KeyCombo = combo, Macro = macro, CommandArgs = args });
                     }

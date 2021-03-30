@@ -15,12 +15,12 @@ class Program
     private static LowLevelMouseProc _mouseHook;
     private static IntPtr _hookId = IntPtr.Zero;
     private static IntPtr _mouseHookId = IntPtr.Zero;
-    private static List<Script> scripts;
-    private static readonly HashSet<ushort> pressedKeys = new HashSet<ushort>();
+    private static List<Script> _scripts;
+    private static readonly HashSet<ushort> PressedKeys = new HashSet<ushort>();
 
     private static void Main(string[] args)
     {
-        scripts = ReadScripts.GetScripts(args);
+        _scripts = ReadScripts.GetScripts(args);
         Execute.Start();
         Hook();
         Application.Run();
@@ -42,7 +42,7 @@ class Program
     private static IntPtr MouseHookCallback(int nCode, IntPtr wParam, ref MouseInput lParam)
     {
         if (wParam == WM_LBUTTONDOWN)
-            pressedKeys.Clear();
+            PressedKeys.Clear();
 
         return CallNextHookEx(_mouseHookId, nCode, wParam, ref lParam);
     }
@@ -57,14 +57,14 @@ class Program
             return (IntPtr)1;
 
         if (keyUp)
-            pressedKeys.Clear();
+            PressedKeys.Clear();
 
         if (Execute.Executing || (int)lParam.dwExtraInfo == IGNORE_INPUT || nCode != 0 || !keyDown)
             return CallNextHookEx(_hookId, nCode, wParam, ref lParam);
 
-        pressedKeys.Add(vkCode);
+        PressedKeys.Add(vkCode);
 
-        var result = scripts.FirstOrDefault(script => script.KeyCombo.SetEquals(pressedKeys) || script.TestMacro(vkCode)); 
+        var result = _scripts.FirstOrDefault(script => script.KeyCombo.SetEquals(PressedKeys) || script.TestMacro(vkCode)); 
         return result == null ? CallNextHookEx(_hookId, nCode, wParam, ref lParam) : Execute.QueueCommand(result);
     }
 

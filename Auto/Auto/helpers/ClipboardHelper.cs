@@ -7,38 +7,46 @@ namespace Auto.helpers
 {
     public static class ClipboardHelper
     {
-        private static string clipboardText;
+        private static string _clipboardText;
+        private const int CopyDelay = 75;
 
-        public static string GetHighlightedText()
-        {
-            KeyboardHelper.CopyHighlightedText();
-            Thread.Sleep(350);
-            Thread resetClipboard = StartResetClipboardThread();
-            resetClipboard.Join();
-            return clipboardText;
+        public static string GetClipboardText(bool copyHighlightedText = false)
+        {   
+            if (copyHighlightedText)
+                KeyboardHelper.CopyHighlightedText();
+
+            var retrieveClipboard = new Thread(RetrieveClipboardText);
+            StartStaThread(retrieveClipboard);
+
+            if (copyHighlightedText)
+                DeleteClipboard();
+
+            retrieveClipboard.Join();
+            return _clipboardText?.Trim();
         }
 
-        public static Thread StartResetClipboardThread() {
-            Thread resetClipboard = new Thread(() => ResetClipboard());
-            resetClipboard.SetApartmentState(ApartmentState.STA);
-            resetClipboard.Start();
-            return resetClipboard;
+        public static void DeleteClipboard() =>
+            StartStaThread(new Thread(ResetClipboard));
+
+        public static void RetrieveClipboardText()
+        {
+            Thread.Sleep(CopyDelay);
+            _clipboardText = System.Windows.Forms.Clipboard.GetText();
+        }
+
+        private static void StartStaThread(Thread clipboardThread)
+        {
+            clipboardThread.SetApartmentState(ApartmentState.STA);
+            clipboardThread.Start();
         }
 
         public static async void ResetClipboard()
         {
-            var history = await Clipboard.GetHistoryItemsAsync();
+            Thread.Sleep(500 + CopyDelay);
 
+            var history = await Clipboard.GetHistoryItemsAsync();
             var t = history.Items;
 
-            clipboardText = t[0]?.Content.GetTextAsync().GetAwaiter().GetResult();
-
-            if (clipboardText == null)
-            {
-                clipboardText = "empty clipboard";
-                return;
-            }
-            
             if (t.Any())
                 Clipboard.DeleteItemFromHistory(t[0]);
 

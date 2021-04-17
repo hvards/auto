@@ -53,6 +53,9 @@ namespace Auto
                     case "StartProgram":
                         StartProgram.Start(args[0], args.Length > 1 ? args[1] : null);
                         break;
+                    case "PowerShell":
+                        StartProgram.ExecutePowerShellScript(args);
+                        break;
                     case "DeleteClipboard":
                         ClipboardHelper.DeleteClipboard();
                         break;

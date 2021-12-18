@@ -19,16 +19,4 @@ public class StartProgram
             UseShellExecute = false,
             CreateNoWindow = true
         };
-
-    public static void ExecutePowerShellScript(string[] args)
-    {
-        var psi = GetCmdProcessStartInfo();
-        foreach (var arg in new[] { "/c", "start", "", "/b", "powershell.exe", Application.StartupPath + args[0] })
-            psi.ArgumentList.Add(arg);
-
-        for (var i = 1; i < args.Length; i++)
-            psi.ArgumentList.Add(args[i]);
-
-        Process.Start(psi);
-    }
 }

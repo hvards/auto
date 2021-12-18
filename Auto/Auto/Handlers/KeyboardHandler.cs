@@ -15,7 +15,9 @@ public static class KeyboardHandler
         { "right", (ushort)Keys.Right },
         { "down", (ushort)Keys.Down },
         { "LCtrl", (ushort)Keys.LControlKey },
-        { "tab", (ushort)Keys.Tab }
+        { "tab", (ushort)Keys.Tab },
+        { "Esc", (ushort)Keys.Escape },
+        { "Menu", (ushort)Keys.Apps}
     };
 
     public static void SendChar(string ch, IntPtr? action = null)

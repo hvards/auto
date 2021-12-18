@@ -1,7 +1,8 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using Auto;
 using static Auto.Constants;
+
+namespace Auto;
 
 public class Program
 {
@@ -13,9 +14,10 @@ public class Program
     private static IntPtr _mouseHookId = IntPtr.Zero;
     private static List<Command> _commands;
     private static readonly HashSet<ushort> PressedKeys = new();
+
     private static void Main(string[] args)
     {
-        _commands = GetCommands.Execute(args);
+        _commands = GetCommands.Execute(args).ToList();
         Execute.Start();
         Hook();
         Application.Run();
@@ -30,8 +32,9 @@ public class Program
 
         _keyboardHook = KeyboardHookCallback;
         _mouseHook = MouseHookCallback;
-        _hookId = SetWindowsHookEx(WH_KEYBOARD_LL, _keyboardHook, GetModuleHandle(module.ModuleName), 0);
-        _mouseHookId = SetWindowsHookEx(WH_MOUSE_LL, _mouseHook, GetModuleHandle(module.ModuleName), 0);
+        
+        _hookId = SetWindowsHookEx(WH_KEYBOARD_LL, _keyboardHook, GetModuleHandle(module!.ModuleName!), 0);
+        _mouseHookId = SetWindowsHookEx(WH_MOUSE_LL, _mouseHook, GetModuleHandle(module.ModuleName!), 0);
     }
 
     private static IntPtr KeyboardHookCallback(int nCode, IntPtr wParam, ref KeyboardInput lParam)
@@ -40,8 +43,8 @@ public class Program
         var keyUp = wParam == WM_KEYUP || wParam == WM_SYSKEYUP;
         var vkCode = lParam.wVk;
 
-        if (Execute.Executing && (int)lParam.dwExtraInfo != IGNORE_INPUT)
-            return (IntPtr)1;
+        if (Execute.Executing && (int) lParam.dwExtraInfo != IGNORE_INPUT)
+            return (IntPtr) 1;
 
         if (keyUp)
             PressedKeys.Clear();

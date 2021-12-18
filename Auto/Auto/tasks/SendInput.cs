@@ -1,11 +1,21 @@
 ﻿using Auto.Handlers;
+using Auto.InputUtils;
 using static Auto.Constants;
 
 namespace Auto.Tasks;
 
-public class SendInput
+
+public static class SendInput
 {
-    public static void Send(bool del, string input = null)
+    public static void Mouse(string input)
+    {
+        foreach (var token in input.GetTokens())
+        {
+            MouseHandler.LeftClick();
+        }
+    }
+
+    public static void Keyboard(bool del, string input)
     {
         if (del)
         {
@@ -15,37 +25,26 @@ public class SendInput
             KeyboardHandler.ClickKey((ushort)Keys.ControlKey, WM_KEYUP);
             KeyboardHandler.ClickKey((ushort)Keys.ShiftKey, WM_KEYUP);
         }
-        SendKeys(input);
-    }
-
-    private static void SendKeys(string input)
-    {
-        for (var i = 0; i < input.Length; i++)
+        
+        foreach (var token in input.GetTokens())
         {
-            string str;
-            switch (input[i])
+            switch (token.InputAction)
             {
-                case '{':
-                    str = GetKey(input, i + 1);
-                    KeyboardHandler.SendChar(str);
-                    i += str.Length + 1;
+                case InputAction.NotSet:
+                    KeyboardHandler.SendChar(token.Value);
                     break;
-                case '[':
-                    // KeyDown: [1:key], KeyUp: [0:key]
-                    str = GetKey(input, i+3);
-                    if (input[i + 2].Equals('!'))
-                        Thread.Sleep(int.Parse(str));
-                    else
-                        KeyboardHandler.SendChar(str, short.Parse(input[i + 1].ToString()) == 1 ? WM_KEYDOWN : WM_KEYUP);
-                    i += str.Length + 3;
+                case InputAction.Down:
+                    KeyboardHandler.SendChar(token.Value, WM_KEYDOWN);
+                    break;
+                case InputAction.Up:
+                    KeyboardHandler.SendChar(token.Value, WM_KEYUP);
+                    break;
+                case InputAction.Sleep:
+                    Thread.Sleep(int.Parse(token.Value));
                     break;
                 default:
-                    KeyboardHandler.SendChar(input[i].ToString());
-                    break;
+                    throw new ArgumentOutOfRangeException();
             }
         }
     }
-
-    private static string GetKey(string input, int startPos) =>
-        string.Concat(input[startPos..].TakeWhile(c => !(c.Equals(']') || c.Equals('}'))));
 }

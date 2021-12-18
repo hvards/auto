@@ -3,10 +3,10 @@
 namespace Auto.Handlers;
 public static class ClipboardHandler
 {
-    private static string? _clipboardText;
+    private static string _clipboardText;
     private const int CopyDelay = 75;
 
-    public static string? GetClipboardText(bool copyHighlightedText = false)
+    public static string GetClipboardText(bool copyHighlightedText = false)
     {
         if (copyHighlightedText)
             KeyboardHandler.CopyHighlightedText();

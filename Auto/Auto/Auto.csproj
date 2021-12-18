@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
-		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<UseWindowsForms>true</UseWindowsForms>
 		<OutputType>Exe</OutputType>
 	</PropertyGroup>
 	<ItemGroup>
-	  <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
+		<PackageReference Include="Microsoft.PowerShell.SDK" Version="7.2.1" />
+		<PackageReference Include="System.Management.Automation" Version="7.2.1" />
 	</ItemGroup>
 </Project>

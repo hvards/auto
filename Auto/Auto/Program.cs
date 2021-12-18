@@ -1,13 +1,9 @@
-﻿using System;
 using System.Diagnostics;
-using System.Windows.Forms;
 using System.Runtime.InteropServices;
-using System.Collections.Generic;
 using Auto;
 using static Auto.Constants;
-using System.Linq;
 
-class Program
+public class Program
 {
     private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, ref KeyboardInput lParam);
     private delegate IntPtr LowLevelMouseProc(int nCode, IntPtr wParam, ref MouseInput lParam);
@@ -15,12 +11,11 @@ class Program
     private static LowLevelMouseProc _mouseHook;
     private static IntPtr _hookId = IntPtr.Zero;
     private static IntPtr _mouseHookId = IntPtr.Zero;
-    private static List<Script> _scripts;
-    private static readonly HashSet<ushort> PressedKeys = new HashSet<ushort>();
-
+    private static List<Command> _commands;
+    private static readonly HashSet<ushort> PressedKeys = new();
     private static void Main(string[] args)
     {
-        _scripts = ReadScripts.GetScripts(args);
+        _commands = GetCommands.Execute(args);
         Execute.Start();
         Hook();
         Application.Run();
@@ -30,21 +25,13 @@ class Program
 
     private static void Hook()
     {
-        using var curProcess = Process.GetCurrentProcess();
-        using var curModule = curProcess.MainModule;
+        using var currentProcess = Process.GetCurrentProcess();
+        using var module = currentProcess.MainModule;
 
         _keyboardHook = KeyboardHookCallback;
         _mouseHook = MouseHookCallback;
-        _hookId = SetWindowsHookEx(WH_KEYBOARD_LL, _keyboardHook, GetModuleHandle(curModule?.ModuleName), 0);
-        _mouseHookId = SetWindowsHookEx(WH_MOUSE_LL, _mouseHook, GetModuleHandle(curModule?.ModuleName), 0);
-    }
-
-    private static IntPtr MouseHookCallback(int nCode, IntPtr wParam, ref MouseInput lParam)
-    {
-        if (wParam == WM_LBUTTONDOWN)
-            PressedKeys.Clear();
-
-        return CallNextHookEx(_mouseHookId, nCode, wParam, ref lParam);
+        _hookId = SetWindowsHookEx(WH_KEYBOARD_LL, _keyboardHook, GetModuleHandle(module.ModuleName), 0);
+        _mouseHookId = SetWindowsHookEx(WH_MOUSE_LL, _mouseHook, GetModuleHandle(module.ModuleName), 0);
     }
 
     private static IntPtr KeyboardHookCallback(int nCode, IntPtr wParam, ref KeyboardInput lParam)
@@ -64,8 +51,16 @@ class Program
 
         PressedKeys.Add(vkCode);
 
-        var result = _scripts.FirstOrDefault(script => script.KeyCombo.SetEquals(PressedKeys) || script.TestMacro(vkCode)); 
+        var result = _commands.FirstOrDefault(command => command.KeyCombo.SetEquals(PressedKeys) || command.TestMacro(vkCode));
         return result == null ? CallNextHookEx(_hookId, nCode, wParam, ref lParam) : Execute.QueueCommand(result);
+    }
+
+    private static IntPtr MouseHookCallback(int nCode, IntPtr wParam, ref MouseInput lParam)
+    {
+        if (wParam == WM_LBUTTONDOWN)
+            PressedKeys.Clear();
+
+        return CallNextHookEx(_mouseHookId, nCode, wParam, ref lParam);
     }
 
     [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]

@@ -22,6 +22,7 @@ namespace Auto.Tasks
             foreach (var parameter in parameters) 
                 _powerShell.AddParameter(null, parameter);
             var result = _powerShell.Invoke();
+            _powerShell.Commands.Clear();
             return ResultToString(result);
         }
 

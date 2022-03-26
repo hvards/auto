@@ -24,19 +24,23 @@ public static class Execute
         while (true)
         {
             var command = MessageQueue.Take();
+            var arguments = command.ExecuteArguments();
+
             Executing = true;
             foreach (var k in ModifierKeys)
                 KeyboardHandler.ClickKey(k, WM_KEYUP);
-            ExecuteCommand(command);
+            foreach (var k in command.KeyCombo)
+                KeyboardHandler.ClickKey(k, WM_KEYUP);
+
+            ExecuteCommand(command, arguments);
             Executing = false;
         }
     }
 
-    private static void ExecuteCommand(Command command)
+    private static void ExecuteCommand(Command command, IReadOnlyList<string> args)
     {
         try
         {
-            var args = command.ExecuteArguments();
             switch (command.Keyword)
             {
                 case "MouseInput":

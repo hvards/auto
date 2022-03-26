@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using Auto.CommandJson;
 using static Auto.Constants;
 
 namespace Auto;

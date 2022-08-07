@@ -18,7 +18,7 @@ public class Program
 
     private static void Main(string[] args)
     {
-        _commands = GetCommands.Execute(args).ToList();
+        _commands = GetCommands.Execute(args).Where(x => x.Enabled).ToList();
         Execute.Start();
         Hook();
         Application.Run();

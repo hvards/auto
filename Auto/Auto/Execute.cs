@@ -52,9 +52,6 @@ public static class Execute
                 case "StartProgram":
                     StartProgram.Start(args[0], args.Count > 1 ? args[1] : null);
                     break;
-                case "DeleteClipboard":
-                    ClipboardHandler.DeleteClipboard();
-                    break;
             }
         }
         catch (Exception e)

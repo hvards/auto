@@ -9,10 +9,7 @@ public class GetCommands
         {
             try
             {
-                return JsonSerializer.Deserialize<List<Command>>(File.ReadAllText(file), new JsonSerializerOptions
-                {
-                    Converters = {new UshortSerializerConverter()}
-                });
+                return JsonSerializer.Deserialize<List<Command>>(File.ReadAllText(file));
             }
             catch (Exception ex)
             {

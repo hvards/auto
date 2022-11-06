@@ -2,30 +2,15 @@
 using Auto.Handlers;
 using Auto.Tasks;
 
-namespace Auto;
+namespace Auto.Command;
 
 public class Command
 {
-    public HashSet<ushort> KeyCombo { get; set; }
-    public string Keyword { get; set; }
-    public ushort[] Macro { get; set; }
+    public Trigger Trigger { get; set; }
+    public string Action { get; set; }
     public string[] Args { get; set; }
     public Dictionary<string, List<string>> ScriptArguments { get; set; }
     public bool Enabled { get; set; }
-    private ushort _macroPosition;
-
-    public bool TestMacro(int key)
-    {
-        if (_macroPosition >= Macro?.Length || key != Macro?[_macroPosition++])
-        {
-            _macroPosition = 0;
-            return false;
-        }
-        
-        if (_macroPosition == Macro.Length)
-            _macroPosition = 0;
-        return _macroPosition == 0;
-    }
 
     public List<string> ExecuteArguments() => Args.Select(arg =>
     {

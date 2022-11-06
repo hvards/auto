@@ -20,6 +20,16 @@ public static class KeyboardHandler
         { "Menu", (ushort)Keys.Apps}
     };
 
+    public static void ReleaseAllKeys()
+    {
+        foreach (int key in Enum.GetValues(typeof(Keys)))
+        {
+            var state = GetAsyncKeyState(key);
+            if ((state & 0x8000) != 0)
+                ClickKey((ushort)key, WM_KEYUP);
+        }
+    }
+
     public static void SendChar(string ch, IntPtr? action = null)
     {
         if (LShiftKeys.Contains(ch))
@@ -72,4 +82,7 @@ public static class KeyboardHandler
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern uint SendInput(uint nInputs, Input[] pInputs, int cbSize);
+
+    [DllImport("user32.dll")]
+    static extern short GetAsyncKeyState(int lpKeyState);
 }

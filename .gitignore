@@ -2,6 +2,7 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/Auto/.vs/Auto
-/Auto/Auto/bin
-/Auto/Auto/obj
+/Auto/.vs/*
+/Auto/*/bin
+/Auto/*/obj
+/**/*sln.DotSettings.user

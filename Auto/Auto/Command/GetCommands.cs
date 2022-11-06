@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace Auto.CommandJson;
+namespace Auto.Command;
 
 public class GetCommands
 {

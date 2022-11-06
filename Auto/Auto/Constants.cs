@@ -15,9 +15,6 @@ public class Constants
     public static readonly uint MOUSEEVENTF_LEFTDOWN = 0x0002;
     public static readonly uint MOUSEEVENTF_LEFTUP = 0x0004;
     public static readonly int IGNORE_INPUT = 0xffffff;
-    public static readonly List<ushort> ModifierKeys = new() { 16, 17, 18, 91, 92, 160, 161, 162, 163, 164, 165 };
-
-
 
     [StructLayout(LayoutKind.Sequential)]
     public struct KeyboardInput

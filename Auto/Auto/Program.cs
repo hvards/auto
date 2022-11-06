@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using Auto.CommandJson;
+using Auto.Command;
 using static Auto.Constants;
 
 namespace Auto;
@@ -13,7 +13,7 @@ public class Program
     private static LowLevelMouseProc _mouseHook;
     private static IntPtr _hookId = IntPtr.Zero;
     private static IntPtr _mouseHookId = IntPtr.Zero;
-    private static List<Command> _commands;
+    private static List<Command.Command> _commands;
     private static readonly HashSet<ushort> PressedKeys = new();
 
     private static void Main(string[] args)
@@ -55,8 +55,8 @@ public class Program
 
         PressedKeys.Add(vkCode);
 
-        var result = _commands.FirstOrDefault(command => command.KeyCombo.SetEquals(PressedKeys) || command.TestMacro(vkCode));
-        return result == null ? CallNextHookEx(_hookId, nCode, wParam, ref lParam) : Execute.QueueCommand(result);
+        var command = _commands.FirstOrDefault(x => x.Trigger.Check(PressedKeys, vkCode));
+        return command == null ? CallNextHookEx(_hookId, nCode, wParam, ref lParam) : Execute.QueueCommand(command);
     }
 
     private static IntPtr MouseHookCallback(int nCode, IntPtr wParam, ref MouseInput lParam)

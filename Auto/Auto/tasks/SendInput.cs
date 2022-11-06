@@ -15,17 +15,8 @@ public static class SendInput
         }
     }
 
-    public static void Keyboard(bool del, string input)
-    {
-        if (del)
-        {
-            KeyboardHandler.ClickKey((ushort)Keys.ShiftKey, WM_KEYDOWN);
-            KeyboardHandler.ClickKey((ushort)Keys.ControlKey, WM_KEYDOWN);
-            KeyboardHandler.ClickKey((ushort)Keys.Left, null);
-            KeyboardHandler.ClickKey((ushort)Keys.ControlKey, WM_KEYUP);
-            KeyboardHandler.ClickKey((ushort)Keys.ShiftKey, WM_KEYUP);
-        }
-        
+    public static void Keyboard(string input)
+    {        
         foreach (var token in input.GetTokens())
         {
             switch (token.InputAction)

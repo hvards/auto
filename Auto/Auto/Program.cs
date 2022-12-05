@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Auto.Command;
+using Auto.Handlers;
 using static Auto.Constants;
 
 namespace Auto;
@@ -14,11 +15,17 @@ public class Program
     private static IntPtr _hookId = IntPtr.Zero;
     private static IntPtr _mouseHookId = IntPtr.Zero;
     private static List<Command.Command> _commands;
+    private static List<Command.Command> _remappedKeys;
     private static readonly HashSet<ushort> PressedKeys = new();
 
-    private static void Main(string[] args)
+    private static void Main()
     {
-        _commands = GetCommands.Execute(args).Where(x => x.Enabled).ToList();
+        var commandFolders =
+            (Environment.GetEnvironmentVariable("Auto", EnvironmentVariableTarget.Machine) ??
+             throw new Exception("Missing auto folders")).Split(";")
+            .Where(Directory.Exists).ToList();
+        _commands = GetCommands.Execute(commandFolders).Where(x => x.Enabled).ToList();
+        _remappedKeys = GetCommands.GetRemappedKeys(commandFolders).ToList();
         Execute.Start();
         Hook();
         Application.Run();
@@ -50,6 +57,10 @@ public class Program
         if (keyUp)
             PressedKeys.Clear();
 
+        var remappedKey = _remappedKeys.FirstOrDefault(x => x.Trigger.Combination.First() == vkCode);
+        if (remappedKey != null)
+            return RemapKey(remappedKey, keyUp);
+
         if (Execute.Executing || (int)lParam.dwExtraInfo == IGNORE_INPUT || nCode != 0 || !keyDown)
             return CallNextHookEx(_hookId, nCode, wParam, ref lParam);
 
@@ -57,6 +68,17 @@ public class Program
 
         var command = _commands.FirstOrDefault(x => x.Trigger.Check(PressedKeys, vkCode));
         return command == null ? CallNextHookEx(_hookId, nCode, wParam, ref lParam) : Execute.QueueCommand(command);
+    }
+
+    private static IntPtr RemapKey(Command.Command command, bool keyUp)
+    {
+        foreach (var commandArg in command.Args)
+        {
+            var vkCode = ushort.Parse(commandArg);
+            KeyboardHandler.ClickKey(vkCode, keyUp ? WM_KEYUP : WM_KEYDOWN);
+        }
+        
+        return (IntPtr)1;
     }
 
     private static IntPtr MouseHookCallback(int nCode, IntPtr wParam, ref MouseInput lParam)

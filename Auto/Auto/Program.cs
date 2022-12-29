@@ -72,7 +72,7 @@ public class Program
 
     private static IntPtr RemapKey(Command.Command command, bool keyUp)
     {
-        foreach (var commandArg in command.Args)
+        foreach (var commandArg in command.Arguments.SelectMany(x => x.Tokens).Select(x => x.Value))
         {
             var vkCode = ushort.Parse(commandArg);
             KeyboardHandler.ClickKey(vkCode, keyUp ? WM_KEYUP : WM_KEYDOWN);

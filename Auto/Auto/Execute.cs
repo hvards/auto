@@ -25,7 +25,11 @@ public static class Execute
             try
             {
                 var command = MessageQueue.Take();
-                var arguments = command.ExecuteArguments();
+
+                var clipboard = command.ClipboardTextRequired ? ClipboardHandler.GetClipboardText() : string.Empty;
+                var highlighted = command.HighlightedTextRequired ? ClipboardHandler.GetClipboardText(true) : string.Empty;
+
+                var arguments = command.ExecuteArguments(clipboard, highlighted);
 
                 Executing = true;
 

@@ -1,6 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using Auto.Handlers;
-using Auto.Tasks;
+﻿using Auto.Tasks;
 
 namespace Auto.Command;
 
@@ -8,25 +6,42 @@ public class Command
 {
     public Trigger Trigger { get; set; }
     public string Action { get; set; }
-    public string[] Args { get; set; }
-    public Dictionary<string, List<string>> ScriptArguments { get; set; }
+    public CommandArgument[] Arguments { get; set; }
+    public Dictionary<string, CommandArgument[]> PowerShellArguments { get; set; }
     public bool Enabled { get; set; }
+    public bool HighlightedTextRequired { get; set; }
+    public bool ClipboardTextRequired { get; set; }
 
-    public List<string> ExecuteArguments() => Args.Select(arg =>
-    {
-        if (arg.Contains("{:highlighted}"))
-            arg = arg.Replace("{:highlighted}", ClipboardHandler.GetClipboardText(true));
-        if (arg.Contains("{:clipboard}"))
-            arg = arg.Replace("{:clipboard}", ClipboardHandler.GetClipboardText());
-        return GetPowerShellArguments(arg);
-    }).ToList();
+    public List<string> ExecuteArguments(string clipboard = null, string highlighted = null) =>
+        Arguments.Select(arg => ExecuteArgument(arg, clipboard, highlighted)).ToList();
 
-    private string GetPowerShellArguments(string argument)
+    private string ExecuteArgument(CommandArgument argument, string clipboard, string highlighted)
     {
-        var psResult = Regex.Match(argument, "{:powershell:([^}]*)}");
-        if (!psResult.Success) return argument;
-        ScriptArguments.TryGetValue(psResult.Groups[1].Value, out var scriptArgs);
-        return argument.Replace(argument.Substring(psResult.Index, psResult.Length),
-            PowerShell.Execute(psResult.Groups[1].Value, scriptArgs?.Select(GetPowerShellArguments) ?? Enumerable.Empty<string>()));
+        return argument.Tokens.Aggregate(string.Empty,
+            (current, next) =>
+            {
+                current += ExecuteArgumentToken(next, clipboard, highlighted);
+                return current;
+            });
+    }
+
+    private string ExecuteArgumentToken(ArgumentToken token, string clipboard, string highlighted)
+    {
+        switch (token.Type)
+        {
+            case ArgumentType.Clipboard:
+                return clipboard;
+            case ArgumentType.Highlighted:
+                return highlighted;
+            case ArgumentType.PowerShell:
+                PowerShellArguments.TryGetValue(token.Value, out var scriptArgs);
+                return PowerShell.Execute(token.Value,
+                    scriptArgs?.Select(x => ExecuteArgument(x, clipboard, highlighted)) ?? Enumerable.Empty<string>());
+            case ArgumentType.Text:
+                return token.Value;
+            case ArgumentType.NotSet:
+            default:
+                return null;
+        }
     }
 }

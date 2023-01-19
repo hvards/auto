@@ -16,11 +16,29 @@ namespace Auto.Tasks
             _powerShell = System.Management.Automation.PowerShell.Create(iss);
         }
 
-        public static string Execute(string file, IEnumerable<string> parameters)
+        public static string Execute(string file, IList<string> parameters)
         {
             _powerShell.AddCommand(Path.Combine(Application.StartupPath, file));
-            foreach (var parameter in parameters) 
-                _powerShell.AddParameter(null, parameter);
+
+            if (parameters != null)
+            {
+	            foreach (var parameter in parameters)
+	            {
+		            var multi = parameter.StartsWith("#Multi:");
+		            if (multi)
+		            {
+			            foreach (var param in parameter[7..].Split("\n"))
+			            {
+				            _powerShell.AddParameter(null, param);
+			            }
+                    }
+		            else
+		            {
+			            _powerShell.AddParameter(null, parameter);
+		            }
+	            }
+            }
+
             var result = _powerShell.Invoke();
             _powerShell.Commands.Clear();
             return ResultToString(result);

@@ -36,7 +36,7 @@ public class Command
             case ArgumentType.PowerShell:
                 PowerShellArguments.TryGetValue(token.Value, out var scriptArgs);
                 return PowerShell.Execute(token.Value,
-                    scriptArgs?.Select(x => ExecuteArgument(x, clipboard, highlighted)) ?? Enumerable.Empty<string>());
+                    scriptArgs?.Select(x => ExecuteArgument(x, clipboard, highlighted)).ToList());
             case ArgumentType.Text:
                 return token.Value;
             case ArgumentType.NotSet:

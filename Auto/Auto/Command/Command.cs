@@ -11,9 +11,14 @@ public class Command
     public bool Enabled { get; set; }
     public bool HighlightedTextRequired { get; set; }
     public bool ClipboardTextRequired { get; set; }
+    private readonly Dictionary<string, string> _powerShellExecutionResult = new();
 
-    public List<string> ExecuteArguments(string clipboard = null, string highlighted = null) =>
-        Arguments.Select(arg => ExecuteArgument(arg, clipboard, highlighted)).ToList();
+    public List<string> ExecuteArguments(string clipboard = null, string highlighted = null)
+    {
+	    var res = Arguments.Select(arg => ExecuteArgument(arg, clipboard, highlighted)).ToList();
+        _powerShellExecutionResult.Clear();
+        return res;
+    }
 
     private string ExecuteArgument(CommandArgument argument, string clipboard, string highlighted)
     {
@@ -35,8 +40,12 @@ public class Command
                 return highlighted;
             case ArgumentType.PowerShell:
                 PowerShellArguments.TryGetValue(token.Value, out var scriptArgs);
-                return PowerShell.Execute(token.Value,
-                    scriptArgs?.Select(x => ExecuteArgument(x, clipboard, highlighted)).ToList());
+                if (_powerShellExecutionResult.TryGetValue(token.Value, out var result))
+	                return result;
+                result = PowerShell.Execute(token.Value,
+	                scriptArgs?.Select(x => ExecuteArgument(x, clipboard, highlighted)).ToList());
+                _powerShellExecutionResult.Add(token.Value, result);
+                return result;
             case ArgumentType.Text:
                 return token.Value;
             case ArgumentType.NotSet:

@@ -11,10 +11,10 @@ public static class Execute
     public static bool Executing { get; set; }
     public static void Start() => ExecuteThread.Start();
 
-    public static IntPtr QueueCommand(Command.Command s)
+    public static nint QueueCommand(Command.Command s)
     {
         MessageQueue.Add(s);
-        return (IntPtr) 1;
+        return 1;
     }
 
     private static void ProcessCommands()

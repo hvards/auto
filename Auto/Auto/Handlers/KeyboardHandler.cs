@@ -30,7 +30,15 @@ public static class KeyboardHandler
         }
     }
 
-    public static void SendChar(string ch, IntPtr? action = null)
+    public static void ReleaseKeys(IEnumerable<ushort> keys)
+    {
+        foreach (var key in keys)
+        {
+            ClickKey(key, WM_KEYUP);
+        }
+    }
+
+    public static void SendChar(string ch, nint? action = null)
     {
         if (LShiftKeys.Contains(ch))
             SendWithLShift((ushort)VkKeyScan(ch[0]));
@@ -44,7 +52,7 @@ public static class KeyboardHandler
             ClickKey((ushort)VkKeyScan(ch[0]), action);
     }
 
-    public static void ClickKey(ushort vk, IntPtr? action) => SendKeyboardInput(GetKeyboardInputArr(vk, action: action));
+    public static void ClickKey(ushort vk, nint? action) => SendKeyboardInput(GetKeyboardInputArr(vk, action: action));
 
     public static void CopyHighlightedText() => SendWithLCtrl(0x43);
 
@@ -58,7 +66,7 @@ public static class KeyboardHandler
     private static void SendWithLCtrl(ushort vk) => SendKeyboardInput(GetKeyboardInputArr(vk, 0xA2));
 
     private static void SendKeyboardInput(Input[] kbInputs) => SendInput((uint)kbInputs.Length, kbInputs, Marshal.SizeOf(typeof(Input)));
-    private static Input[] GetKeyboardInputArr(ushort vk, ushort modifier = 0, IntPtr? action = null) => action == null ? modifier == 0
+    private static Input[] GetKeyboardInputArr(ushort vk, ushort modifier = 0, nint? action = null) => action == null ? modifier == 0
             ? new[] { GetKeyboardInput(vk, true), GetKeyboardInput(vk, false) }
             : new[] { GetKeyboardInput(modifier, true), GetKeyboardInput(vk, true), GetKeyboardInput(vk, false), GetKeyboardInput(modifier, false) }
             : new[] { GetKeyboardInput(vk, (int)action == (int)WM_KEYDOWN) };
@@ -72,7 +80,7 @@ public static class KeyboardHandler
             {
                 wVk = vk,
                 dwFlags = (ushort)(down ? KeyEventF.KeyDown : KeyEventF.KeyUp),
-                dwExtraInfo = (IntPtr)IGNORE_INPUT
+                dwExtraInfo = IGNORE_INPUT
             }
         }
     };

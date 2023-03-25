@@ -8,15 +8,16 @@ namespace Auto;
 
 public class Program
 {
-    private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, ref KeyboardInput lParam);
-    private delegate IntPtr LowLevelMouseProc(int nCode, IntPtr wParam, ref MouseInput lParam);
+    private delegate nint LowLevelKeyboardProc(int nCode, nint wParam, ref KeyboardInput lParam);
+    private delegate nint LowLevelMouseProc(int nCode, nint wParam, ref MouseInput lParam);
     private static LowLevelKeyboardProc _keyboardHook;
     private static LowLevelMouseProc _mouseHook;
-    private static IntPtr _hookId = IntPtr.Zero;
-    private static IntPtr _mouseHookId = IntPtr.Zero;
+    private static nint _hookId = nint.Zero;
+    private static nint _mouseHookId = nint.Zero;
     private static List<Command.Command> _commands;
     private static List<Command.Command> _remappedKeys;
     private static readonly HashSet<ushort> PressedKeys = new();
+    private static HashSet<ushort> _activeRemapModifier;
 
     private static void Main()
     {
@@ -45,19 +46,23 @@ public class Program
         _mouseHookId = SetWindowsHookEx(WH_MOUSE_LL, _mouseHook, GetModuleHandle(module.ModuleName!), 0);
     }
 
-    private static IntPtr KeyboardHookCallback(int nCode, IntPtr wParam, ref KeyboardInput lParam)
+    private static nint KeyboardHookCallback(int nCode, nint wParam, ref KeyboardInput lParam)
     {
         var keyDown = wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN;
         var keyUp = wParam == WM_KEYUP || wParam == WM_SYSKEYUP;
         var vkCode = lParam.wVk;
 
         if (Execute.Executing && (int) lParam.dwExtraInfo != IGNORE_INPUT)
-            return (IntPtr) 1;
+            return 1;
 
         if (keyUp)
+        {
             PressedKeys.Clear();
+            if (lParam.dwExtraInfo != IGNORE_INPUT && _activeRemapModifier != null && _activeRemapModifier.Contains(vkCode))
+                _activeRemapModifier = null;
+        }
 
-        var remappedKey = _remappedKeys.FirstOrDefault(x => x.Trigger.Combination.First() == vkCode);
+        var remappedKey = TestRemapKey(vkCode);
         if (remappedKey != null)
             return RemapKey(remappedKey, keyUp);
 
@@ -70,7 +75,23 @@ public class Program
         return command == null ? CallNextHookEx(_hookId, nCode, wParam, ref lParam) : Execute.QueueCommand(command);
     }
 
-    private static IntPtr RemapKey(Command.Command command, bool keyUp)
+    private static Command.Command TestRemapKey(ushort vkCode)
+    {
+        var keys = new HashSet<ushort>(_activeRemapModifier ?? PressedKeys) { vkCode };
+        var remappedKey = _remappedKeys.FirstOrDefault(x =>
+	        x.Trigger.Combination.SetEquals(keys) ||
+	        x.Trigger.Combination.Count == 1 && x.Trigger.Combination.First() == vkCode);
+        if (remappedKey == null) return null;
+        if (_activeRemapModifier == null && remappedKey.Trigger.Combination.Count > 1)
+        {
+            _activeRemapModifier = new HashSet<ushort>(remappedKey.Trigger.Combination);
+            _activeRemapModifier.Remove(vkCode);
+            KeyboardHandler.ReleaseKeys(remappedKey.Trigger.Combination);
+        }
+        return remappedKey;
+    }
+
+    private static nint RemapKey(Command.Command command, bool keyUp)
     {
         foreach (var commandArg in command.Arguments.SelectMany(x => x.Tokens).Select(x => x.Value))
         {
@@ -78,10 +99,10 @@ public class Program
             KeyboardHandler.ClickKey(vkCode, keyUp ? WM_KEYUP : WM_KEYDOWN);
         }
         
-        return (IntPtr)1;
+        return 1;
     }
 
-    private static IntPtr MouseHookCallback(int nCode, IntPtr wParam, ref MouseInput lParam)
+    private static nint MouseHookCallback(int nCode, nint wParam, ref MouseInput lParam)
     {
         if (wParam == WM_LBUTTONDOWN)
             PressedKeys.Clear();
@@ -90,21 +111,21 @@ public class Program
     }
 
     [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
+    private static extern nint SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, nint hMod, uint dwThreadId);
 
     [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelMouseProc lpfn, IntPtr hMod, uint dwThreadId);
+    private static extern nint SetWindowsHookEx(int idHook, LowLevelMouseProc lpfn, nint hMod, uint dwThreadId);
 
     [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool UnhookWindowsHookEx(IntPtr hhk);
+    private static extern bool UnhookWindowsHookEx(nint hhk);
 
     [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    private static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, ref KeyboardInput lParam);
+    private static extern nint CallNextHookEx(nint hhk, int nCode, nint wParam, ref KeyboardInput lParam);
 
     [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    private static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, ref MouseInput lParam);
+    private static extern nint CallNextHookEx(nint hhk, int nCode, nint wParam, ref MouseInput lParam);
 
     [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    private static extern IntPtr GetModuleHandle(string lpModuleName);
+    private static extern nint GetModuleHandle(string lpModuleName);
 }

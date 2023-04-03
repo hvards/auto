@@ -14,7 +14,18 @@ public static class KeyboardHandler
         { "LCtrl", (ushort)Keys.LControlKey },
         { "tab", (ushort)Keys.Tab },
         { "Esc", (ushort)Keys.Escape },
-        { "Menu", (ushort)Keys.Apps}
+        { "Menu", (ushort)Keys.Apps},
+        { "alt", (ushort)Keys.LMenu },
+        { "NumPad0", (ushort)Keys.NumPad0},
+        { "NumPad1", (ushort)Keys.NumPad1},
+        { "NumPad2", (ushort)Keys.NumPad2},
+        { "NumPad3", (ushort)Keys.NumPad3},
+        { "NumPad4", (ushort)Keys.NumPad4},
+        { "NumPad5", (ushort)Keys.NumPad5},
+        { "NumPad6", (ushort)Keys.NumPad6},
+        { "NumPad7", (ushort)Keys.NumPad7},
+        { "NumPad8", (ushort)Keys.NumPad8},
+        { "NumPad9", (ushort)Keys.NumPad9}
     };
 
     public static void ReleaseAllKeys()

@@ -31,6 +31,14 @@ public class GetCommands
         }))).Where(x => x.Action == "RemapKey");
     }
 
+    public static IEnumerable<Command> GetBlockedKeys(IEnumerable<string> folders)
+    {
+	    return DeserializeFileContent(folders.SelectMany(x => Directory.GetFiles(x, "*.auto", new EnumerationOptions
+	    {
+		    RecurseSubdirectories = true
+	    }))).Where(x => x.Action == "BlockKey");
+    }
+
     private static IEnumerable<Command> DeserializeFileContent(IEnumerable<string> files) => files.SelectMany(file =>
     {
         try

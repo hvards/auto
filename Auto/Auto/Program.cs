@@ -14,8 +14,11 @@ public class Program
     private static LowLevelMouseProc _mouseHook;
     private static nint _hookId = nint.Zero;
     private static nint _mouseHookId = nint.Zero;
+
     private static List<Command.Command> _commands;
     private static List<Command.Command> _remappedKeys;
+    private static HashSet<ushort> _blockedKeys;
+
     private static readonly HashSet<ushort> PressedKeys = new();
     private static HashSet<ushort> _activeRemapModifier;
 
@@ -27,6 +30,7 @@ public class Program
             .Where(Directory.Exists).ToList();
         _commands = GetCommands.Execute(commandFolders).Where(x => x.Enabled).ToList();
         _remappedKeys = GetCommands.GetRemappedKeys(commandFolders).ToList();
+        _blockedKeys = new HashSet<ushort>(GetCommands.GetBlockedKeys(commandFolders).Select(x => x.Trigger.Combination.First()));
         Execute.Start();
         Hook();
         Application.Run();
@@ -43,7 +47,7 @@ public class Program
         _mouseHook = MouseHookCallback;
         
         _hookId = SetWindowsHookEx(WH_KEYBOARD_LL, _keyboardHook, GetModuleHandle(module!.ModuleName!), 0);
-        _mouseHookId = SetWindowsHookEx(WH_MOUSE_LL, _mouseHook, GetModuleHandle(module.ModuleName!), 0);
+        //_mouseHookId = SetWindowsHookEx(WH_MOUSE_LL, _mouseHook, GetModuleHandle(module.ModuleName!), 0);
     }
 
     private static nint KeyboardHookCallback(int nCode, nint wParam, ref KeyboardInput lParam)
@@ -51,7 +55,6 @@ public class Program
         var keyDown = wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN;
         var keyUp = wParam == WM_KEYUP || wParam == WM_SYSKEYUP;
         var vkCode = lParam.wVk;
-
         if (Execute.Executing && (int) lParam.dwExtraInfo != IGNORE_INPUT)
             return 1;
 
@@ -72,7 +75,9 @@ public class Program
         PressedKeys.Add(vkCode);
 
         var command = _commands.FirstOrDefault(x => x.Trigger.Check(PressedKeys, vkCode));
-        return command == null ? CallNextHookEx(_hookId, nCode, wParam, ref lParam) : Execute.QueueCommand(command);
+        return command == null
+	        ? _blockedKeys.Contains(vkCode) ? 1 : CallNextHookEx(_hookId, nCode, wParam, ref lParam)
+	        : Execute.QueueCommand(command);
     }
 
     private static Command.Command TestRemapKey(ushort vkCode)

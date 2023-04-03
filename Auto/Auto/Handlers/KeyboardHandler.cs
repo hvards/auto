@@ -4,10 +4,7 @@ using static Auto.Constants;
 namespace Auto.Handlers;
 public static class KeyboardHandler
 {
-    private static readonly HashSet<string> LShiftKeys = new() { "§", "!", "\"", "#", "¤", "%", "&", "/", "(", ")", "=", "?", "`", "^", "*", "_", ":", ";" };
-    private static readonly HashSet<string> AltGrKeys = new() { "@", "£", "$", "€", "{", "[", "]", "}", "´", "~", "€" };
-
-    private static readonly Dictionary<string, ushort> KeyMap = new()
+	private static readonly Dictionary<string, ushort> KeyMap = new()
     {
         { "enter", (ushort)Keys.Enter },
         { "left", (ushort)Keys.Left },
@@ -40,16 +37,31 @@ public static class KeyboardHandler
 
     public static void SendChar(string ch, nint? action = null)
     {
-        if (LShiftKeys.Contains(ch))
-            SendWithLShift((ushort)VkKeyScan(ch[0]));
-        else if (AltGrKeys.Contains(ch))
-            SendWithAltGr((ushort)VkKeyScan(ch[0]));
-        else if (KeyMap.TryGetValue(ch, out var val))
-            ClickKey(val, action);
-        else if (char.IsUpper(ch[0]))
-            SendWithLShift((ushort)VkKeyScan(ch[0]));
-        else
-            ClickKey((ushort)VkKeyScan(ch[0]), action);
+	    if (KeyMap.TryGetValue(ch, out var val))
+	    {
+		    ClickKey(val, action);
+		    return;
+	    }
+        
+	    var scanResult = VkKeyScan(ch[0]);
+	    var vk = (ushort)(scanResult & 0xff);
+	    var modifier = scanResult >> 8;
+
+	    switch (modifier)
+	    {
+		    case 6:
+			    SendWithAltGr(vk);
+			    break;
+		    case 2:
+			    SendWithLCtrl(vk);
+			    break;
+		    case 1:
+			    SendWithLShift(vk);
+			    break;
+		    default:
+			    ClickKey(vk, action);
+			    break;
+	    }
     }
 
     public static void ClickKey(ushort vk, nint? action) => SendKeyboardInput(GetKeyboardInputArr(vk, action: action));

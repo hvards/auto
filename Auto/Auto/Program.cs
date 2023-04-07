@@ -24,18 +24,25 @@ public class Program
 
     private static void Main()
     {
-        var commandFolders =
-            (Environment.GetEnvironmentVariable("Auto", EnvironmentVariableTarget.Machine) ??
-             throw new Exception("Missing auto folders")).Split(";")
-            .Where(Directory.Exists).ToList();
-        _commands = GetCommands.Execute(commandFolders).Where(x => x.Enabled).ToList();
-        _remappedKeys = GetCommands.GetRemappedKeys(commandFolders).ToList();
-        _blockedKeys = new HashSet<ushort>(GetCommands.GetBlockedKeys(commandFolders).Select(x => x.Trigger.Combination.First()));
-        Execute.Start();
+	    var commandFolders =
+		    (Environment.GetEnvironmentVariable("Auto", EnvironmentVariableTarget.Machine) ??
+		     throw new Exception("Missing auto folders")).Split(";")
+		    .Where(Directory.Exists).ToList();
+	        InitializeCommandLists(commandFolders);
+
+	    Execute.Start();
         Hook();
         Application.Run();
         UnhookWindowsHookEx(_hookId);
         UnhookWindowsHookEx(_mouseHookId);
+    }
+
+    private static void InitializeCommandLists(IEnumerable<string> folders)
+    {
+	    var commands = GetCommands.Execute(folders);
+	    _commands = GetCommands.GetActions(commands).ToList();
+	    _remappedKeys = GetCommands.GetRemappedKeys(commands).ToList();
+	    _blockedKeys = new HashSet<ushort>(GetCommands.GetBlockedKeys(commands).Select(x => x.Trigger.Combination.First()));
     }
 
     private static void Hook()
@@ -47,7 +54,7 @@ public class Program
         _mouseHook = MouseHookCallback;
         
         _hookId = SetWindowsHookEx(WH_KEYBOARD_LL, _keyboardHook, GetModuleHandle(module!.ModuleName!), 0);
-        //_mouseHookId = SetWindowsHookEx(WH_MOUSE_LL, _mouseHook, GetModuleHandle(module.ModuleName!), 0);
+        _mouseHookId = SetWindowsHookEx(WH_MOUSE_LL, _mouseHook, GetModuleHandle(module.ModuleName!), 0);
     }
 
     private static nint KeyboardHookCallback(int nCode, nint wParam, ref KeyboardInput lParam)

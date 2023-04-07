@@ -4,13 +4,9 @@ namespace Auto.Command;
 
 public class GetCommands
 {
-    public static IEnumerable<Command> Execute(IEnumerable<string> folders)
+    public static IList<Command> Execute(IEnumerable<string> folders)
     {
-        var commands = DeserializeFileContent(folders.SelectMany(x => Directory.GetFiles(x, "*.auto",
-            new EnumerationOptions
-            {
-                RecurseSubdirectories = true
-            }))).Where(x => x.Action != "RemapKey").ToList();
+	    var commands = GetEnabledCommands(folders).ToList();
         foreach (var command in commands)
         {
             command.ClipboardTextRequired = command.Arguments.Any(x => x.ClipboardTextRequired) ||
@@ -20,23 +16,24 @@ public class GetCommands
                                               command.PowerShellArguments.Select(x => x.Value)
                                                   .Any(x => x.Any(x => x.HighlightedTextRequired));
         }
-        return commands;
+        return commands.ToList();
     }
 
-    public static IEnumerable<Command> GetRemappedKeys(IEnumerable<string> folders)
-    {
-        return DeserializeFileContent(folders.SelectMany(x => Directory.GetFiles(x, "*.auto", new EnumerationOptions
-        {
-            RecurseSubdirectories = true
-        }))).Where(x => x.Action == "RemapKey");
-    }
+    public static IEnumerable<Command> GetActions(IEnumerable<Command> commands) =>
+	    commands.Where(x => x.Action != "RemapKey" && x.Action != "BlockKey");
 
-    public static IEnumerable<Command> GetBlockedKeys(IEnumerable<string> folders)
+    public static IEnumerable<Command> GetRemappedKeys(IEnumerable<Command> commands) =>
+	    commands.Where(x => x.Action == "RemapKey");
+
+    public static IEnumerable<Command> GetBlockedKeys(IEnumerable<Command> commands) =>
+	    commands.Where(x => x.Action == "BlockKey");
+
+    private static IEnumerable<Command> GetEnabledCommands(IEnumerable<string> folders)
     {
 	    return DeserializeFileContent(folders.SelectMany(x => Directory.GetFiles(x, "*.auto", new EnumerationOptions
 	    {
 		    RecurseSubdirectories = true
-	    }))).Where(x => x.Action == "BlockKey");
+	    }))).Where(x => x.Enabled);
     }
 
     private static IEnumerable<Command> DeserializeFileContent(IEnumerable<string> files) => files.SelectMany(file =>

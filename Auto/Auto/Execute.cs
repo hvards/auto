@@ -29,14 +29,24 @@ public static class Execute
                 var clipboard = command.ClipboardTextRequired ? ClipboardHandler.GetClipboardText() : string.Empty;
                 var highlighted = command.HighlightedTextRequired ? ClipboardHandler.GetClipboardText(true) : string.Empty;
 
-                var arguments = command.ExecuteArguments(clipboard, highlighted);
+                void Execute()
+                {
+                    var arguments = command.ExecuteArguments(clipboard, highlighted);
 
-                Executing = true;
+                    Executing = true;
 
-                ClearKeyboardInput(command);
-                ExecuteCommand(command, arguments);
+                    ClearKeyboardInput(command);
+                    ExecuteCommand(command, arguments);
+
+                    Executing = false;
+                }
+
+                if (command.ConcurrentExecution)
+                    Task.Run(Execute);
+                else
+                    Execute();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Log.Error($"Error executing command: {e}");
             }
@@ -56,17 +66,17 @@ public static class Execute
 
     private static void ExecuteCommand(Command.Command command, IReadOnlyList<string> args)
     {
-            switch (command.Action)
-            {
-                case "MouseInput":
-                    SendInput.Mouse(args[0]);
-                    break;
-                case "KeyboardInput":
-                    SendInput.Keyboard(args[0]);
-                    break;
-                case "StartProgram":
-                    StartProgram.Start(args[0], args.Count > 1 ? args[1] : null);
-                    break;
-            }
+        switch (command.Action)
+        {
+            case "MouseInput":
+                SendInput.Mouse(args[0]);
+                break;
+            case "KeyboardInput":
+                SendInput.Keyboard(args[0]);
+                break;
+            case "StartProgram":
+                StartProgram.Start(args[0], args.Count > 1 ? args[1] : null);
+                break;
+        }
     }
 }

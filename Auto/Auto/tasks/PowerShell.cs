@@ -7,18 +7,20 @@ namespace Auto.Tasks
 {
     public class PowerShell
     {
-        private static System.Management.Automation.PowerShell _powerShell;
+		private static RunspacePool _runspacePool;
+		private static InitialSessionState iss = InitialSessionState.CreateDefault();
 
         public static void Initialize()
         {
-            var iss = InitialSessionState.CreateDefault();
             iss.ExecutionPolicy = ExecutionPolicy.Unrestricted;
-            _powerShell = System.Management.Automation.PowerShell.Create(iss);
+			_runspacePool = RunspaceFactory.CreateRunspacePool();
+			_runspacePool.Open();
         }
 
         public static string Execute(string file, IList<string> parameters)
         {
-            _powerShell.AddCommand(Path.Combine(Application.StartupPath, file));
+            var powerShell = System.Management.Automation.PowerShell.Create(iss);
+            powerShell.AddCommand(Path.Combine(Application.StartupPath, file));
 
             if (parameters != null)
             {
@@ -29,25 +31,23 @@ namespace Auto.Tasks
 		            {
 			            foreach (var param in parameter[7..].Split("\n"))
 			            {
-				            _powerShell.AddParameter(null, param);
+				            powerShell.AddParameter(null, param);
 			            }
                     }
 		            else
 		            {
-			            _powerShell.AddParameter(null, parameter);
+			            powerShell.AddParameter(null, parameter);
 		            }
 	            }
             }
-
-            var result = _powerShell.Invoke();
-            _powerShell.Commands.Clear();
+            var result= powerShell.Invoke();
             return ResultToString(result);
         }
 
         private static string ResultToString(IEnumerable<PSObject> result)
         {
             var sb = new StringBuilder();
-            foreach (var psObject in result)
+            foreach (var psObject in result.Where(x => x != null))
                 sb.AppendLine(psObject.ToString());
             return sb.ToString().Trim();
         }

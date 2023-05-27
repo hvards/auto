@@ -10,6 +10,7 @@ public class Command
     public Dictionary<string, CommandArgument[]> PowerShellArguments { get; set; }
     public bool Enabled { get; set; }
     public bool HighlightedTextRequired { get; set; }
+    public bool ConcurrentExecution { get; set; }
     public bool ClipboardTextRequired { get; set; }
     private readonly Dictionary<string, string> _powerShellExecutionResult = new();
 

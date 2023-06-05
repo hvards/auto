@@ -40,11 +40,8 @@ public static class Execute
 
                     Executing = false;
                 }
-
-                if (command.ConcurrentExecution)
-                    Task.Run(Execute);
-                else
-                    Execute();
+                
+                Task.Run(Execute);
             }
             catch (Exception e)
             {
@@ -52,6 +49,9 @@ public static class Execute
             }
             finally
             {
+                // To avoid keypresses from trigger to interfere with execution
+                Thread.Sleep(500);
+
                 Executing = false;
             }
         }

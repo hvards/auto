@@ -42,9 +42,9 @@ public class Command
             case ArgumentType.PowerShell:
                 PowerShellArguments.TryGetValue(token.Value, out var scriptArgs);
                 if (_powerShellExecutionResult.TryGetValue(token.Value, out var result))
-	                return result;
+                    return result;
                 result = PowerShell.Execute(token.Value,
-	                scriptArgs?.Select(x => ExecuteArgument(x, clipboard, highlighted)).ToList());
+                    scriptArgs?.Select(x => (x.ParameterName, ExecuteArgument(x, clipboard, highlighted))).ToList());
                 _powerShellExecutionResult.Add(token.Value, result);
                 return result;
             case ArgumentType.Text:

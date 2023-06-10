@@ -17,7 +17,7 @@ namespace Auto.Tasks
 			_runspacePool.Open();
         }
 
-        public static string Execute(string file, IList<string> parameters)
+        public static string Execute(string file, IList<(string name, string value)> parameters)
         {
             var powerShell = System.Management.Automation.PowerShell.Create(iss);
             powerShell.AddCommand(Path.Combine(Application.StartupPath, file));
@@ -26,17 +26,17 @@ namespace Auto.Tasks
             {
 	            foreach (var parameter in parameters)
 	            {
-		            var multi = parameter.StartsWith("#Multi:");
+		            var multi = parameter.value.StartsWith("#Multi:");
 		            if (multi)
 		            {
-			            foreach (var param in parameter[7..].Split("\n"))
+			            foreach (var param in parameter.value[7..].Split("\n"))
 			            {
-				            powerShell.AddParameter(null, param);
+				            powerShell.AddParameter(parameter.name, param);
 			            }
                     }
 		            else
 		            {
-			            powerShell.AddParameter(null, parameter);
+			            powerShell.AddParameter(parameter.name, parameter.value);
 		            }
 	            }
             }

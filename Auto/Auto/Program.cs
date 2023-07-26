@@ -9,11 +9,8 @@ namespace Auto;
 public class Program
 {
     private delegate nint LowLevelKeyboardProc(int nCode, nint wParam, ref KeyboardInput lParam);
-    private delegate nint LowLevelMouseProc(int nCode, nint wParam, ref MouseInput lParam);
     private static LowLevelKeyboardProc _keyboardHook;
-    private static LowLevelMouseProc _mouseHook;
     private static nint _hookId = nint.Zero;
-    private static nint _mouseHookId = nint.Zero;
 
     private static List<Command.Command> _commands;
     private static List<Command.Command> _remappedKeys;
@@ -34,7 +31,6 @@ public class Program
         Hook();
         Application.Run();
         UnhookWindowsHookEx(_hookId);
-        UnhookWindowsHookEx(_mouseHookId);
     }
 
     private static void InitializeCommandLists(IEnumerable<string> folders)
@@ -51,10 +47,8 @@ public class Program
         using var module = currentProcess.MainModule;
 
         _keyboardHook = KeyboardHookCallback;
-        _mouseHook = MouseHookCallback;
         
         _hookId = SetWindowsHookEx(WH_KEYBOARD_LL, _keyboardHook, GetModuleHandle(module!.ModuleName!), 0);
-        _mouseHookId = SetWindowsHookEx(WH_MOUSE_LL, _mouseHook, GetModuleHandle(module.ModuleName!), 0);
     }
 
     private static nint KeyboardHookCallback(int nCode, nint wParam, ref KeyboardInput lParam)
@@ -114,19 +108,8 @@ public class Program
         return 1;
     }
 
-    private static nint MouseHookCallback(int nCode, nint wParam, ref MouseInput lParam)
-    {
-        if (wParam == WM_LBUTTONDOWN)
-            PressedKeys.Clear();
-
-        return CallNextHookEx(_mouseHookId, nCode, wParam, ref lParam);
-    }
-
     [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     private static extern nint SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, nint hMod, uint dwThreadId);
-
-    [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    private static extern nint SetWindowsHookEx(int idHook, LowLevelMouseProc lpfn, nint hMod, uint dwThreadId);
 
     [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]

@@ -38,7 +38,7 @@ public class Program
 	    var commands = GetCommands.Execute(folders);
 	    _commands = GetCommands.GetActions(commands).ToList();
 	    _remappedKeys = GetCommands.GetRemappedKeys(commands).ToList();
-	    _blockedKeys = new HashSet<ushort>(GetCommands.GetBlockedKeys(commands).Select(x => x.Trigger.Combination.First()));
+	    _blockedKeys = [..GetCommands.GetBlockedKeys(commands).Select(x => x.Trigger.Combination.First())];
     }
 
     private static void Hook()
@@ -90,7 +90,7 @@ public class Program
         if (remappedKey == null) return null;
         if (_activeRemapModifier == null && remappedKey.Trigger.Combination.Count > 1)
         {
-            _activeRemapModifier = new HashSet<ushort>(remappedKey.Trigger.Combination);
+            _activeRemapModifier = [..remappedKey.Trigger.Combination];
             _activeRemapModifier.Remove(vkCode);
             KeyboardHandler.ReleaseKeys(remappedKey.Trigger.Combination);
         }

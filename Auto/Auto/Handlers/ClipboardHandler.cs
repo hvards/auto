@@ -36,7 +36,7 @@ public static class ClipboardHandler
         clipboardThread.Start();
     }
 
-    public static async void ResetClipboard()
+    private static async void ResetClipboard()
     {
         Thread.Sleep(500 + CopyDelay);
 

@@ -6,5 +6,5 @@ public static class Log
 
     public static void Info(string log) => LogItem(log, "INFO");
     public static void Error(string log) => LogItem(log, "ERROR");
-    private static void LogItem(string log, string level) => File.AppendAllText($"C:\\LOGS\\{RELATIVE_FILE_PATH}", $"{level} {DateTime.Now}: {log}\n");
+    private static void LogItem(string log, string level) => File.AppendAllText($@"C:\LOGS\{RELATIVE_FILE_PATH}", $"{level} {DateTime.Now}: {log}\n");
 }

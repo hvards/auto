@@ -8,7 +8,7 @@ public static class MouseHandler
     public static void LeftClick()
     {
         var input = new [] {GetMouseInput(true), GetMouseInput(false)};
-        SendInput((uint) input.Length, input, Marshal.SizeOf(typeof(Input)));
+        _ = SendInput((uint) input.Length, input, Marshal.SizeOf(typeof(Input)));
     }
 
     private static Input GetMouseInput(bool down) => new()

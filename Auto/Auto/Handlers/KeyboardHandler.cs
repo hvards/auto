@@ -4,30 +4,6 @@ using static Auto.Constants;
 namespace Auto.Handlers;
 public static class KeyboardHandler
 {
-	private static readonly Dictionary<string, ushort> KeyMap = new()
-    {
-        { "enter", (ushort)Keys.Enter },
-        { "left", (ushort)Keys.Left },
-        { "up", (ushort)Keys.Up },
-        { "right", (ushort)Keys.Right },
-        { "down", (ushort)Keys.Down },
-        { "LCtrl", (ushort)Keys.LControlKey },
-        { "tab", (ushort)Keys.Tab },
-        { "Esc", (ushort)Keys.Escape },
-        { "Menu", (ushort)Keys.Apps},
-        { "alt", (ushort)Keys.LMenu },
-        { "NumPad0", (ushort)Keys.NumPad0},
-        { "NumPad1", (ushort)Keys.NumPad1},
-        { "NumPad2", (ushort)Keys.NumPad2},
-        { "NumPad3", (ushort)Keys.NumPad3},
-        { "NumPad4", (ushort)Keys.NumPad4},
-        { "NumPad5", (ushort)Keys.NumPad5},
-        { "NumPad6", (ushort)Keys.NumPad6},
-        { "NumPad7", (ushort)Keys.NumPad7},
-        { "NumPad8", (ushort)Keys.NumPad8},
-        { "NumPad9", (ushort)Keys.NumPad9}
-    };
-
     public static void ReleaseAllKeys()
     {
         foreach (int key in Enum.GetValues(typeof(Keys)))
@@ -48,12 +24,13 @@ public static class KeyboardHandler
 
     public static void SendChar(string ch, nint? action = null)
     {
-	    if (KeyMap.TryGetValue(ch, out var val))
+	    if (ch.Length > 1 && Enum.TryParse(typeof(Keys), ch, out var value))
 	    {
-		    ClickKey(val, action);
-		    return;
+		    var key = (Keys)value;
+		    ClickKey((ushort)key, action);
+			return;
 	    }
-        
+
 	    var scanResult = VkKeyScan(ch[0]);
 	    var vk = (ushort)(scanResult & 0xff);
 	    var modifier = scanResult >> 8;
@@ -90,9 +67,9 @@ public static class KeyboardHandler
 
     private static void SendKeyboardInput(Input[] kbInputs) => SendInput((uint)kbInputs.Length, kbInputs, Marshal.SizeOf(typeof(Input)));
     private static Input[] GetKeyboardInputArr(ushort vk, ushort modifier = 0, nint? action = null) => action == null ? modifier == 0
-            ? new[] { GetKeyboardInput(vk, true), GetKeyboardInput(vk, false) }
-            : new[] { GetKeyboardInput(modifier, true), GetKeyboardInput(vk, true), GetKeyboardInput(vk, false), GetKeyboardInput(modifier, false) }
-            : new[] { GetKeyboardInput(vk, (int)action == (int)WM_KEYDOWN) };
+            ? [GetKeyboardInput(vk, true), GetKeyboardInput(vk, false)]
+            : [GetKeyboardInput(modifier, true), GetKeyboardInput(vk, true), GetKeyboardInput(vk, false), GetKeyboardInput(modifier, false)]
+			: [GetKeyboardInput(vk, (int)action == (int)WM_KEYDOWN)];
 
     private static Input GetKeyboardInput(ushort vk, bool down) => new()
     {

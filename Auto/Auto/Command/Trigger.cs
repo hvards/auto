@@ -2,24 +2,24 @@
 
 public class Trigger
 {
-    public HashSet<ushort> Combination { get; set; } = new();
+    public HashSet<ushort> Combination { get; init; } = [];
     public ushort[] Sequence
     {
         get => _sequence;
-        set
+        init
         {
             _sequence = value;
             _sequencePosition = new bool[value?.Length ?? 0];
         }
     }
-    private ushort[] _sequence;
+    private readonly ushort[] _sequence;
     private bool[] _sequencePosition;
-    public bool MacroTriggered { get; set; }
+    public bool MacroTriggered { get; private set; }
     
     public bool Check(HashSet<ushort> pressedKeys, ushort lastKey)
     {
         MacroTriggered = TestMacro(lastKey);
-        return MacroTriggered || ((pressedKeys?.Any() ?? false) && pressedKeys.SetEquals(Combination));
+        return MacroTriggered || (pressedKeys != null && pressedKeys.Count != 0 && pressedKeys.SetEquals(Combination));
     }
 
     private bool TestMacro(ushort key)

@@ -8,7 +8,7 @@ public static class Execute
 {
     private static readonly Thread ExecuteThread = new(ProcessCommands);
     private static readonly BlockingCollection<Command.Command> MessageQueue = new();
-    public static bool Executing { get; set; }
+    public static bool Executing { get; private set; }
     public static void Start() => ExecuteThread.Start();
 
     public static nint QueueCommand(Command.Command s)

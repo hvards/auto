@@ -21,10 +21,10 @@ public static class ClipboardHandler
         return _clipboardText?.Trim();
     }
 
-    public static void DeleteClipboard() =>
+    private static void DeleteClipboard() =>
         StartStaThread(new Thread(ResetClipboard));
 
-    public static void RetrieveClipboardText()
+    private static void RetrieveClipboardText()
     {
         Thread.Sleep(CopyDelay);
         _clipboardText = System.Windows.Forms.Clipboard.GetText();

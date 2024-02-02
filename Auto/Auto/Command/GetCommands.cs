@@ -2,7 +2,7 @@
 
 namespace Auto.Command;
 
-public class GetCommands
+public static class GetCommands
 {
     public static IList<Command> Execute(IEnumerable<string> folders)
     {

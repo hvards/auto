@@ -65,7 +65,7 @@ public static class KeyboardHandler
 
     private static void SendWithLCtrl(ushort vk) => SendKeyboardInput(GetKeyboardInputArr(vk, 0xA2));
 
-    private static void SendKeyboardInput(Input[] kbInputs) => SendInput((uint)kbInputs.Length, kbInputs, Marshal.SizeOf(typeof(Input)));
+    private static void SendKeyboardInput(Input[] kbInputs) => _ = SendInput((uint)kbInputs.Length, kbInputs, Marshal.SizeOf(typeof(Input)));
     private static Input[] GetKeyboardInputArr(ushort vk, ushort modifier = 0, nint? action = null) => action == null ? modifier == 0
             ? [GetKeyboardInput(vk, true), GetKeyboardInput(vk, false)]
             : [GetKeyboardInput(modifier, true), GetKeyboardInput(vk, true), GetKeyboardInput(vk, false), GetKeyboardInput(modifier, false)]

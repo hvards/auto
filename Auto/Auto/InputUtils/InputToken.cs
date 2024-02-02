@@ -2,8 +2,8 @@
 
 public class InputToken
 {
-    public string Value { get; set; }
-    public InputAction InputAction { get; set; }
+    public string Value { get; init; }
+    public InputAction InputAction { get; init; }
 }
 
 public enum InputAction

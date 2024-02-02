@@ -6,7 +6,7 @@ using static Auto.Constants;
 
 namespace Auto;
 
-public class Program
+public static class Program
 {
     private delegate nint LowLevelKeyboardProc(int nCode, nint wParam, ref KeyboardInput lParam);
     private static LowLevelKeyboardProc _keyboardHook;
@@ -16,7 +16,7 @@ public class Program
     private static List<Command.Command> _remappedKeys;
     private static HashSet<ushort> _blockedKeys;
 
-    private static readonly HashSet<ushort> PressedKeys = new();
+    private static readonly HashSet<ushort> PressedKeys = [];
     private static HashSet<ushort> _activeRemapModifier;
 
     private static void Main()
@@ -87,13 +87,13 @@ public class Program
         var remappedKey = _remappedKeys.FirstOrDefault(x =>
 	        x.Trigger.Combination.SetEquals(keys) ||
 	        x.Trigger.Combination.Count == 1 && x.Trigger.Combination.First() == vkCode);
+
         if (remappedKey == null) return null;
-        if (_activeRemapModifier == null && remappedKey.Trigger.Combination.Count > 1)
-        {
-            _activeRemapModifier = [..remappedKey.Trigger.Combination];
-            _activeRemapModifier.Remove(vkCode);
-            KeyboardHandler.ReleaseKeys(remappedKey.Trigger.Combination);
-        }
+        if (_activeRemapModifier != null || remappedKey.Trigger.Combination.Count <= 1) return remappedKey;
+
+        _activeRemapModifier = [..remappedKey.Trigger.Combination];
+        _activeRemapModifier.Remove(vkCode);
+        KeyboardHandler.ReleaseKeys(remappedKey.Trigger.Combination);
         return remappedKey;
     }
 

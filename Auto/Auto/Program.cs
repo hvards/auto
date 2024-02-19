@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Auto.Command;
-using Auto.Handlers;
 using static Auto.Constants;
 
 namespace Auto;
@@ -11,11 +10,7 @@ public static class Program
     private delegate nint LowLevelKeyboardProc(int nCode, nint wParam, ref KeyboardInput lParam);
     private static LowLevelKeyboardProc _keyboardHook;
     private static nint _hookId = nint.Zero;
-
     private static List<Command.Command> _commands;
-    private static List<Command.Command> _remappedKeys;
-    private static HashSet<ushort> _blockedKeys;
-
     private static readonly HashSet<ushort> PressedKeys = [];
     private static HashSet<ushort> _activeRemapModifier;
 
@@ -25,20 +20,12 @@ public static class Program
 		    (Environment.GetEnvironmentVariable("Auto", EnvironmentVariableTarget.Machine) ??
 		     throw new Exception("Missing auto folders")).Split(";")
 		    .Where(Directory.Exists).ToList();
-	        InitializeCommandLists(commandFolders);
+	    _commands = GetCommands.Execute(commandFolders);
 
 	    Execute.Start();
         Hook();
         Application.Run();
         UnhookWindowsHookEx(_hookId);
-    }
-
-    private static void InitializeCommandLists(IEnumerable<string> folders)
-    {
-	    var commands = GetCommands.Execute(folders);
-	    _commands = GetCommands.GetActions(commands).ToList();
-	    _remappedKeys = GetCommands.GetRemappedKeys(commands).ToList();
-	    _blockedKeys = [..GetCommands.GetBlockedKeys(commands).Select(x => x.Trigger.Combination.First())];
     }
 
     private static void Hook()
@@ -47,7 +34,6 @@ public static class Program
         using var module = currentProcess.MainModule;
 
         _keyboardHook = KeyboardHookCallback;
-        
         _hookId = SetWindowsHookEx(WH_KEYBOARD_LL, _keyboardHook, GetModuleHandle(module!.ModuleName!), 0);
     }
 
@@ -66,46 +52,13 @@ public static class Program
                 _activeRemapModifier = null;
         }
 
-        var remappedKey = TestRemapKey(vkCode);
-        if (remappedKey != null)
-            return RemapKey(remappedKey, keyUp);
-
         if (Execute.Executing || (int)lParam.dwExtraInfo == IGNORE_INPUT || nCode != 0 || !keyDown)
             return CallNextHookEx(_hookId, nCode, wParam, ref lParam);
 
         PressedKeys.Add(vkCode);
 
         var command = _commands.FirstOrDefault(x => x.Trigger.Check(PressedKeys, vkCode));
-        return command == null
-	        ? _blockedKeys.Contains(vkCode) ? 1 : CallNextHookEx(_hookId, nCode, wParam, ref lParam)
-	        : Execute.QueueCommand(command);
-    }
-
-    private static Command.Command TestRemapKey(ushort vkCode)
-    {
-        var keys = new HashSet<ushort>(_activeRemapModifier ?? PressedKeys) { vkCode };
-        var remappedKey = _remappedKeys.FirstOrDefault(x =>
-	        x.Trigger.Combination.SetEquals(keys) ||
-	        x.Trigger.Combination.Count == 1 && x.Trigger.Combination.First() == vkCode);
-
-        if (remappedKey == null) return null;
-        if (_activeRemapModifier != null || remappedKey.Trigger.Combination.Count <= 1) return remappedKey;
-
-        _activeRemapModifier = [..remappedKey.Trigger.Combination];
-        _activeRemapModifier.Remove(vkCode);
-        KeyboardHandler.ReleaseKeys(remappedKey.Trigger.Combination);
-        return remappedKey;
-    }
-
-    private static nint RemapKey(Command.Command command, bool keyUp)
-    {
-        foreach (var commandArg in command.Arguments.SelectMany(x => x.Tokens).Select(x => x.Value))
-        {
-            var vkCode = ushort.Parse(commandArg);
-            KeyboardHandler.ClickKey(vkCode, keyUp ? WM_KEYUP : WM_KEYDOWN);
-        }
-        
-        return 1;
+        return command == null ? CallNextHookEx(_hookId, nCode, wParam, ref lParam) : Execute.QueueCommand(command);
     }
 
     [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
@@ -117,9 +70,6 @@ public static class Program
 
     [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     private static extern nint CallNextHookEx(nint hhk, int nCode, nint wParam, ref KeyboardInput lParam);
-
-    [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    private static extern nint CallNextHookEx(nint hhk, int nCode, nint wParam, ref MouseInput lParam);
 
     [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     private static extern nint GetModuleHandle(string lpModuleName);

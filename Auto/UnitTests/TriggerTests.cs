@@ -1,4 +1,3 @@
-using Auto;
 using System.Windows.Forms;
 using Auto.Command;
 using Command = Auto.Command.Command;
@@ -14,10 +13,10 @@ public class TriggerTests
     public void IsMacroOrKeyComboPressed_ShouldReturnTrue_IfMacroPressed(params Keys[] keys)
     {
         var command = new Command
-            { Trigger = new Trigger { Sequence = new[] { (ushort)Keys.A, (ushort)Keys.B, (ushort)Keys.C } } };
+            { Trigger = new Trigger { Sequence = [(ushort)Keys.A, (ushort)Keys.B, (ushort)Keys.C] } };
         foreach (var key in keys)
-            Assert.That(command.Trigger.Check(new HashSet<ushort>(), (ushort)key), Is.False);
-        Assert.That(command.Trigger.Check(new HashSet<ushort>(), (ushort)Keys.C), Is.True);
+            Assert.That(command.Trigger.Check([], (ushort)key), Is.False);
+        Assert.That(command.Trigger.Check([], (ushort)Keys.C), Is.True);
     }
     
     [TestCase(Keys.A, Keys.C)]
@@ -25,9 +24,9 @@ public class TriggerTests
     public void IsMacroOrKeyComboPressed_ShouldReturnFalse_IfMacroNotPressed(params Keys[] keys)
     {
         var command = new Command
-            { Trigger = new Trigger { Sequence = new[] { (ushort)Keys.A, (ushort)Keys.B, (ushort)Keys.C } } };
+            { Trigger = new Trigger { Sequence = [(ushort)Keys.A, (ushort)Keys.B, (ushort)Keys.C] } };
         foreach (var key in keys)
-            Assert.That(command.Trigger.Check(new HashSet<ushort>(), (ushort)key), Is.False);
+            Assert.That(command.Trigger.Check([], (ushort)key), Is.False);
     }
 
     [Test]

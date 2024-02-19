@@ -14,14 +14,6 @@ public static class KeyboardHandler
         }
     }
 
-    public static void ReleaseKeys(IEnumerable<ushort> keys)
-    {
-        foreach (var key in keys)
-        {
-            ClickKey(key, WM_KEYUP);
-        }
-    }
-
     public static void SendChar(string ch, nint? action = null)
     {
 	    if (ch.Length > 1 && Enum.TryParse(typeof(Keys), ch, out var value))
@@ -56,10 +48,10 @@ public static class KeyboardHandler
 
     public static void CopyHighlightedText() => SendWithLCtrl(0x43);
 
-    private static void SendWithAltGr(ushort vk) => SendKeyboardInput(new[]{
-            GetKeyboardInput(162, true), GetKeyboardInput(165, true), GetKeyboardInput(vk, true),
-            GetKeyboardInput(vk, false), GetKeyboardInput(165, false), GetKeyboardInput(162, false)
-        });
+    private static void SendWithAltGr(ushort vk) => SendKeyboardInput([
+	    GetKeyboardInput(162, true), GetKeyboardInput(165, true), GetKeyboardInput(vk, true),
+		GetKeyboardInput(vk, false), GetKeyboardInput(165, false), GetKeyboardInput(162, false)
+    ]);
 
     private static void SendWithLShift(ushort vk) => SendKeyboardInput(GetKeyboardInputArr(vk, 16));
 
@@ -92,5 +84,5 @@ public static class KeyboardHandler
     private static extern uint SendInput(uint nInputs, Input[] pInputs, int cbSize);
 
     [DllImport("user32.dll")]
-    static extern short GetAsyncKeyState(int lpKeyState);
+    private static extern short GetAsyncKeyState(int lpKeyState);
 }

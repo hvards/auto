@@ -9,7 +9,7 @@ public static class SendInput
 {
     public static void Mouse(string input)
     {
-        foreach (var token in input.GetTokens())
+        foreach (var _ in input.GetTokens())
         {
             MouseHandler.LeftClick();
         }

@@ -2,7 +2,7 @@
 
 namespace Auto.Tasks;
 
-public class StartProgram
+public static class StartProgram
 {
     public static void Start(string program, string args, bool hidden = false)
     {

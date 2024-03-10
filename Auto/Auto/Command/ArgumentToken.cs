@@ -12,5 +12,6 @@ public enum ArgumentType
     Text,
     PowerShell,
     Clipboard,
-    Highlighted
+    Highlighted,
+    Plugin
 }

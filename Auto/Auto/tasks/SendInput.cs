@@ -2,7 +2,7 @@
 using Auto.InputUtils;
 using static Auto.Constants;
 
-namespace Auto.Tasks;
+namespace Auto.tasks;
 
 
 public static class SendInput

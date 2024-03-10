@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 using Auto.Command;
 using static Auto.Constants;
@@ -8,6 +9,7 @@ namespace Auto;
 public static class Program
 {
     private delegate nint LowLevelKeyboardProc(int nCode, nint wParam, ref KeyboardInput lParam);
+
     private static LowLevelKeyboardProc _keyboardHook;
     private static nint _hookId = nint.Zero;
     private static List<Command.Command> _commands;
@@ -16,13 +18,13 @@ public static class Program
 
     private static void Main()
     {
-	    var commandFolders =
-		    (Environment.GetEnvironmentVariable("Auto", EnvironmentVariableTarget.Machine) ??
-		     throw new Exception("Missing auto folders")).Split(";")
-		    .Where(Directory.Exists).ToList();
-	    _commands = GetCommands.Execute(commandFolders);
+        var commandFolders =
+            (Environment.GetEnvironmentVariable("Auto", EnvironmentVariableTarget.Machine) ??
+             throw new Exception("Missing auto folders")).Split(";")
+            .Where(Directory.Exists).ToList();
+        _commands = GetCommands.Execute(commandFolders);
 
-	    Execute.Start();
+        Execute.Start();
         Hook();
         Application.Run();
         UnhookWindowsHookEx(_hookId);
@@ -42,7 +44,7 @@ public static class Program
         var keyDown = wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN;
         var keyUp = wParam == WM_KEYUP || wParam == WM_SYSKEYUP;
         var vkCode = lParam.wVk;
-        if (Execute.Executing && (int) lParam.dwExtraInfo != IGNORE_INPUT)
+        if (Execute.Executing && (int)lParam.dwExtraInfo != IGNORE_INPUT)
             return 1;
 
         if (keyUp)

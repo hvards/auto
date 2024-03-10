@@ -1,4 +1,6 @@
-﻿namespace Auto;
+﻿using System.IO;
+
+namespace Auto;
 
 public static class Log
 {

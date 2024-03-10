@@ -1,13 +1,13 @@
 ﻿using System.Collections.Concurrent;
 using Auto.Handlers;
-using Auto.Tasks;
+using Auto.tasks;
 
 namespace Auto;
 
 public static class Execute
 {
     private static readonly Thread ExecuteThread = new(ProcessCommands);
-    private static readonly BlockingCollection<Command.Command> MessageQueue = new();
+    private static readonly BlockingCollection<Command.Command> MessageQueue = [];
     public static bool Executing { get; private set; }
     public static void Start() => ExecuteThread.Start();
 
@@ -19,6 +19,7 @@ public static class Execute
 
     private static void ProcessCommands()
     {
+        Plugin.Initialize();
         PowerShell.Initialize();
         while (true)
         {

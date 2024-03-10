@@ -3,50 +3,41 @@
 namespace Auto.Handlers;
 public static class ClipboardHandler
 {
-    private static string _clipboardText;
-    private const int CopyDelay = 75;
+    private const int COPY_DELAY = 75;
 
     public static string GetClipboardText(bool copyHighlightedText = false)
     {
         if (copyHighlightedText)
             KeyboardHandler.CopyHighlightedText();
 
-        var retrieveClipboard = new Thread(RetrieveClipboardText);
-        StartStaThread(retrieveClipboard);
+        var clipboardText = StaHandler.Execute(RetrieveClipboardText);
 
         if (copyHighlightedText)
             DeleteClipboard();
 
-        retrieveClipboard.Join();
-        return _clipboardText?.Trim();
+        return clipboardText?.Trim();
     }
 
-    private static void DeleteClipboard() =>
-        StartStaThread(new Thread(ResetClipboard));
+    private static void DeleteClipboard() => StaHandler.Execute(ResetClipboard);
 
-    private static void RetrieveClipboardText()
+    private static string RetrieveClipboardText()
     {
-        Thread.Sleep(CopyDelay);
-        _clipboardText = System.Windows.Forms.Clipboard.GetText();
+        Thread.Sleep(COPY_DELAY);
+        return System.Windows.Forms.Clipboard.GetText();
     }
 
-    private static void StartStaThread(Thread clipboardThread)
+    private static async Task<bool> ResetClipboard()
     {
-        clipboardThread.SetApartmentState(ApartmentState.STA);
-        clipboardThread.Start();
-    }
-
-    private static async void ResetClipboard()
-    {
-        Thread.Sleep(500 + CopyDelay);
+        Thread.Sleep(500 + COPY_DELAY);
 
         var history = await Clipboard.GetHistoryItemsAsync();
         var t = history.Items;
 
-        if (t.Any())
+        if (t.Count > 0)
             Clipboard.DeleteItemFromHistory(t[0]);
-
         if (t.Count > 1)
             Clipboard.SetHistoryItemAsContent(t[1]);
+
+        return true;
     }
 }

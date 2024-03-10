@@ -1,9 +1,10 @@
-﻿using System.Management.Automation;
+﻿using System.IO;
+using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Text;
 using Microsoft.PowerShell;
 
-namespace Auto.Tasks;
+namespace Auto.tasks;
 
 public static class PowerShell
 {

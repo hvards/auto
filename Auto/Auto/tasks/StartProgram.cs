@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace Auto.Tasks;
+namespace Auto.tasks;
 
 public static class StartProgram
 {

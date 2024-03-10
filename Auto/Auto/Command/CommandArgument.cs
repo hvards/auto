@@ -1,5 +1,6 @@
 ﻿namespace Auto.Command;
 
+// ReSharper disable once ClassNeverInstantiated.Global
 public class CommandArgument
 {
     public string ParameterName { get; set; }

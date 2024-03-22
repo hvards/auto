@@ -61,8 +61,8 @@ public static class PluginLoader
 					? StaHandler.Execute(GetAssemblyPlugins)
 					: GetAssemblyPlugins();
 
-				foreach (var plugin in plugins)
-					result.Add(plugin.Item1, plugin.Item2);
+				foreach (var (id, plugin) in plugins)
+					result.Add(id, plugin);
 			}
 			catch
 			{

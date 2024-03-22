@@ -1,3 +1,5 @@
+using System.Windows.Threading;
+
 namespace Auto.Handlers;
 
 public static class StaHandler
@@ -8,6 +10,7 @@ public static class StaHandler
 		var thread = new Thread(() =>
 		{
 			result = func();
+			Dispatcher.FromThread(Thread.CurrentThread)?.InvokeShutdown();
 		});
 
 		thread.SetApartmentState(ApartmentState.STA);

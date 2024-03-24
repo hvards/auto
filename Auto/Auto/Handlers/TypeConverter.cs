@@ -1,3 +1,5 @@
+using System.Collections;
+
 namespace Auto.Handlers;
 
 public static class TypeConverter
@@ -25,13 +27,23 @@ public static class TypeConverter
 	{
 		var res = arg.Split(";").Select(x =>
 		{
+			if (type == typeof(string)) return x;
 			var success = TryParseType(x, type, out var res);
 			return success ? res : GetDefaultValue(type);
-		});
+		}).ToArray();
 
-		return array
-			? res.ToArray()
-			: res.ToList();
+		if (array)
+		{
+			var result = Array.CreateInstance(type, res.Length);
+			for (var i = 0; i < res.Length; i++)
+				result.SetValue(res[i], i);
+			return result;
+		}
+
+		var list = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(type));
+		foreach (var r in res)
+			list!.Add(r);
+		return list;
 	}
 
 	private static bool TryParseType(string input, Type type, out dynamic result)

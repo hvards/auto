@@ -4,12 +4,11 @@ namespace Auto.Command;
 
 public class Command
 {
-	public Trigger Trigger { get; set; }
-	public string Action { get; set; }
-	public CommandArgument[] Arguments { get; set; }
-	public Dictionary<string, CommandArgument[]> PowerShellArguments { get; set; }
-	public Dictionary<string, CommandArgument[]> PluginArguments { get; set; }
-	public bool Enabled { get; set; }
+	public Trigger Trigger { get; init; }
+	public ArgumentToken[] Actions { get; init; }
+	public Dictionary<string, CommandArgument[]> PowerShellArguments { get; init; }
+	public Dictionary<string, CommandArgument[]> PluginArguments { get; init; }
+	public bool Enabled { get; init; }
 	public bool HighlightedTextRequired { get; set; }
 	public bool ConcurrentExecution { get; set; }
 	public bool ClipboardTextRequired { get; set; }
@@ -17,7 +16,7 @@ public class Command
 
 	public List<string> ExecuteArguments(string clipboard = null, string highlighted = null)
 	{
-		var res = Arguments.Select(arg => ExecuteArgument(arg, clipboard, highlighted)).ToList();
+		var res = Actions.Select(arg => ExecuteArgumentToken(arg, clipboard, highlighted)).ToList();
 		_powerShellExecutionResult.Clear();
 		return res;
 	}

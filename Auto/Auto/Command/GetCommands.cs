@@ -10,13 +10,11 @@ public static class GetCommands
 		var commands = GetEnabledCommands(folders).ToList();
 		foreach (var command in commands)
 		{
-			command.ClipboardTextRequired = command.Arguments.Any(x => x.ClipboardTextRequired) ||
-			                                command.PowerShellArguments.Select(x => x.Value)
+			command.ClipboardTextRequired = command.PowerShellArguments.Select(x => x.Value)
 				                                .Any(x => x.Any(y => y.ClipboardTextRequired)) ||
 			                                (command.PluginArguments?.Select(x => x.Value)
 				                                .Any(x => x.Any(y => y.ClipboardTextRequired)) ?? false);
-			command.HighlightedTextRequired = command.Arguments.Any(x => x.HighlightedTextRequired) ||
-			                                  command.PowerShellArguments.Select(x => x.Value)
+			command.HighlightedTextRequired = command.PowerShellArguments.Select(x => x.Value)
 				                                  .Any(x => x.Any(y => y.HighlightedTextRequired)) ||
 			                                  (command.PluginArguments?.Select(x => x.Value)
 				                                  .Any(x => x.Any(y => y.HighlightedTextRequired)) ?? false);

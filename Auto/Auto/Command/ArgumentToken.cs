@@ -2,8 +2,8 @@
 
 public class ArgumentToken
 {
-    public ArgumentType Type { get; set; }
-    public string Value { get; set; }
+    public ArgumentType Type { get; init; }
+    public string Value { get; init; }
 }
 
 public enum ArgumentType

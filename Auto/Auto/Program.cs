@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using Auto.Command;
+using Auto.tasks;
 using static Auto.Constants;
 
 namespace Auto;
@@ -14,7 +15,6 @@ public static class Program
     private static nint _hookId = nint.Zero;
     private static List<Command.Command> _commands;
     private static readonly HashSet<ushort> PressedKeys = [];
-    private static HashSet<ushort> _activeRemapModifier;
 
     private static void Main()
     {
@@ -44,17 +44,13 @@ public static class Program
         var keyDown = wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN;
         var keyUp = wParam == WM_KEYUP || wParam == WM_SYSKEYUP;
         var vkCode = lParam.wVk;
-        if (Execute.Executing && (int)lParam.dwExtraInfo != IGNORE_INPUT)
+        if (SendInput.BlockInput && (int)lParam.dwExtraInfo != IGNORE_INPUT)
             return 1;
 
         if (keyUp)
-        {
             PressedKeys.Clear();
-            if (lParam.dwExtraInfo != IGNORE_INPUT && _activeRemapModifier != null && _activeRemapModifier.Contains(vkCode))
-                _activeRemapModifier = null;
-        }
 
-        if (Execute.Executing || (int)lParam.dwExtraInfo == IGNORE_INPUT || nCode != 0 || !keyDown)
+        if (SendInput.BlockInput || (int)lParam.dwExtraInfo == IGNORE_INPUT || nCode != 0 || !keyDown)
             return CallNextHookEx(_hookId, nCode, wParam, ref lParam);
 
         PressedKeys.Add(vkCode);

@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Text.Json;
 using Auto.Command;
 using Auto.Handlers;
+using Auto.Plugins;
 using AutoContracts;
 
 namespace Auto.PluginLoader;
@@ -45,10 +46,32 @@ public static class PluginLoader
 		return paths;
 	}
 
-	public static Dictionary<string, Plugin> CreateCommands()
+	private static Dictionary<string, Plugin> GetBuiltInCommands()
 	{
 		var result = new Dictionary<string, Plugin>();
 
+		var keyboardInput = new KeyboardInputPlugin();
+		result.Add(keyboardInput.Id.ToString(), new Plugin
+		{
+			Action = keyboardInput.Execute,
+			ArgumentTypes = keyboardInput.ExpectedArguments.Select(x => x.Type).ToArray(),
+			StaThreadRequired = false
+		});
+
+		var startProgram = new StartProgramPlugin();
+		result.Add(startProgram.Id.ToString(), new Plugin
+		{
+			Action = startProgram.Execute,
+			ArgumentTypes = startProgram.ExpectedArguments.Select(x => x.Type).ToArray(),
+			StaThreadRequired = false
+		});
+
+		return result;
+	}
+
+	public static Dictionary<string, Plugin> CreateCommands()
+	{
+		var result = GetBuiltInCommands();
 		foreach (var dllPath in GetDllPaths())
 		{
 			try

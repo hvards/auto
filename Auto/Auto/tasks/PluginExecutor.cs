@@ -1,17 +1,18 @@
 ﻿using Auto.Handlers;
+using Auto.Interfaces;
 
 namespace Auto.tasks;
 
-public static class Plugin
+public class PluginExecutor : IPluginExecutor
 {
 	private static Dictionary<string, Command.Plugin> _plugins;
 
-	public static void Initialize()
+	public PluginExecutor(IPluginLoader pluginLoader)
 	{
-		_plugins = PluginLoader.PluginLoader.CreateCommands();
+		_plugins = pluginLoader.CreateCommands();
 	}
 
-	public static object ExecutePlugin(string id, IEnumerable<object> args)
+	public object ExecutePlugin(string id, IEnumerable<object> args)
 	{
 		if (!_plugins.TryGetValue(id, out var plugin))
 		{

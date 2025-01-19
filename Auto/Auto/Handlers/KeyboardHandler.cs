@@ -1,10 +1,11 @@
 ﻿using System.Runtime.InteropServices;
+using Auto.Interfaces;
 using static Auto.Constants;
 
 namespace Auto.Handlers;
-public static class KeyboardHandler
+public class KeyboardHandler : IKeyboardHandler
 {
-    public static void ReleaseAllKeys()
+    public void ReleaseAllKeys()
     {
         foreach (int key in Enum.GetValues(typeof(Keys)))
         {
@@ -14,7 +15,7 @@ public static class KeyboardHandler
         }
     }
 
-    public static void SendChar(string ch, nint? action = null)
+    public void SendChar(string ch, nint? action = null)
     {
 	    if (ch.Length > 1 && Enum.TryParse(typeof(Keys), ch, out var value))
 	    {
@@ -44,9 +45,9 @@ public static class KeyboardHandler
 	    }
     }
 
-    public static void ClickKey(ushort vk, nint? action) => SendKeyboardInput(GetKeyboardInputArr(vk, action: action));
+    public void ClickKey(ushort vk, nint? action) => SendKeyboardInput(GetKeyboardInputArr(vk, action: action));
 
-    public static void CopyHighlightedText() => SendWithLCtrl(0x43);
+    public void CopyHighlightedText() => SendWithLCtrl(0x43);
 
     private static void SendWithAltGr(ushort vk) => SendKeyboardInput([
 	    GetKeyboardInput(162, true), GetKeyboardInput(165, true), GetKeyboardInput(vk, true),

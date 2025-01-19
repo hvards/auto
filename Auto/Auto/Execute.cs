@@ -1,41 +1,52 @@
 ﻿using System.Collections.Concurrent;
-using Auto.Handlers;
-using Auto.tasks;
+using Auto.Interfaces;
 
 namespace Auto;
 
-public static class Execute
+public class Execute : IExecute
 {
-	private static readonly Thread ExecuteThread = new(ProcessCommands);
-	private static readonly BlockingCollection<Command.Command> MessageQueue = [];
-	public static void Start() => ExecuteThread.Start();
+	private readonly IClipboardHandler _clipboardHandler;
+	private readonly IKeyboardHandler _keyboardHandler;
+	private readonly Interfaces.ICommandExecutor _commandExecutor;
 
-	public static nint QueueCommand(Command.Command s)
+	private readonly Thread _executeThread;
+	private static readonly BlockingCollection<Command.Command> MessageQueue = [];
+
+	public Execute(IClipboardHandler clipboardHandler, IKeyboardHandler keyboardHandler,
+		Interfaces.ICommandExecutor commandExecutor)
+	{
+		_clipboardHandler = clipboardHandler;
+		_keyboardHandler = keyboardHandler;
+		_commandExecutor = commandExecutor;
+
+		_executeThread = new Thread(ProcessCommands);
+		_executeThread.Start();
+	}
+
+	public nint QueueCommand(Command.Command s)
 	{
 		MessageQueue.Add(s);
 		return 1;
 	}
 
-	private static void ProcessCommands()
+	private void ProcessCommands()
 	{
-		Plugin.Initialize();
-		PowerShell.Initialize();
 		while (true)
 		{
 			try
 			{
 				var command = MessageQueue.Take();
 				for (var i = 0; command.Trigger.MacroTriggered && i < command.Trigger.Sequence.Length - 1; i++)
-					KeyboardHandler.ClickKey((ushort)Keys.Back, null);
+					_keyboardHandler.ClickKey((ushort)Keys.Back, null);
 
 				var clipboard = command.ClipboardTextRequired
-					? ClipboardHandler.GetClipboardText()
+					? _clipboardHandler.GetClipboardText()
 					: string.Empty;
 				var highlighted = command.HighlightedTextRequired
-					? ClipboardHandler.GetClipboardText(true)
+					? _clipboardHandler.GetClipboardText(true)
 					: string.Empty;
 
-				Task.Run(() => command.ExecuteArguments(clipboard, highlighted));
+				Task.Run(() => _commandExecutor.ExecuteCommand(command, clipboard, highlighted));
 			}
 			catch (Exception e)
 			{

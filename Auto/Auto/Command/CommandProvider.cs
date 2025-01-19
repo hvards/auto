@@ -1,13 +1,32 @@
 ﻿using System.IO;
 using System.Text.Json;
+using Auto.Interfaces;
 
 namespace Auto.Command;
 
-public static class GetCommands
+public class CommandProvider : ICommandProvider
 {
-	public static List<Command> Execute(IEnumerable<string> folders)
+	private List<Command> _commands;
+
+	public CommandProvider()
 	{
-		var commands = GetEnabledCommands(folders).ToList();
+		InitializeCommands();
+	}
+
+	public bool TryGetCommand(HashSet<ushort> pressedKeys, ushort vkCode, out Command command)
+	{
+        command = _commands.FirstOrDefault(x => x.Trigger.Check(pressedKeys, vkCode));
+		return command != null;
+	}
+
+	private void InitializeCommands()
+	{
+        var commandFolders =
+            (Environment.GetEnvironmentVariable("Auto", EnvironmentVariableTarget.Machine) ??
+             throw new Exception("Missing auto folders")).Split(";")
+            .Where(Directory.Exists).ToList();
+
+		var commands = GetEnabledCommands(commandFolders).ToList();
 		foreach (var command in commands)
 		{
 			command.ClipboardTextRequired = command.PowerShellArguments.Select(x => x.Value)
@@ -20,7 +39,7 @@ public static class GetCommands
 				                                  .Any(x => x.Any(y => y.HighlightedTextRequired)) ?? false);
 		}
 
-		return commands;
+		_commands = commands;
 	}
 
 	private static IEnumerable<Command> GetEnabledCommands(IEnumerable<string> folders)

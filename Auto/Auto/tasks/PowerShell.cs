@@ -2,23 +2,24 @@
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Text;
+using Auto.Interfaces;
 using Microsoft.PowerShell;
 
 namespace Auto.tasks;
 
-public static class PowerShell
+public class PowerShell : IPowerShell
 {
 	private static RunspacePool _runspacePool;
 	private static readonly InitialSessionState Iss = InitialSessionState.CreateDefault();
 
-	public static void Initialize()
+	public PowerShell()
 	{
 		Iss.ExecutionPolicy = ExecutionPolicy.Unrestricted;
 		_runspacePool = RunspaceFactory.CreateRunspacePool();
 		_runspacePool.Open();
 	}
 
-	public static string Execute(string file, IList<(string name, string value)> parameters)
+	public string Execute(string file, IList<(string name, string value)> parameters)
 	{
 		var powerShell = System.Management.Automation.PowerShell.Create(Iss);
 		powerShell.AddCommand(Path.Combine(Application.StartupPath, file));
@@ -41,7 +42,7 @@ public static class PowerShell
 				}
 			}
 		}
-		var result= powerShell.Invoke();
+		var result = powerShell.Invoke();
 		return ResultToString(result);
 	}
 

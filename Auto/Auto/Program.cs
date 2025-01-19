@@ -1,74 +1,43 @@
-using System.Diagnostics;
-using System.IO;
-using System.Runtime.InteropServices;
 using Auto.Command;
+using Auto.Handlers;
+using Auto.Interfaces;
 using Auto.tasks;
-using static Auto.Constants;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Auto;
 
 public static class Program
 {
-    private delegate nint LowLevelKeyboardProc(int nCode, nint wParam, ref KeyboardInput lParam);
-
-    private static LowLevelKeyboardProc _keyboardHook;
-    private static nint _hookId = nint.Zero;
-    private static List<Command.Command> _commands;
-    private static readonly HashSet<ushort> PressedKeys = [];
 
     private static void Main()
     {
-        var commandFolders =
-            (Environment.GetEnvironmentVariable("Auto", EnvironmentVariableTarget.Machine) ??
-             throw new Exception("Missing auto folders")).Split(";")
-            .Where(Directory.Exists).ToList();
-        _commands = GetCommands.Execute(commandFolders);
+        var serviceCollection = new ServiceCollection();
+        // var configuration = new ConfigurationBuilder()
+        //     .SetBasePath(AppContext.BaseDirectory)
+        //     .AddJsonFile("appsettings.json")
+        //     .Build();
+        // Log.Logger = new LoggerConfiguration()
+        //     .ReadFrom.Configuration(configuration)
+        //     .CreateLogger();
 
-        Execute.Start();
-        Hook();
-        Application.Run();
-        UnhookWindowsHookEx(_hookId);
+       ConfigureServices(serviceCollection);
+
+       var serviceProvider = serviceCollection.BuildServiceProvider();
+       _ = serviceProvider.GetRequiredService<KeyListener>();
+       Application.Run();
     }
 
-    private static void Hook()
+    private static void ConfigureServices(IServiceCollection services)
     {
-        using var currentProcess = Process.GetCurrentProcess();
-        using var module = currentProcess.MainModule;
-
-        _keyboardHook = KeyboardHookCallback;
-        _hookId = SetWindowsHookEx(WH_KEYBOARD_LL, _keyboardHook, GetModuleHandle(module!.ModuleName!), 0);
+        services.AddSingleton<KeyListener>();
+        services.AddSingleton<ICommandProvider, CommandProvider>();
+        services.AddSingleton<IExecute, Execute>();
+        services.AddSingleton<IClipboardHandler, ClipboardHandler>();
+        services.AddSingleton<ISendInput, SendInput>();
+        services.AddSingleton<IKeyboardHandler, KeyboardHandler>();
+        services.AddSingleton<IPluginLoader, PluginLoader.PluginLoader>();
+        services.AddSingleton<IPluginExecutor, PluginExecutor>();
+        services.AddSingleton<Interfaces.ICommandExecutor, CommandExecutor>();
+        services.AddSingleton<IPowerShell, PowerShell>();
     }
-
-    private static nint KeyboardHookCallback(int nCode, nint wParam, ref KeyboardInput lParam)
-    {
-        var keyDown = wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN;
-        var keyUp = wParam == WM_KEYUP || wParam == WM_SYSKEYUP;
-        var vkCode = lParam.wVk;
-        if (SendInput.BlockInput && (int)lParam.dwExtraInfo != IGNORE_INPUT)
-            return 1;
-
-        if (keyUp)
-            PressedKeys.Clear();
-
-        if (SendInput.BlockInput || (int)lParam.dwExtraInfo == IGNORE_INPUT || nCode != 0 || !keyDown)
-            return CallNextHookEx(_hookId, nCode, wParam, ref lParam);
-
-        PressedKeys.Add(vkCode);
-
-        var command = _commands.FirstOrDefault(x => x.Trigger.Check(PressedKeys, vkCode));
-        return command == null ? CallNextHookEx(_hookId, nCode, wParam, ref lParam) : Execute.QueueCommand(command);
-    }
-
-    [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    private static extern nint SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, nint hMod, uint dwThreadId);
-
-    [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool UnhookWindowsHookEx(nint hhk);
-
-    [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    private static extern nint CallNextHookEx(nint hhk, int nCode, nint wParam, ref KeyboardInput lParam);
-
-    [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    private static extern nint GetModuleHandle(string lpModuleName);
 }

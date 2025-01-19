@@ -1,10 +1,10 @@
-using Auto.Handlers;
-using Auto.tasks;
+using Auto.Interfaces;
 using AutoContracts;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Auto.Plugins;
 
-public class KeyboardInputPlugin : ICommand
+public class KeyboardInputPlugin(IServiceProvider serviceProvider) : ICommand
 {
 	public string Name => "Keyboard input";
 	public string Description => "Send keyboard input.";
@@ -13,7 +13,7 @@ public class KeyboardInputPlugin : ICommand
 
 	public List<PluginArgument> ExpectedArguments { get; } =
 	[
-		new PluginArgument
+		new()
 		{
 			Name = "Input",
 			Type = typeof(string)
@@ -23,8 +23,9 @@ public class KeyboardInputPlugin : ICommand
 	public object Execute(object[] args)
 	{
 		var input = (string)args[0];
-		KeyboardHandler.ReleaseAllKeys();
-		SendInput.Keyboard(input);
+
+		serviceProvider.GetService<IKeyboardHandler>().ReleaseAllKeys();
+		serviceProvider.GetService<ISendInput>().Keyboard(input);
 		return false;
 	}
 }

@@ -3,12 +3,13 @@ using System.Reflection;
 using System.Text.Json;
 using Auto.Command;
 using Auto.Handlers;
+using Auto.Interfaces;
 using Auto.Plugins;
 using AutoContracts;
 
 namespace Auto.PluginLoader;
 
-public static class PluginLoader
+public class PluginLoader(IServiceProvider serviceProvider) : IPluginLoader
 {
 	private static Assembly LoadPlugin(string path)
 	{
@@ -46,11 +47,11 @@ public static class PluginLoader
 		return paths;
 	}
 
-	private static Dictionary<string, Plugin> GetBuiltInCommands()
+	private Dictionary<string, Plugin> GetBuiltInCommands()
 	{
 		var result = new Dictionary<string, Plugin>();
 
-		var keyboardInput = new KeyboardInputPlugin();
+		var keyboardInput = new KeyboardInputPlugin(serviceProvider);
 		result.Add(keyboardInput.Id.ToString(), new Plugin
 		{
 			Action = keyboardInput.Execute,
@@ -69,7 +70,7 @@ public static class PluginLoader
 		return result;
 	}
 
-	public static Dictionary<string, Plugin> CreateCommands()
+	public Dictionary<string, Plugin> CreateCommands()
 	{
 		var result = GetBuiltInCommands();
 		foreach (var dllPath in GetDllPaths())
@@ -79,7 +80,7 @@ public static class PluginLoader
 				var assembly = LoadPlugin(dllPath);
 				var staThread = assembly.GetReferencedAssemblies().Any(x => x.Name == "PresentationFramework");
 
-				IEnumerable<(string, Plugin)> GetAssemblyPlugins() => GetPlugins(assembly, staThread);
+				IEnumerable<(string, Plugin)> GetAssemblyPlugins() => GetPluginsFromAssembly(assembly, staThread);
 				var plugins = staThread
 					? StaHandler.Execute(GetAssemblyPlugins)
 					: GetAssemblyPlugins();
@@ -96,7 +97,7 @@ public static class PluginLoader
 		return result;
 	}
 
-	private static IEnumerable<(string, Plugin)> GetPlugins(Assembly assembly, bool staThread)
+	private static IEnumerable<(string, Plugin)> GetPluginsFromAssembly(Assembly assembly, bool staThread)
 	{
 		foreach (var type in assembly.GetTypes())
 		{

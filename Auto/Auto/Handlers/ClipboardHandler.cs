@@ -1,17 +1,18 @@
-﻿using Clipboard = Windows.ApplicationModel.DataTransfer.Clipboard;
+﻿using Auto.Interfaces;
+using Clipboard = Windows.ApplicationModel.DataTransfer.Clipboard;
 
 namespace Auto.Handlers;
 
-public static class ClipboardHandler
+public class ClipboardHandler(IKeyboardHandler keyboardHandler) : IClipboardHandler
 {
 	private const int COPY_DELAY = 75;
 
-	public static string GetClipboardText(bool copyHighlightedText = false)
+	public string GetClipboardText(bool copyHighlightedText = false)
 	{
 		if (copyHighlightedText)
 		{
-			KeyboardHandler.ReleaseAllKeys();
-			KeyboardHandler.CopyHighlightedText();
+			keyboardHandler.ReleaseAllKeys();
+			keyboardHandler.CopyHighlightedText();
 		}
 
 		var clipboardText = StaHandler.Execute(RetrieveClipboardText);

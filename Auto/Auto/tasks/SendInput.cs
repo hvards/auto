@@ -1,6 +1,6 @@
 ﻿using Auto.InputUtils;
 using Auto.Interfaces;
-using static Auto.Constants;
+using static Auto.Native.Constants;
 
 namespace Auto.tasks;
 

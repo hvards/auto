@@ -1,6 +1,7 @@
 using Auto.Command;
 using Auto.Handlers;
 using Auto.Interfaces;
+using Auto.Native;
 using Auto.tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +11,6 @@ namespace Auto;
 
 public static class Program
 {
-
     private static void Main()
     {
         var serviceCollection = new ServiceCollection();
@@ -22,14 +22,14 @@ public static class Program
             .ReadFrom.Configuration(configuration)
             .CreateLogger();
 
-       ConfigureServices(serviceCollection, configuration);
+       ConfigureServices(serviceCollection);
 
        var serviceProvider = serviceCollection.BuildServiceProvider();
        _ = serviceProvider.GetRequiredService<KeyListener>();
        Application.Run();
     }
 
-    private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
+    private static void ConfigureServices(IServiceCollection services)
     {
         services.AddLogging(config => { config.AddSerilog(); });
 
@@ -43,5 +43,6 @@ public static class Program
         services.AddSingleton<IPluginExecutor, PluginExecutor>();
         services.AddSingleton<Interfaces.ICommandExecutor, CommandExecutor>();
         services.AddSingleton<IPowerShell, PowerShell>();
+        services.AddSingleton<INativeMethods, NativeMethods>();
     }
 }

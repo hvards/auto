@@ -5,6 +5,46 @@ namespace UnitTests;
 [TestFixture]
 public class ConverterTests
 {
+	[TestCase("123", true, 123)]
+	[TestCase("abc", false, 0)]
+	public void TryParse_Int(string input, bool expectedSuccess, int expectedResult)
+	{
+		var success = TypeConverter.TryParse<int>(input, out var result);
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(success, Is.EqualTo(expectedSuccess));
+            Assert.That(result, Is.EqualTo(expectedResult));
+        }
+    }
+
+	[TestCase("true", true, true)]
+	[TestCase("false", true, false)]
+	[TestCase("False", true, false)]
+	[TestCase("True", true, true)]
+	[TestCase("0", false, false)]
+	[TestCase("thisistrue", false, false)]
+	public void TryParse_Bool(string input, bool expectedSuccess, bool expectedResult)
+	{
+		var success = TypeConverter.TryParse<bool>(input, out var result);
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(success, Is.EqualTo(expectedSuccess));
+            Assert.That(result, Is.EqualTo(expectedResult));
+        }
+    }
+
+	[TestCase("2021-01-01", true, "2021-01-01")]
+	[TestCase("tomorrow", false, null)]
+	public void TryParse_DateTime(string input, bool expectedSuccess, string? expectedResult)
+	{
+		var success = TypeConverter.TryParse<DateTime>(input, out var result);
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(success, Is.EqualTo(expectedSuccess));
+            Assert.That(result, Is.EqualTo(expectedSuccess ? DateTime.Parse(expectedResult) : default));
+        }
+    }
+
 	[Test]
 	public void ConvertValueTypes_successfully()
 	{

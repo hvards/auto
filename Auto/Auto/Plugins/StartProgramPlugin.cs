@@ -12,12 +12,12 @@ public class StartProgramPlugin : ICommand
 
 	public List<PluginArgument> ExpectedArguments { get; } =
 	[
-		new PluginArgument
+		new()
 		{
 			Name = "Program",
 			Type = typeof(string)
 		},
-		new PluginArgument
+		new()
 		{
 			Name = "Arguments",
 			Type = typeof(string)
@@ -28,7 +28,7 @@ public class StartProgramPlugin : ICommand
 	{
 		var program = (string)args[0];
 		var arguments = args.Length > 1 ? (string)args[1] : string.Empty;
-		var hidden = false;
+		const bool hidden = false;
 
         var psi = GetCmdProcessStartInfo();
         psi.Arguments = $"/c start {(hidden ? "/b " : "")}\"\" \"{program}\" \"{arguments}\"";

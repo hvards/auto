@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Auto.Native.Models;
-using Microsoft.Extensions.Logging;
 
 namespace Auto.Native;
 

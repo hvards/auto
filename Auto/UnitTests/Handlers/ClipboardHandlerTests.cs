@@ -2,7 +2,7 @@
 using Auto.Interfaces;
 using Moq;
 
-namespace UnitTests;
+namespace UnitTests.Handlers;
 
 [TestFixture]
 public class ClipboardHandlerTests

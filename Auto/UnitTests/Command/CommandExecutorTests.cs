@@ -2,7 +2,7 @@
 using Auto.Interfaces;
 using Moq;
 
-namespace UnitTests;
+namespace UnitTests.Command;
 
 [TestFixture]
 public class CommandExecutorTests
@@ -22,7 +22,7 @@ public class CommandExecutorTests
 	[Test]
 	public void ExecuteCommand_ShouldReturnClipboardText_WhenArgumentTypeIsClipboard()
 	{
-		var command = new Command
+		var command = new Auto.Command.Command
 		{
 			Actions = [new ArgumentToken { Type = ArgumentType.Clipboard }]
 		};
@@ -35,7 +35,7 @@ public class CommandExecutorTests
 	[Test]
 	public void ExecuteCommand_ShouldReturnHighlightedText_WhenArgumentTypeIsHighlighted()
 	{
-		var command = new Command
+		var command = new Auto.Command.Command
 		{
 			Actions = [new ArgumentToken { Type = ArgumentType.Highlighted }]
 		};
@@ -48,7 +48,7 @@ public class CommandExecutorTests
 	[Test]
 	public void ExecuteCommand_ShouldExecutePowerShell_WhenArgumentTypeIsPowerShell()
 	{
-		var command = new Command
+		var command = new Auto.Command.Command
 		{
 			Actions = [new ArgumentToken { Type = ArgumentType.PowerShell, Value = "script" }],
 			PowerShellArguments = new Dictionary<string, CommandArgument[]>()
@@ -65,7 +65,7 @@ public class CommandExecutorTests
 	[Test]
 	public void ExecuteCommand_ShouldExecutePlugin_WhenArgumentTypeIsPlugin()
 	{
-		var command = new Command
+		var command = new Auto.Command.Command
 		{
 			Actions = [new ArgumentToken { Type = ArgumentType.Plugin, Value = "plugin" }],
 			PluginArguments = new Dictionary<string, CommandArgument[]>
@@ -85,7 +85,7 @@ public class CommandExecutorTests
 	[Test]
 	public void ExecuteCommand_ShouldReturnText_WhenArgumentTypeIsText()
 	{
-		var command = new Command
+		var command = new Auto.Command.Command
 		{
 			Actions = [new ArgumentToken { Type = ArgumentType.Text, Value = "text" }]
 		};

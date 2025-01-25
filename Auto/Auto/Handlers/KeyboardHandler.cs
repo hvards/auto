@@ -42,23 +42,30 @@ public class KeyboardHandler(INativeMethods nativeMethods) : IKeyboardHandler
 	    }
     }
 
-    public void ClickKey(ushort vk, nint? action) => nativeMethods.SendKeyboardInput(GetKeyboardInputArr(vk, action: action));
+    public void ClickKey(ushort vk, nint? action) =>
+	    nativeMethods.SendKeyboardInput(GetKeyboardInputArr(vk, action: action));
 
     public void CopyHighlightedText() => SendWithLCtrl(0x43);
 
     private void SendWithAltGr(ushort vk) => nativeMethods.SendKeyboardInput([
 	    GetKeyboardInput(162, true), GetKeyboardInput(165, true), GetKeyboardInput(vk, true),
-		GetKeyboardInput(vk, false), GetKeyboardInput(165, false), GetKeyboardInput(162, false)
+	    GetKeyboardInput(vk, false), GetKeyboardInput(165, false), GetKeyboardInput(162, false)
     ]);
 
     private void SendWithLShift(ushort vk) => nativeMethods.SendKeyboardInput(GetKeyboardInputArr(vk, 16));
 
     private void SendWithLCtrl(ushort vk) => nativeMethods.SendKeyboardInput(GetKeyboardInputArr(vk, 0xA2));
 
-    private static KeyboardInput[] GetKeyboardInputArr(ushort vk, ushort modifier = 0, nint? action = null) => action == null ? modifier == 0
-            ? [GetKeyboardInput(vk, true), GetKeyboardInput(vk, false)]
-            : [GetKeyboardInput(modifier, true), GetKeyboardInput(vk, true), GetKeyboardInput(vk, false), GetKeyboardInput(modifier, false)]
-			: [GetKeyboardInput(vk, (int)action == (int)WM_KEYDOWN)];
+    private static KeyboardInput[] GetKeyboardInputArr(ushort vk, ushort modifier = 0, nint? action = null) =>
+	    action == null
+		    ? modifier == 0
+			    ? [GetKeyboardInput(vk, true), GetKeyboardInput(vk, false)]
+			    :
+			    [
+				    GetKeyboardInput(modifier, true), GetKeyboardInput(vk, true),
+				    GetKeyboardInput(vk, false), GetKeyboardInput(modifier, false)
+			    ]
+		    : [GetKeyboardInput(vk, (int)action == (int)WM_KEYDOWN)];
 
     private static KeyboardInput GetKeyboardInput(ushort vk, bool down) => new()
     {

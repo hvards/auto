@@ -1,9 +1,9 @@
 using Auto.Handlers;
 
-namespace UnitTests;
+namespace UnitTests.Handlers;
 
 [TestFixture]
-public class ConverterTests
+public class TypeConverterTests
 {
 	[TestCase("123", true, 123)]
 	[TestCase("abc", false, 0)]

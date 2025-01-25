@@ -9,6 +9,5 @@ public interface INativeMethods
 	bool IsKeyPressed(int vk);
 	nint GetCurrentProcessHandle();
 	nint SetKeyboardHook(NativeMethods.LowLevelKeyboardProc lpfn, nint handle);
-	void RemoveKeyboardHook(nint hookId);
 	nint CallNextHook(nint hookId, int nCode, nint wParam, KeyboardInput lParam);
 }

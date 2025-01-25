@@ -49,9 +49,4 @@ public class KeyListener
             ? _execute.QueueCommand(command)
             : _nativeMethods.CallNextHook(_hookId, nCode, wParam, lParam);
     }
-
-    ~KeyListener()
-    {
-        _nativeMethods.RemoveKeyboardHook(_hookId);
-    }
 }

@@ -4,7 +4,7 @@ using Auto.tasks;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
-namespace UnitTests;
+namespace UnitTests.tasks;
 
 [TestFixture]
 public class PluginExecutorTests

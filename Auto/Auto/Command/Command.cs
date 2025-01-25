@@ -1,6 +1,4 @@
-﻿using Auto.tasks;
-
-namespace Auto.Command;
+﻿namespace Auto.Command;
 
 public class Command
 {
@@ -12,5 +10,4 @@ public class Command
 	public bool HighlightedTextRequired { get; set; }
 	public bool ConcurrentExecution { get; set; }
 	public bool ClipboardTextRequired { get; set; }
-
 }

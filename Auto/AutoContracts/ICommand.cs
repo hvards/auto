@@ -18,7 +18,8 @@ public interface ICommand
 	Guid Id { get; }
 
 	/// <summary>
-	/// Return type of the <c>Execute</c> function, if <c>Execute</c> throws an exception the default value of this type will be used.
+	/// Return type of the <c>Execute</c> function, if <c>Execute</c> throws an exception the default value of this
+	/// type will be used.
 	/// </summary>
 	Type ReturnType { get; }
 
@@ -31,7 +32,10 @@ public interface ICommand
     ///	Executes plugin and return result.
     /// </summary>
     /// <param name="args">Arguments as defined in <c>ExpectedArgument</c>, if correctly configured.</param>
-    /// <returns>If return object is input for another plugin it will be used as is, if not the <c>.ToString()</c> method will be called instead.</returns>
+    /// <returns>
+    /// If return object is input for another plugin it will be used as is, if not the <c>.ToString()</c> method will
+    /// be called instead.
+    /// </returns>
 	object Execute(object[] args);
 }
 

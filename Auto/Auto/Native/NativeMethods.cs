@@ -4,13 +4,13 @@ using Auto.Native.Models;
 
 namespace Auto.Native;
 
-public class NativeMethods : INativeMethods
+public partial class NativeMethods : INativeMethods
 {
 	private LowLevelKeyboardProc _keyboardHook;
 
 	public KeyScanResult KeyScan(char ch)
 	{
-		var scanResult = VkKeyScan(ch);
+		var scanResult = VkKeyScanW(ch);
 
 	    var vk = (ushort)(scanResult & 0xff);
 	    var modifier = scanResult >> 8;
@@ -26,7 +26,7 @@ public class NativeMethods : INativeMethods
 	{
         using var currentProcess = Process.GetCurrentProcess();
         using var module = currentProcess.MainModule;
-        return GetModuleHandle(module!.ModuleName);
+        return GetModuleHandleW(module!.ModuleName);
 	}
 
 	public void SendKeyboardInput(KeyboardInput[] keyboardInputs)
@@ -55,7 +55,7 @@ public class NativeMethods : INativeMethods
 			throw new Exception("Multiple keyboard hooks not supported");
 
 		_keyboardHook = lpfn; // Assign private field to avoid garbage collection
-		return SetWindowsHookEx(Constants.WH_KEYBOARD_LL, lpfn, handle, 0);
+		return SetWindowsHookExW(Constants.WH_KEYBOARD_LL, lpfn, handle, 0);
 	}
 
 	public nint CallNextHook(nint hookId, int nCode, nint wParam, KeyboardInput lParam)
@@ -63,33 +63,23 @@ public class NativeMethods : INativeMethods
 		return CallNextHookEx(hookId, nCode, wParam, ref lParam);
 	}
 
-	public void RemoveKeyboardHook(nint hookId)
-	{
-		_keyboardHook = null;
-		UnhookWindowsHookEx(hookId);
-	}
-
     public delegate nint LowLevelKeyboardProc(int nCode, nint wParam, ref KeyboardInput lParam);
 
-    [DllImport("user32.dll")]
-    private static extern short VkKeyScan(char ch);
+    [LibraryImport("user32.dll")]
+    private static partial short VkKeyScanW(ushort ch);
 
-    [DllImport("user32.dll", SetLastError = true)]
-    private static extern uint SendInput(uint nInputs, Input[] pInputs, int cbSize);
+    [LibraryImport("user32.dll", SetLastError = true)]
+    private static partial uint SendInput(uint nInputs, Input[] pInputs, int cbSize);
 
-    [DllImport("user32.dll")]
-    private static extern short GetAsyncKeyState(int vKey);
+    [LibraryImport("user32.dll")]
+    private static partial short GetAsyncKeyState(int vKey);
 
-    [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    private static extern nint SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, nint hMod, uint dwThreadId);
+    [LibraryImport("user32.dll", SetLastError = true)]
+    private static partial nint SetWindowsHookExW(int idHook, LowLevelKeyboardProc lpfn, nint hMod, uint dwThreadId);
 
-    [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool UnhookWindowsHookEx(nint hhk);
+    [LibraryImport("user32.dll", SetLastError = true)]
+    private static partial nint CallNextHookEx(nint hhk, int nCode, nint wParam, ref KeyboardInput lParam);
 
-    [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    private static extern nint CallNextHookEx(nint hhk, int nCode, nint wParam, ref KeyboardInput lParam);
-
-    [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    private static extern nint GetModuleHandle(string lpModuleName);
+    [LibraryImport("kernel32.dll", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+    private static partial nint GetModuleHandleW(string lpModuleName);
 }

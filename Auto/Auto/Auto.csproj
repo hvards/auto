@@ -5,6 +5,7 @@
         <UseWindowsForms>true</UseWindowsForms>
         <UseWpf>true</UseWpf>
         <OutputType>Exe</OutputType>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
     
     <ItemGroup>

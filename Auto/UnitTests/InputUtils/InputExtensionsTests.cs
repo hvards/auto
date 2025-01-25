@@ -1,6 +1,6 @@
 ﻿using Auto.InputUtils;
 
-namespace UnitTests;
+namespace UnitTests.InputUtils;
 
 [TestFixture]
 public class InputExtensionsTests

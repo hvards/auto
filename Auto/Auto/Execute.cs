@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using Auto.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace Auto;
 
@@ -8,16 +9,18 @@ public class Execute : IExecute
 	private readonly IClipboardHandler _clipboardHandler;
 	private readonly IKeyboardHandler _keyboardHandler;
 	private readonly Interfaces.ICommandExecutor _commandExecutor;
+	private readonly ILogger<Execute> _logger;
 
 	private readonly Thread _executeThread;
 	private static readonly BlockingCollection<Command.Command> MessageQueue = [];
 
 	public Execute(IClipboardHandler clipboardHandler, IKeyboardHandler keyboardHandler,
-		Interfaces.ICommandExecutor commandExecutor)
+		Interfaces.ICommandExecutor commandExecutor, ILogger<Execute> logger)
 	{
 		_clipboardHandler = clipboardHandler;
 		_keyboardHandler = keyboardHandler;
 		_commandExecutor = commandExecutor;
+		_logger = logger;
 
 		_executeThread = new Thread(ProcessCommands);
 		_executeThread.Start();
@@ -50,7 +53,7 @@ public class Execute : IExecute
 			}
 			catch (Exception e)
 			{
-				Log.Error($"Error executing command: {e}");
+				_logger.LogError(e, "Error executing command");
 			}
 			finally
 			{

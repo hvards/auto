@@ -1,15 +1,18 @@
 ﻿using System.IO;
 using System.Text.Json;
 using Auto.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace Auto.Command;
 
 public class CommandProvider : ICommandProvider
 {
+	private readonly ILogger<CommandProvider> _logger;
 	private List<Command> _commands;
 
-	public CommandProvider()
+	public CommandProvider(ILogger<CommandProvider> logger)
 	{
+		_logger = logger;
 		InitializeCommands();
 	}
 
@@ -42,7 +45,7 @@ public class CommandProvider : ICommandProvider
 		_commands = commands;
 	}
 
-	private static IEnumerable<Command> GetEnabledCommands(IEnumerable<string> folders)
+	private IEnumerable<Command> GetEnabledCommands(IEnumerable<string> folders)
 	{
 		return DeserializeFileContent(folders.SelectMany(x => Directory.GetFiles(x, "*.auto", new EnumerationOptions
 		{
@@ -50,7 +53,7 @@ public class CommandProvider : ICommandProvider
 		}))).Where(x => x.Enabled);
 	}
 
-	private static IEnumerable<Command> DeserializeFileContent(IEnumerable<string> files) => files.SelectMany(file =>
+	private IEnumerable<Command> DeserializeFileContent(IEnumerable<string> files) => files.SelectMany(file =>
 	{
 		try
 		{
@@ -58,7 +61,7 @@ public class CommandProvider : ICommandProvider
 		}
 		catch (Exception ex)
 		{
-			Log.Error($"Error loading commands {file}: {ex}");
+			_logger.LogError(ex, "Error loading commands from file: {File}", file);
 			return null;
 		}
 	});

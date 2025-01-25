@@ -2,7 +2,9 @@ using Auto.Command;
 using Auto.Handlers;
 using Auto.Interfaces;
 using Auto.tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 namespace Auto;
 
@@ -12,23 +14,25 @@ public static class Program
     private static void Main()
     {
         var serviceCollection = new ServiceCollection();
-        // var configuration = new ConfigurationBuilder()
-        //     .SetBasePath(AppContext.BaseDirectory)
-        //     .AddJsonFile("appsettings.json")
-        //     .Build();
-        // Log.Logger = new LoggerConfiguration()
-        //     .ReadFrom.Configuration(configuration)
-        //     .CreateLogger();
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(AppContext.BaseDirectory)
+            .AddJsonFile("appsettings.json")
+            .Build();
+        Log.Logger = new LoggerConfiguration()
+            .ReadFrom.Configuration(configuration)
+            .CreateLogger();
 
-       ConfigureServices(serviceCollection);
+       ConfigureServices(serviceCollection, configuration);
 
        var serviceProvider = serviceCollection.BuildServiceProvider();
        _ = serviceProvider.GetRequiredService<KeyListener>();
        Application.Run();
     }
 
-    private static void ConfigureServices(IServiceCollection services)
+    private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
+        services.AddLogging(config => { config.AddSerilog(); });
+
         services.AddSingleton<KeyListener>();
         services.AddSingleton<ICommandProvider, CommandProvider>();
         services.AddSingleton<IExecute, Execute>();

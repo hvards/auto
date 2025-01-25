@@ -1,6 +1,7 @@
 ﻿using Auto.Command;
 using Auto.Interfaces;
 using Auto.tasks;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
 namespace UnitTests;
@@ -15,14 +16,14 @@ public class PluginExecutorTests
 	public void SetUp()
 	{
 		_pluginLoaderMock = new Mock<IPluginLoader>();
-		_subject = new PluginExecutor(_pluginLoaderMock.Object);
+		_subject = new PluginExecutor(_pluginLoaderMock.Object, new NullLogger<PluginExecutor>());
 	}
 
 	[Test]
 	public void ExecutePlugin_PluginNotFound_ReturnsNull()
 	{
 		_pluginLoaderMock.Setup(pl => pl.CreateCommands()).Returns(new Dictionary<string, Plugin>());
-		_subject = new PluginExecutor(_pluginLoaderMock.Object);
+		_subject = new PluginExecutor(_pluginLoaderMock.Object, new NullLogger<PluginExecutor>());
 
 		var result = _subject.ExecutePlugin("nonexistent", new List<object>());
 
@@ -40,7 +41,7 @@ public class PluginExecutorTests
 		};
 		var plugins = new Dictionary<string, Plugin> { { "testPlugin", plugin } };
 		_pluginLoaderMock.Setup(pl => pl.CreateCommands()).Returns(plugins);
-		_subject = new PluginExecutor(_pluginLoaderMock.Object);
+		_subject = new PluginExecutor(_pluginLoaderMock.Object, new NullLogger<PluginExecutor>());
 
 		var result = _subject.ExecutePlugin("testPlugin", []);
 
@@ -58,7 +59,7 @@ public class PluginExecutorTests
 		};
 		var plugins = new Dictionary<string, Plugin> { { "testPlugin", plugin } };
 		_pluginLoaderMock.Setup(pl => pl.CreateCommands()).Returns(plugins);
-		_subject = new PluginExecutor(_pluginLoaderMock.Object);
+		_subject = new PluginExecutor(_pluginLoaderMock.Object, new NullLogger<PluginExecutor>());
 
 		var result = _subject.ExecutePlugin("testPlugin", []);
 

@@ -1,14 +1,17 @@
 ﻿using Auto.Handlers;
 using Auto.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace Auto.tasks;
 
 public class PluginExecutor : IPluginExecutor
 {
+	private readonly ILogger<PluginExecutor> _logger;
 	private static Dictionary<string, Command.Plugin> _plugins;
 
-	public PluginExecutor(IPluginLoader pluginLoader)
+	public PluginExecutor(IPluginLoader pluginLoader, ILogger<PluginExecutor> logger)
 	{
+		_logger = logger;
 		_plugins = pluginLoader.CreateCommands();
 	}
 
@@ -16,7 +19,7 @@ public class PluginExecutor : IPluginExecutor
 	{
 		if (!_plugins.TryGetValue(id, out var plugin))
 		{
-			Log.Error($"Plugin {id} not available");
+			_logger.LogError("Plugin {Id} not available", id);
 			return null;
 		}
 
@@ -39,7 +42,7 @@ public class PluginExecutor : IPluginExecutor
 		}
 		catch (Exception ex)
 		{
-			Log.Error($"Error executing plugin {id}: {ex}");
+			_logger.LogError(ex, "Error executing plugin {Id}", id);
 			return null;
 		}
 	}

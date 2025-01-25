@@ -1,9 +1,11 @@
-﻿using Auto.Interfaces;
-using Auto.tasks;
-using ICommandExecutor = Auto.Interfaces.ICommandExecutor;
+﻿using Auto.tasks;
 
 namespace Auto.Command;
 
+public interface ICommandExecutor
+{
+	List<string> ExecuteCommand(Command command, string clipboard = null, string highlighted = null);
+}
 
 public class CommandExecutor(IPluginExecutor pluginExecutor, IPowerShell powerShell) : ICommandExecutor
 {

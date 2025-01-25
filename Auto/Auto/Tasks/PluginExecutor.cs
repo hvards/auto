@@ -1,8 +1,13 @@
 ﻿using Auto.Handlers;
-using Auto.Interfaces;
+using Auto.PluginLoader;
 using Microsoft.Extensions.Logging;
 
 namespace Auto.tasks;
+
+public interface IPluginExecutor
+{
+	object ExecutePlugin(string id, IEnumerable<object> args);
+}
 
 public class PluginExecutor : IPluginExecutor
 {

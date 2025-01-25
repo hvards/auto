@@ -1,5 +1,5 @@
 ﻿using Auto;
-using Auto.Interfaces;
+using Auto.Command;
 using Auto.Native;
 using Moq;
 

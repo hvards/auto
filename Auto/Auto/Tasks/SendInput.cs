@@ -1,8 +1,13 @@
-﻿using Auto.InputUtils;
-using Auto.Interfaces;
+﻿using Auto.Handlers;
+using Auto.InputUtils;
 using static Auto.Native.Constants;
 
 namespace Auto.tasks;
+
+public interface ISendInput
+{
+	void Keyboard(string input);
+}
 
 public class SendInput(IKeyboardHandler keyboardHandler) : ISendInput
 {

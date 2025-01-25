@@ -1,7 +1,7 @@
 using Auto.Command;
 using Auto.Handlers;
-using Auto.Interfaces;
 using Auto.Native;
+using Auto.PluginLoader;
 using Auto.tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,7 +41,7 @@ public static class Program
         services.AddSingleton<IKeyboardHandler, KeyboardHandler>();
         services.AddSingleton<IPluginLoader, PluginLoader.PluginLoader>();
         services.AddSingleton<IPluginExecutor, PluginExecutor>();
-        services.AddSingleton<Interfaces.ICommandExecutor, CommandExecutor>();
+        services.AddSingleton<Command.ICommandExecutor, CommandExecutor>();
         services.AddSingleton<IPowerShell, PowerShell>();
         services.AddSingleton<INativeMethods, NativeMethods>();
     }

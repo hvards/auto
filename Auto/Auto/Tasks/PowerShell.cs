@@ -2,10 +2,14 @@
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Text;
-using Auto.Interfaces;
 using Microsoft.PowerShell;
 
 namespace Auto.tasks;
+
+public interface IPowerShell
+{
+	string Execute(string file, IList<(string name, string value)> parameters);
+}
 
 public class PowerShell : IPowerShell
 {

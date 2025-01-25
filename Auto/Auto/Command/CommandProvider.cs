@@ -1,9 +1,13 @@
 ﻿using System.IO;
 using System.Text.Json;
-using Auto.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace Auto.Command;
+
+public interface ICommandProvider
+{
+	public bool TryGetCommand(HashSet<ushort> pressedKeys, ushort vkCode, out Command command);
+}
 
 public class CommandProvider : ICommandProvider
 {

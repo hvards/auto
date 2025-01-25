@@ -1,21 +1,26 @@
 ﻿using System.Collections.Concurrent;
-using Auto.Interfaces;
+using Auto.Handlers;
 using Microsoft.Extensions.Logging;
 
 namespace Auto;
+
+public interface IExecute
+{
+	nint QueueCommand(Command.Command s);
+}
 
 public class Execute : IExecute
 {
 	private readonly IClipboardHandler _clipboardHandler;
 	private readonly IKeyboardHandler _keyboardHandler;
-	private readonly Interfaces.ICommandExecutor _commandExecutor;
+	private readonly Auto.Command.ICommandExecutor _commandExecutor;
 	private readonly ILogger<Execute> _logger;
 
 	private readonly Thread _executeThread;
 	private static readonly BlockingCollection<Command.Command> MessageQueue = [];
 
 	public Execute(IClipboardHandler clipboardHandler, IKeyboardHandler keyboardHandler,
-		Interfaces.ICommandExecutor commandExecutor, ILogger<Execute> logger)
+		Auto.Command.ICommandExecutor commandExecutor, ILogger<Execute> logger)
 	{
 		_clipboardHandler = clipboardHandler;
 		_keyboardHandler = keyboardHandler;

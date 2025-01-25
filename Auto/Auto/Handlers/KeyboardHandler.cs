@@ -1,14 +1,21 @@
-﻿using Auto.Interfaces;
-using Auto.Native;
+﻿using Auto.Native;
 using static Auto.Native.Constants;
 
 namespace Auto.Handlers;
+
+public interface IKeyboardHandler
+{
+    void ReleaseAllKeys();
+    void SendChar(string ch, nint? action = null);
+    void ClickKey(ushort vk, nint? action);
+    void CopyHighlightedText();
+}
 
 public class KeyboardHandler(INativeMethods nativeMethods) : IKeyboardHandler
 {
     public void ReleaseAllKeys()
     {
-        foreach (int key in Enum.GetValues(typeof(Keys)))
+        foreach (int key in Enum.GetValues<Keys>())
         {
 	        if (nativeMethods.IsKeyPressed(key))
                 ClickKey((ushort)key, WM_KEYUP);

@@ -3,11 +3,15 @@ using System.Reflection;
 using System.Text.Json;
 using Auto.Command;
 using Auto.Handlers;
-using Auto.Interfaces;
 using Auto.Plugins;
 using AutoContracts;
 
 namespace Auto.PluginLoader;
+
+public interface IPluginLoader
+{
+	Dictionary<string, Plugin> CreateCommands();
+}
 
 public class PluginLoader(IServiceProvider serviceProvider) : IPluginLoader
 {

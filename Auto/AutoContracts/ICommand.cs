@@ -38,9 +38,3 @@ public interface ICommand
     /// </returns>
 	object Execute(object[] args);
 }
-
-public struct PluginArgument
-{
-	public string Name { get; set; }
-	public Type Type { get; set; }
-}

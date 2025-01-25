@@ -1,5 +1,5 @@
 ﻿using Auto.Command;
-using Auto.Interfaces;
+using Auto.PluginLoader;
 using Auto.tasks;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;

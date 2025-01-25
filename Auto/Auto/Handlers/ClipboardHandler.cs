@@ -1,7 +1,11 @@
-﻿using Auto.Interfaces;
-using Clipboard = Windows.ApplicationModel.DataTransfer.Clipboard;
+﻿using Clipboard = Windows.ApplicationModel.DataTransfer.Clipboard;
 
 namespace Auto.Handlers;
+
+public interface IClipboardHandler
+{
+	string GetClipboardText(bool copyHighlighted = false);
+}
 
 public class ClipboardHandler(IKeyboardHandler keyboardHandler) : IClipboardHandler
 {

@@ -1,5 +1,5 @@
 ﻿using Auto.Command;
-using Auto.Interfaces;
+using Auto.tasks;
 using Moq;
 
 namespace UnitTests.Command;

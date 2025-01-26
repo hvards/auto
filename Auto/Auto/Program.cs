@@ -1,8 +1,8 @@
 using Auto.Command;
 using Auto.Handlers;
 using Auto.Native;
-using Auto.PluginLoader;
-using Auto.tasks;
+using Auto.PluginUtils;
+using Auto.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -39,7 +39,7 @@ public static class Program
         services.AddSingleton<IClipboardHandler, ClipboardHandler>();
         services.AddSingleton<ISendInput, SendInput>();
         services.AddSingleton<IKeyboardHandler, KeyboardHandler>();
-        services.AddSingleton<IPluginLoader, PluginLoader.PluginLoader>();
+        services.AddSingleton<IPluginLoader, PluginLoader>();
         services.AddSingleton<IPluginExecutor, PluginExecutor>();
         services.AddSingleton<Command.ICommandExecutor, CommandExecutor>();
         services.AddSingleton<IPowerShell, PowerShell>();

@@ -4,7 +4,7 @@ using System.Management.Automation.Runspaces;
 using System.Text;
 using Microsoft.PowerShell;
 
-namespace Auto.tasks;
+namespace Auto.Tasks;
 
 public interface IPowerShell
 {

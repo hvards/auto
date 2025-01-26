@@ -6,7 +6,7 @@ using Auto.Handlers;
 using Auto.Plugins;
 using AutoContracts;
 
-namespace Auto.PluginLoader;
+namespace Auto.PluginUtils;
 
 public interface IPluginLoader
 {

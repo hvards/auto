@@ -2,6 +2,6 @@
 
 public class KeyScanResult
 {
-	public ushort VirtualKey { get; set; }
-	public int Modifier { get; set; }
+	public ushort VirtualKey { get; init; }
+	public int Modifier { get; init; }
 }

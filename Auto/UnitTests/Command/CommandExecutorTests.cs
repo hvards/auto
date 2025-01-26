@@ -1,5 +1,6 @@
 ﻿using Auto.Command;
-using Auto.tasks;
+using Auto.PluginUtils;
+using Auto.Tasks;
 using Moq;
 
 namespace UnitTests.Command;

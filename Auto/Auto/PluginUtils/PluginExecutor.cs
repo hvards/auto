@@ -1,8 +1,7 @@
 ﻿using Auto.Handlers;
-using Auto.PluginLoader;
 using Microsoft.Extensions.Logging;
 
-namespace Auto.tasks;
+namespace Auto.PluginUtils;
 
 public interface IPluginExecutor
 {

@@ -2,7 +2,7 @@
 using Auto.InputUtils;
 using static Auto.Native.Constants;
 
-namespace Auto.tasks;
+namespace Auto.Tasks;
 
 public interface ISendInput
 {

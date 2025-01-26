@@ -1,4 +1,5 @@
-﻿using Auto.tasks;
+﻿using Auto.PluginUtils;
+using Auto.Tasks;
 
 namespace Auto.Command;
 

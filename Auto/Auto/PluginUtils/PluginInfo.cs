@@ -1,4 +1,4 @@
-﻿namespace Auto.PluginLoader;
+﻿namespace Auto.PluginUtils;
 
 public class PluginInfo
 {

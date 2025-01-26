@@ -1,5 +1,5 @@
 using Auto.Handlers;
-using Auto.tasks;
+using Auto.Tasks;
 using AutoContracts;
 using Microsoft.Extensions.DependencyInjection;
 

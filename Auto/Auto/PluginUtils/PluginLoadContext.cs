@@ -1,7 +1,7 @@
 using System.Reflection;
 using System.Runtime.Loader;
 
-namespace Auto.PluginLoader;
+namespace Auto.PluginUtils;
 
 public class PluginLoadContext(string pluginPath) : AssemblyLoadContext
 {

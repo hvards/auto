@@ -2,18 +2,22 @@
 
 public class Trigger
 {
-    public HashSet<ushort> Combination { get; init; } = [];
+    public HashSet<ushort> Combination { get; init; }
     public ushort[] Sequence
     {
         get => _sequence;
         init
         {
             _sequence = value;
-            _sequencePosition = new bool[value?.Length ?? 0];
+            _sequenceEnabled = (value?.Length ?? 0) > 1;
+            if (_sequenceEnabled)
+                _sequencePosition = new bool[value!.Length - 1];
         }
     }
+
     private readonly ushort[] _sequence;
-    private bool[] _sequencePosition;
+    private readonly bool[] _sequencePosition;
+    private readonly bool _sequenceEnabled;
     public bool MacroTriggered { get; private set; }
     
     public bool Check(HashSet<ushort> pressedKeys, ushort lastKey)
@@ -24,12 +28,12 @@ public class Trigger
 
     private bool TestMacro(ushort key)
     {
-        if (_sequencePosition is not { Length: > 1 })
+        if (!_sequenceEnabled)
             return false;
 
         if (_sequencePosition[Sequence.Length - 2] && Sequence[^1] == key)
         {
-            _sequencePosition = new bool[Sequence.Length];
+            Array.Clear(_sequencePosition, 0, _sequencePosition.Length);
             return true;
         }
 

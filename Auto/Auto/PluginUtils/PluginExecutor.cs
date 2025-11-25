@@ -8,7 +8,7 @@ public interface IPluginExecutor
 	object ExecutePlugin(string id, IEnumerable<object> args);
 }
 
-public class PluginExecutor : IPluginExecutor
+public partial class PluginExecutor : IPluginExecutor
 {
 	private readonly ILogger<PluginExecutor> _logger;
 	private static Dictionary<string, Command.Plugin> _plugins;
@@ -18,12 +18,13 @@ public class PluginExecutor : IPluginExecutor
 		_logger = logger;
 		_plugins = pluginLoader.CreateCommands();
 	}
+	
 
 	public object ExecutePlugin(string id, IEnumerable<object> args)
 	{
 		if (!_plugins.TryGetValue(id, out var plugin))
 		{
-			_logger.LogError("Plugin {Id} not available", id);
+			LogPluginIdNotAvailable(id);
 			return null;
 		}
 
@@ -46,8 +47,14 @@ public class PluginExecutor : IPluginExecutor
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Error executing plugin {Id}", id);
+			LogErrorExecutingPlugin(ex, id);
 			return null;
 		}
 	}
+
+	[LoggerMessage(LogLevel.Error, "Error executing plugin {Id}")]
+	public partial void LogErrorExecutingPlugin(Exception ex, string id);
+
+	[LoggerMessage(LogLevel.Error, "Plugin {Id} not available")]
+	public partial void LogPluginIdNotAvailable(string id);
 }

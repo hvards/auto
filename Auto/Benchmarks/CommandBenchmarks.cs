@@ -6,10 +6,10 @@ namespace Benchmarks;
 [MemoryDiagnoser]
 public class CommandBenchmarks
 {
-	private Trigger[] _sequenceTriggers;
-	private Trigger[] _combinationTriggers;
-	private ushort[] _letters;
-	private HashSet<ushort>[] _combinations;
+	private Trigger[] _sequenceTriggers = [];
+	private Trigger[] _combinationTriggers = [];
+	private ushort[] _letters = [];
+	private HashSet<ushort>[] _combinations = [];
 
 	[IterationSetup]
 	public void IterationSetup()

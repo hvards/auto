@@ -9,7 +9,7 @@ public interface IExecute
 	nint QueueCommand(Command.Command s);
 }
 
-public class Execute : IExecute
+public partial class Execute : IExecute
 {
 	private readonly IClipboardHandler _clipboardHandler;
 	private readonly IKeyboardHandler _keyboardHandler;
@@ -56,9 +56,9 @@ public class Execute : IExecute
 
 				Task.Run(() => _commandExecutor.ExecuteCommand(command, clipboard, highlighted));
 			}
-			catch (Exception e)
+			catch (Exception ex)
 			{
-				_logger.LogError(e, "Error executing command");
+				LogErrorExecutingCommand(ex);
 			}
 			finally
 			{
@@ -67,4 +67,7 @@ public class Execute : IExecute
 			}
 		}
 	}
+
+	[LoggerMessage(LogLevel.Error, Message = "Error executing command")]
+	public partial void LogErrorExecutingCommand(Exception ex);
 }

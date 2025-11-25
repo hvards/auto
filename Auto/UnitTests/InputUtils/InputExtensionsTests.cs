@@ -45,7 +45,7 @@ public class InputExtensionsTests
     [Test]
     public void GetTokens_ShouldHandleSleepAction_WhenInputHasSleepAction()
     {
-        var input = "[0!1000]";
+        var input = "[!:1000]";
 
         var tokens = input.GetTokens().ToList();
 

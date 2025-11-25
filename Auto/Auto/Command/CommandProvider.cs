@@ -9,7 +9,7 @@ public interface ICommandProvider
 	public bool TryGetCommand(HashSet<ushort> pressedKeys, ushort vkCode, out Command command);
 }
 
-public class CommandProvider : ICommandProvider
+public partial class CommandProvider : ICommandProvider
 {
 	private readonly ILogger<CommandProvider> _logger;
 	private List<Command> _commands;
@@ -65,8 +65,11 @@ public class CommandProvider : ICommandProvider
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Error loading commands from file: {File}", file);
+			LogErrorLoadingCommands(ex, file);
 			return null;
 		}
 	});
+
+	[LoggerMessage(LogLevel.Error, Message = "Error loading commands from file: {file}")]
+	public partial void LogErrorLoadingCommands(Exception ex, string file);
 }

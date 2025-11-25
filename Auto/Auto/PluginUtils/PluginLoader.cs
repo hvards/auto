@@ -42,7 +42,7 @@ public class PluginLoader(IServiceProvider serviceProvider) : IPluginLoader
 				if (File.Exists(dllPath))
 					paths.Add(dllPath);
 			}
-			catch (Exception _)
+			catch
 			{
 				// ignored
 			}

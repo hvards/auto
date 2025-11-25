@@ -34,14 +34,18 @@ public class TypeConverterTests
     }
 
 	[TestCase("2021-01-01", true, "2021-01-01")]
-	[TestCase("tomorrow", false, null)]
-	public void TryParse_DateTime(string input, bool expectedSuccess, string? expectedResult)
+	[TestCase("tomorrow", false, "")]
+	public void TryParse_DateTime(string input, bool expectedSuccess, string expectedResult)
 	{
 		var success = TypeConverter.TryParse<DateTime>(input, out var result);
+		var expectedDateTimeResult = default(DateTime);
+		if (expectedSuccess)
+			expectedDateTimeResult = DateTime.Parse(expectedResult);
+		
         using (Assert.EnterMultipleScope())
         {
             Assert.That(success, Is.EqualTo(expectedSuccess));
-            Assert.That(result, Is.EqualTo(expectedSuccess ? DateTime.Parse(expectedResult) : default));
+            Assert.That(result, Is.EqualTo(expectedDateTimeResult));
         }
     }
 

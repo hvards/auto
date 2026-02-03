@@ -28,12 +28,11 @@ public partial class CommandProvider : ICommandProvider
 
 	private void InitializeCommands()
 	{
-        var commandFolders =
-            (Environment.GetEnvironmentVariable("Auto", EnvironmentVariableTarget.Machine) ??
-             throw new Exception("Missing auto folders")).Split(";")
-            .Where(Directory.Exists).ToList();
+		var configFolder = Path.Combine(
+			Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "auto"
+		);
 
-		var commands = GetEnabledCommands(commandFolders).ToList();
+		var commands = GetEnabledCommands(configFolder).ToList();
 		foreach (var command in commands)
 		{
 			command.ClipboardTextRequired = command.PowerShellArguments.Select(x => x.Value)
@@ -49,12 +48,15 @@ public partial class CommandProvider : ICommandProvider
 		_commands = commands;
 	}
 
-	private IEnumerable<Command> GetEnabledCommands(IEnumerable<string> folders)
+	private IEnumerable<Command> GetEnabledCommands(string folder)
 	{
-		return DeserializeFileContent(folders.SelectMany(x => Directory.GetFiles(x, "*.auto", new EnumerationOptions
+		if (!Directory.Exists(folder))
+			return [];
+
+		return DeserializeFileContent(Directory.GetFiles(folder, "*.json", new EnumerationOptions
 		{
 			RecurseSubdirectories = true
-		}))).Where(x => x.Enabled);
+		})).Where(x => x.Enabled);
 	}
 
 	private IEnumerable<Command> DeserializeFileContent(IEnumerable<string> files) => files.SelectMany(file =>
@@ -66,7 +68,7 @@ public partial class CommandProvider : ICommandProvider
 		catch (Exception ex)
 		{
 			LogErrorLoadingCommands(ex, file);
-			return null;
+			return [];
 		}
 	});
 

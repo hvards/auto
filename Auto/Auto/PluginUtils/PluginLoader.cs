@@ -24,12 +24,12 @@ public class PluginLoader(IServiceProvider serviceProvider) : IPluginLoader
 	private static List<string> GetDllPaths()
 	{
 		var paths = new List<string>();
-#if DEBUG
-		var pluginDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "hvard",
-			"Auto", "Plugins");
-#else
-        var pluginDirectory = Path.Combine(Directory.GetParent(Environment.ProcessPath!)!.FullName, "..", "Plugins");
-#endif
+		var pluginDirectory = Path.Combine(
+			Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "auto", "plugins"
+		);
+
+		if (!Directory.Exists(pluginDirectory))
+			return paths;
 
 		foreach (var directory in Directory.EnumerateDirectories(pluginDirectory))
 		{

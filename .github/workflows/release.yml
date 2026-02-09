@@ -30,16 +30,16 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Run tests
-        run: dotnet test Auto/UnitTests/UnitTests.csproj -c Release
+        run: dotnet test UnitTests/UnitTests.csproj -c Release
 
       - name: Build installer
-        run: dotnet build Auto/Installer/Installer.wixproj -c Release -p:AutoVersion=${{ inputs.version }}
+        run: dotnet build Installer/Installer.wixproj -c Release -p:AutoVersion=${{ inputs.version }}
 
       - name: Upload installer artifact
         uses: actions/upload-artifact@v4
         with:
           name: Auto-${{ inputs.version }}-x64
-          path: Auto/Installer/bin/Release/Auto-${{ inputs.version }}-x64.msi
+          path: Installer/bin/Release/Auto-${{ inputs.version }}-x64.msi
 
       - name: Create GitHub Release
         if: inputs.create_release
@@ -47,7 +47,7 @@ jobs:
         with:
           tag_name: v${{ inputs.version }}
           name: Auto v${{ inputs.version }}
-          files: Auto/Installer/bin/Release/Auto-${{ inputs.version }}-x64.msi
+          files: Installer/bin/Release/Auto-${{ inputs.version }}-x64.msi
           generate_release_notes: true
           draft: false
           prerelease: false

@@ -1,4 +1,5 @@
 ﻿using Auto.Handlers;
+
 using Microsoft.Extensions.Logging;
 
 namespace Auto.PluginUtils;
@@ -18,7 +19,7 @@ public partial class PluginExecutor : IPluginExecutor
 		_logger = logger;
 		_plugins = pluginLoader.CreateCommands();
 	}
-	
+
 
 	public object ExecutePlugin(string id, IEnumerable<object> args)
 	{

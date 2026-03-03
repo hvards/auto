@@ -1,4 +1,5 @@
 ﻿using Auto.Command;
+
 using BenchmarkDotNet.Attributes;
 
 namespace Benchmarks;
@@ -17,11 +18,12 @@ public class CommandBenchmarks
 		_letters = Enumerable.Range('a', 'i').Select(x => (ushort)x).ToArray();
 		_sequenceTriggers =
 			(from letter in _letters
-				from letter2 in _letters
-				select new Trigger
-				{
-					Sequence = Enumerable.Range(letter, letter2).Select(x => (ushort)x).ToArray(), Combination = []
-				}
+			 from letter2 in _letters
+			 select new Trigger
+			 {
+				 Sequence = Enumerable.Range(letter, letter2).Select(x => (ushort)x).ToArray(),
+				 Combination = []
+			 }
 			).ToArray();
 
 		_combinations = GetPowerSet(Enumerable.Range(1, 12).Select(x => (ushort)x).ToList())
@@ -62,9 +64,9 @@ public class CommandBenchmarks
 	private static IEnumerable<IEnumerable<T>> GetPowerSet<T>(List<T> list)
 	{
 		return from m in Enumerable.Range(0, 1 << list.Count)
-				  select
-					  from i in Enumerable.Range(0, list.Count)
-					  where (m & (1 << i)) != 0
-					  select list[i];
+			   select
+				   from i in Enumerable.Range(0, list.Count)
+				   where (m & (1 << i)) != 0
+				   select list[i];
 	}
 }

@@ -1,7 +1,9 @@
 ﻿using Auto.Command;
 using Auto.PluginUtils;
 using Auto.Tasks;
+
 using Microsoft.Extensions.Logging.Abstractions;
+
 using Moq;
 
 namespace UnitTests.tasks;

@@ -1,8 +1,11 @@
 ﻿using System.Windows.Forms;
+
 using Auto.Handlers;
 using Auto.Native;
 using Auto.Native.Models;
+
 using Moq;
+
 using static Auto.Native.Constants;
 
 namespace UnitTests.Handlers;
@@ -148,7 +151,7 @@ public class KeyboardHandlerTests
 	private static bool IsKeyPress(KeyboardInput input, ushort key, bool down)
 	{
 		return input.wVk == key &&
-		       (down && input.dwFlags == (int)KeyEventF.KeyDown || input.dwFlags == (int)KeyEventF.KeyUp) &&
-		       input.dwExtraInfo == IGNORE_INPUT;
+			   (down && input.dwFlags == (int)KeyEventF.KeyDown || input.dwFlags == (int)KeyEventF.KeyUp) &&
+			   input.dwExtraInfo == IGNORE_INPUT;
 	}
 }

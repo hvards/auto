@@ -26,15 +26,15 @@ public interface ICommand
 	/// <summary>
 	/// Used to help configure plugin correctly.
 	/// </summary>
-    List<PluginArgument> ExpectedArguments { get; }
+	List<PluginArgument> ExpectedArguments { get; }
 
-    /// <summary>
-    ///	Executes plugin and return result.
-    /// </summary>
-    /// <param name="args">Arguments as defined in <c>ExpectedArgument</c>, if correctly configured.</param>
-    /// <returns>
-    /// If return object is input for another plugin it will be used as is, if not the <c>.ToString()</c> method will
-    /// be called instead.
-    /// </returns>
+	/// <summary>
+	///	Executes plugin and return result.
+	/// </summary>
+	/// <param name="args">Arguments as defined in <c>ExpectedArgument</c>, if correctly configured.</param>
+	/// <returns>
+	/// If return object is input for another plugin it will be used as is, if not the <c>.ToString()</c> method will
+	/// be called instead.
+	/// </returns>
 	object Execute(object[] args);
 }

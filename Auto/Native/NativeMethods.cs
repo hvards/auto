@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
+
 using Auto.Native.Models;
 
 namespace Auto.Native;
@@ -22,8 +23,8 @@ public partial class NativeMethods : INativeMethods
 	{
 		var scanResult = VkKeyScanW(ch);
 
-	    var vk = (ushort)(scanResult & 0xff);
-	    var modifier = scanResult >> 8;
+		var vk = (ushort)(scanResult & 0xff);
+		var modifier = scanResult >> 8;
 
 		return new KeyScanResult
 		{
@@ -34,9 +35,9 @@ public partial class NativeMethods : INativeMethods
 
 	public nint GetCurrentProcessHandle()
 	{
-        using var currentProcess = Process.GetCurrentProcess();
-        using var module = currentProcess.MainModule;
-        return GetModuleHandleW(module!.ModuleName);
+		using var currentProcess = Process.GetCurrentProcess();
+		using var module = currentProcess.MainModule;
+		return GetModuleHandleW(module!.ModuleName);
 	}
 
 	public void SendKeyboardInput(KeyboardInput[] keyboardInputs)
@@ -50,7 +51,7 @@ public partial class NativeMethods : INativeMethods
 			}
 		}).ToArray();
 
-		 _ = SendInput((uint)input.Length, input, Marshal.SizeOf(typeof(Input)));
+		_ = SendInput((uint)input.Length, input, Marshal.SizeOf(typeof(Input)));
 	}
 
 	public bool IsKeyPressed(int vk)
@@ -73,23 +74,23 @@ public partial class NativeMethods : INativeMethods
 		return CallNextHookEx(hookId, nCode, wParam, ref lParam);
 	}
 
-    public delegate nint LowLevelKeyboardProc(int nCode, nint wParam, ref KeyboardInput lParam);
+	public delegate nint LowLevelKeyboardProc(int nCode, nint wParam, ref KeyboardInput lParam);
 
-    [LibraryImport("user32.dll")]
-    private static partial short VkKeyScanW(ushort ch);
+	[LibraryImport("user32.dll")]
+	private static partial short VkKeyScanW(ushort ch);
 
-    [LibraryImport("user32.dll", SetLastError = true)]
-    private static partial uint SendInput(uint nInputs, Input[] pInputs, int cbSize);
+	[LibraryImport("user32.dll", SetLastError = true)]
+	private static partial uint SendInput(uint nInputs, Input[] pInputs, int cbSize);
 
-    [LibraryImport("user32.dll")]
-    private static partial short GetAsyncKeyState(int vKey);
+	[LibraryImport("user32.dll")]
+	private static partial short GetAsyncKeyState(int vKey);
 
-    [LibraryImport("user32.dll", SetLastError = true)]
-    private static partial nint SetWindowsHookExW(int idHook, LowLevelKeyboardProc lpfn, nint hMod, uint dwThreadId);
+	[LibraryImport("user32.dll", SetLastError = true)]
+	private static partial nint SetWindowsHookExW(int idHook, LowLevelKeyboardProc lpfn, nint hMod, uint dwThreadId);
 
-    [LibraryImport("user32.dll", SetLastError = true)]
-    private static partial nint CallNextHookEx(nint hhk, int nCode, nint wParam, ref KeyboardInput lParam);
+	[LibraryImport("user32.dll", SetLastError = true)]
+	private static partial nint CallNextHookEx(nint hhk, int nCode, nint wParam, ref KeyboardInput lParam);
 
-    [LibraryImport("kernel32.dll", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
-    private static partial nint GetModuleHandleW(string lpModuleName);
+	[LibraryImport("kernel32.dll", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+	private static partial nint GetModuleHandleW(string lpModuleName);
 }

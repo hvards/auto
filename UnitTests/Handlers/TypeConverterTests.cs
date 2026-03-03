@@ -10,12 +10,12 @@ public class TypeConverterTests
 	public void TryParse_Int(string input, bool expectedSuccess, int expectedResult)
 	{
 		var success = TypeConverter.TryParse<int>(input, out var result);
-        using (Assert.EnterMultipleScope())
-        {
-            Assert.That(success, Is.EqualTo(expectedSuccess));
-            Assert.That(result, Is.EqualTo(expectedResult));
-        }
-    }
+		using (Assert.EnterMultipleScope())
+		{
+			Assert.That(success, Is.EqualTo(expectedSuccess));
+			Assert.That(result, Is.EqualTo(expectedResult));
+		}
+	}
 
 	[TestCase("true", true, true)]
 	[TestCase("false", true, false)]
@@ -26,12 +26,12 @@ public class TypeConverterTests
 	public void TryParse_Bool(string input, bool expectedSuccess, bool expectedResult)
 	{
 		var success = TypeConverter.TryParse<bool>(input, out var result);
-        using (Assert.EnterMultipleScope())
-        {
-            Assert.That(success, Is.EqualTo(expectedSuccess));
-            Assert.That(result, Is.EqualTo(expectedResult));
-        }
-    }
+		using (Assert.EnterMultipleScope())
+		{
+			Assert.That(success, Is.EqualTo(expectedSuccess));
+			Assert.That(result, Is.EqualTo(expectedResult));
+		}
+	}
 
 	[TestCase("2021-01-01", true, "2021-01-01")]
 	[TestCase("tomorrow", false, "")]
@@ -41,13 +41,13 @@ public class TypeConverterTests
 		var expectedDateTimeResult = default(DateTime);
 		if (expectedSuccess)
 			expectedDateTimeResult = DateTime.Parse(expectedResult);
-		
-        using (Assert.EnterMultipleScope())
-        {
-            Assert.That(success, Is.EqualTo(expectedSuccess));
-            Assert.That(result, Is.EqualTo(expectedDateTimeResult));
-        }
-    }
+
+		using (Assert.EnterMultipleScope())
+		{
+			Assert.That(success, Is.EqualTo(expectedSuccess));
+			Assert.That(result, Is.EqualTo(expectedDateTimeResult));
+		}
+	}
 
 	[Test]
 	public void ConvertValueTypes_successfully()

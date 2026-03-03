@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Text.Json;
+
 using Microsoft.Extensions.Logging;
 
 namespace Auto.Command;
@@ -22,7 +23,7 @@ public partial class CommandProvider : ICommandProvider
 
 	public bool TryGetCommand(HashSet<ushort> pressedKeys, ushort vkCode, out Command command)
 	{
-        command = _commands.FirstOrDefault(x => x.Trigger.Check(pressedKeys, vkCode));
+		command = _commands.FirstOrDefault(x => x.Trigger.Check(pressedKeys, vkCode));
 		return command != null;
 	}
 
@@ -36,13 +37,13 @@ public partial class CommandProvider : ICommandProvider
 		foreach (var command in commands)
 		{
 			command.ClipboardTextRequired = command.PowerShellArguments.Select(x => x.Value)
-				                                .Any(x => x.Any(y => y.ClipboardTextRequired)) ||
-			                                (command.PluginArguments?.Select(x => x.Value)
-				                                .Any(x => x.Any(y => y.ClipboardTextRequired)) ?? false);
+												.Any(x => x.Any(y => y.ClipboardTextRequired)) ||
+											(command.PluginArguments?.Select(x => x.Value)
+												.Any(x => x.Any(y => y.ClipboardTextRequired)) ?? false);
 			command.HighlightedTextRequired = command.PowerShellArguments.Select(x => x.Value)
-				                                  .Any(x => x.Any(y => y.HighlightedTextRequired)) ||
-			                                  (command.PluginArguments?.Select(x => x.Value)
-				                                  .Any(x => x.Any(y => y.HighlightedTextRequired)) ?? false);
+												  .Any(x => x.Any(y => y.HighlightedTextRequired)) ||
+											  (command.PluginArguments?.Select(x => x.Value)
+												  .Any(x => x.Any(y => y.HighlightedTextRequired)) ?? false);
 		}
 
 		_commands = commands;

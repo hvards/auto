@@ -1,6 +1,7 @@
 ﻿using Auto.Command;
 using Auto.PluginUtils;
 using Auto.Tasks;
+
 using Moq;
 
 namespace UnitTests.Command;

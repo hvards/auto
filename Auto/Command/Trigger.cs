@@ -2,50 +2,50 @@
 
 public class Trigger
 {
-    public HashSet<ushort> Combination { get; init; }
-    public ushort[] Sequence
-    {
-        get => _sequence;
-        init
-        {
-            _sequence = value;
-            _sequenceEnabled = (value?.Length ?? 0) > 1;
-            if (_sequenceEnabled)
-                _sequencePosition = new bool[value!.Length - 1];
-        }
-    }
+	public HashSet<ushort> Combination { get; init; }
+	public ushort[] Sequence
+	{
+		get => _sequence;
+		init
+		{
+			_sequence = value;
+			_sequenceEnabled = (value?.Length ?? 0) > 1;
+			if (_sequenceEnabled)
+				_sequencePosition = new bool[value!.Length - 1];
+		}
+	}
 
-    private readonly ushort[] _sequence;
-    private readonly bool[] _sequencePosition;
-    private readonly bool _sequenceEnabled;
-    public bool MacroTriggered { get; private set; }
-    
-    public bool Check(HashSet<ushort> pressedKeys, ushort lastKey)
-    {
-        MacroTriggered = TestMacro(lastKey);
-        return MacroTriggered || (pressedKeys != null && pressedKeys.Count != 0 && pressedKeys.SetEquals(Combination));
-    }
+	private readonly ushort[] _sequence;
+	private readonly bool[] _sequencePosition;
+	private readonly bool _sequenceEnabled;
+	public bool MacroTriggered { get; private set; }
 
-    private bool TestMacro(ushort key)
-    {
-        if (!_sequenceEnabled)
-            return false;
+	public bool Check(HashSet<ushort> pressedKeys, ushort lastKey)
+	{
+		MacroTriggered = TestMacro(lastKey);
+		return MacroTriggered || (pressedKeys != null && pressedKeys.Count != 0 && pressedKeys.SetEquals(Combination));
+	}
 
-        if (_sequencePosition[Sequence.Length - 2] && Sequence[^1] == key)
-        {
-            Array.Clear(_sequencePosition, 0, _sequencePosition.Length);
-            return true;
-        }
+	private bool TestMacro(ushort key)
+	{
+		if (!_sequenceEnabled)
+			return false;
 
-        _sequencePosition[Sequence.Length - 2] = false;
-        for (var i = Sequence.Length - 2; i > 0; i--)
-        {
-            if (!_sequencePosition[i - 1]) continue;
-            _sequencePosition[i] = Sequence[i] == key;
-            _sequencePosition[i - 1] = false;
-        }
+		if (_sequencePosition[Sequence.Length - 2] && Sequence[^1] == key)
+		{
+			Array.Clear(_sequencePosition, 0, _sequencePosition.Length);
+			return true;
+		}
 
-        _sequencePosition[0] = Sequence[0] == key;
-        return false;
-    }
+		_sequencePosition[Sequence.Length - 2] = false;
+		for (var i = Sequence.Length - 2; i > 0; i--)
+		{
+			if (!_sequencePosition[i - 1]) continue;
+			_sequencePosition[i] = Sequence[i] == key;
+			_sequencePosition[i - 1] = false;
+		}
+
+		_sequencePosition[0] = Sequence[0] == key;
+		return false;
+	}
 }

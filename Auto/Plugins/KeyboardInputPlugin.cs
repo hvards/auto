@@ -1,6 +1,8 @@
 using Auto.Handlers;
 using Auto.Tasks;
+
 using AutoContracts;
+
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Auto.Plugins;

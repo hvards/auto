@@ -1,7 +1,6 @@
-﻿using System.Diagnostics;
+﻿using Auto.Native.Models;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
-
-using Auto.Native.Models;
 
 namespace Auto.Native;
 

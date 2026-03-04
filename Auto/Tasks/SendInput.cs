@@ -1,6 +1,5 @@
 ﻿using Auto.Handlers;
 using Auto.InputUtils;
-
 using static Auto.Native.Constants;
 
 namespace Auto.Tasks;

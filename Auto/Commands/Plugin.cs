@@ -1,4 +1,4 @@
-namespace Auto.Command;
+namespace Auto.Commands;
 
 public class Plugin
 {

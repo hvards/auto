@@ -1,11 +1,8 @@
-﻿using System.Windows.Forms;
-
-using Auto.Handlers;
+﻿using Auto.Handlers;
 using Auto.Native;
 using Auto.Native.Models;
-
 using Moq;
-
+using System.Windows.Forms;
 using static Auto.Native.Constants;
 
 namespace UnitTests.Handlers;
@@ -66,7 +63,7 @@ public class KeyboardHandlerTests
 			IsKeyPress(inputs[1], (ushort)Keys.C, true) &&
 			IsKeyPress(inputs[2], (ushort)Keys.C, false) &&
 			IsKeyPress(inputs[3], (ushort)Keys.LControlKey, false)
-			)));
+		)));
 	}
 
 	[Test]

@@ -1,10 +1,10 @@
-﻿using Auto.Command;
+﻿using Auto.Commands;
+using Auto.Models;
 using Auto.PluginUtils;
 using Auto.Tasks;
-
 using Moq;
 
-namespace UnitTests.Command;
+namespace UnitTests.Commands;
 
 [TestFixture]
 public class CommandExecutorTests
@@ -24,7 +24,7 @@ public class CommandExecutorTests
 	[Test]
 	public void ExecuteCommand_ShouldReturnClipboardText_WhenArgumentTypeIsClipboard()
 	{
-		var command = new Auto.Command.Command
+		var command = new Command
 		{
 			Actions = [new ArgumentToken { Type = ArgumentType.Clipboard }]
 		};
@@ -37,7 +37,7 @@ public class CommandExecutorTests
 	[Test]
 	public void ExecuteCommand_ShouldReturnHighlightedText_WhenArgumentTypeIsHighlighted()
 	{
-		var command = new Auto.Command.Command
+		var command = new Command
 		{
 			Actions = [new ArgumentToken { Type = ArgumentType.Highlighted }]
 		};
@@ -50,10 +50,10 @@ public class CommandExecutorTests
 	[Test]
 	public void ExecuteCommand_ShouldExecutePowerShell_WhenArgumentTypeIsPowerShell()
 	{
-		var command = new Auto.Command.Command
+		var command = new Command
 		{
 			Actions = [new ArgumentToken { Type = ArgumentType.PowerShell, Value = "script" }],
-			PowerShellArguments = new Dictionary<string, CommandArgument[]>()
+			PowerShellArguments = []
 		};
 		_powerShellMock.Setup(x => x.Execute("script", It.IsAny<List<(string, string)>>()))
 			.Returns("powershell result");
@@ -67,7 +67,7 @@ public class CommandExecutorTests
 	[Test]
 	public void ExecuteCommand_ShouldExecutePlugin_WhenArgumentTypeIsPlugin()
 	{
-		var command = new Auto.Command.Command
+		var command = new Command
 		{
 			Actions = [new ArgumentToken { Type = ArgumentType.Plugin, Value = "plugin" }],
 			PluginArguments = new Dictionary<string, CommandArgument[]>
@@ -87,7 +87,7 @@ public class CommandExecutorTests
 	[Test]
 	public void ExecuteCommand_ShouldReturnText_WhenArgumentTypeIsText()
 	{
-		var command = new Auto.Command.Command
+		var command = new Command
 		{
 			Actions = [new ArgumentToken { Type = ArgumentType.Text, Value = "text" }]
 		};

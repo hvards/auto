@@ -1,12 +1,9 @@
-﻿using Auto.Command;
+﻿using Auto.Commands;
 using Auto.PluginUtils;
-using Auto.Tasks;
-
 using Microsoft.Extensions.Logging.Abstractions;
-
 using Moq;
 
-namespace UnitTests.tasks;
+namespace UnitTests.PluginUtils;
 
 [TestFixture]
 public class PluginExecutorTests

@@ -1,7 +1,8 @@
-﻿using Auto.PluginUtils;
+﻿using Auto.Models;
+using Auto.PluginUtils;
 using Auto.Tasks;
 
-namespace Auto.Command;
+namespace Auto.Commands;
 
 public interface ICommandExecutor
 {

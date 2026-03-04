@@ -1,0 +1,80 @@
+[
+  {
+    "Trigger": {
+      "Combination": [
+        162,
+        164,
+        160,
+        163,
+        165,
+        161,
+        49
+      ],
+      "Sequence": []
+    },
+    "Actions": [
+      {
+        "Type": 5,
+        "Value": "3a40e921-8007-4f18-8f78-4ff8ba10abfe"
+      }
+    ],
+    "PowerShellArguments": {},
+    "PluginArguments": {
+      "2a85d89b-234f-483a-99fd-0bc1b98f34ac": [
+        {
+          "ParameterName": null,
+          "Tokens": [
+            {
+              "Type": 1,
+              "Value": "0"
+            }
+          ]
+        }
+      ],
+      "3a40e921-8007-4f18-8f78-4ff8ba10abfe": [
+        {
+          "ParameterName": null,
+          "Tokens": [
+            {
+              "Type": 1,
+              "Value": "0"
+            }
+          ]
+        },
+        {
+          "ParameterName": null,
+          "Tokens": [
+            {
+              "Type": 5,
+              "Value": "854b6621-9ba9-4eae-bafd-89613cac9c5b"
+            }
+          ]
+        }
+      ],
+      "854b6621-9ba9-4eae-bafd-89613cac9c5b": [
+        {
+          "ParameterName": null,
+          "Tokens": [
+            {
+              "Type": 1,
+              "Value": "Devices"
+            }
+          ]
+        },
+        {
+          "ParameterName": null,
+          "Tokens": [
+            {
+              "Type": 5,
+              "Value": "2a85d89b-234f-483a-99fd-0bc1b98f34ac"
+            }
+          ]
+        }
+      ]
+    },
+    "Enabled": true,
+    "Name": "Set default playback device from list",
+    "Description": "",
+    "Id": "e4d0f13a-ce81-4438-b7c0-6bee2e121493"
+  }
+]

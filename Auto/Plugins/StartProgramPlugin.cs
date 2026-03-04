@@ -1,12 +1,11 @@
-using System.Diagnostics;
-
 using AutoContracts;
+using System.Diagnostics;
 
 namespace Auto.Plugins;
 
 public class StartProgramPlugin : ICommand
 {
-	public string Name => "Start program";
+	public string Name => "StartProgram";
 	public string Description => "Start program";
 	public Guid Id { get; } = Guid.Parse("21092f13-5366-4cba-90df-66bd123e66a5");
 	public Type ReturnType { get; } = typeof(bool);

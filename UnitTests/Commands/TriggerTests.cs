@@ -1,8 +1,7 @@
+using Auto.Models;
 using System.Windows.Forms;
 
-using Auto.Command;
-
-namespace UnitTests.Command;
+namespace UnitTests.Commands;
 
 [TestFixture]
 public class TriggerTests
@@ -12,7 +11,7 @@ public class TriggerTests
 	[TestCase(Keys.B, Keys.A, Keys.B)]
 	public void IsMacroOrKeyComboPressed_ShouldReturnTrue_IfMacroPressed(params Keys[] keys)
 	{
-		var command = new Auto.Command.Command
+		var command = new Command
 		{ Trigger = new Trigger { Sequence = [(ushort)Keys.A, (ushort)Keys.B, (ushort)Keys.C] } };
 		foreach (var key in keys)
 			Assert.That(command.Trigger.Check([], (ushort)key), Is.False);
@@ -23,7 +22,7 @@ public class TriggerTests
 	[TestCase(Keys.A, Keys.B, Keys.B, Keys.C)]
 	public void IsMacroOrKeyComboPressed_ShouldReturnFalse_IfMacroNotPressed(params Keys[] keys)
 	{
-		var command = new Auto.Command.Command
+		var command = new Command
 		{ Trigger = new Trigger { Sequence = [(ushort)Keys.A, (ushort)Keys.B, (ushort)Keys.C] } };
 		foreach (var key in keys)
 			Assert.That(command.Trigger.Check([], (ushort)key), Is.False);
@@ -33,7 +32,7 @@ public class TriggerTests
 	public void IsMacroOrKeyComboPressed_ShouldReturnTrue_IfKeyCombinationPressed()
 	{
 		var combination = new HashSet<ushort> { (ushort)Keys.A, (ushort)Keys.B, (ushort)Keys.ControlKey };
-		var command = new Auto.Command.Command { Trigger = new Trigger { Combination = combination } };
+		var command = new Command { Trigger = new Trigger { Combination = combination } };
 
 		Assert.That(command.Trigger.Check(combination, 0), Is.True);
 	}
@@ -44,7 +43,7 @@ public class TriggerTests
 	public void IsMacroOrKeyComboPressed_ShouldReturnFalse_IfKeyCombinationNotPressed(params Keys[] keys)
 	{
 		var combination = new HashSet<ushort> { (ushort)Keys.A, (ushort)Keys.B, (ushort)Keys.ControlKey };
-		var command = new Auto.Command.Command { Trigger = new Trigger { Combination = combination } };
+		var command = new Command { Trigger = new Trigger { Combination = combination } };
 
 		Assert.That(command.Trigger.Check(keys.Select(x => (ushort)x).ToHashSet(), 0),
 			Is.False);

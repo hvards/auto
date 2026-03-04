@@ -1,12 +1,12 @@
-﻿namespace Auto.Command;
+namespace Auto.Models;
 
 public class Trigger
 {
-	public HashSet<ushort> Combination { get; init; }
+	public HashSet<ushort> Combination { get; set; } = [];
 	public ushort[] Sequence
 	{
 		get => _sequence;
-		init
+		set
 		{
 			_sequence = value;
 			_sequenceEnabled = (value?.Length ?? 0) > 1;
@@ -15,9 +15,9 @@ public class Trigger
 		}
 	}
 
-	private readonly ushort[] _sequence;
-	private readonly bool[] _sequencePosition;
-	private readonly bool _sequenceEnabled;
+	private ushort[] _sequence = [];
+	private bool[] _sequencePosition;
+	private bool _sequenceEnabled;
 	public bool MacroTriggered { get; private set; }
 
 	public bool Check(HashSet<ushort> pressedKeys, ushort lastKey)

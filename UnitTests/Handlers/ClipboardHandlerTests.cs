@@ -1,5 +1,4 @@
 ﻿using Auto.Handlers;
-
 using Moq;
 
 namespace UnitTests.Handlers;

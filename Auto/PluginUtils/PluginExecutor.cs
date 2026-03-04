@@ -1,5 +1,4 @@
 ﻿using Auto.Handlers;
-
 using Microsoft.Extensions.Logging;
 
 namespace Auto.PluginUtils;
@@ -12,14 +11,13 @@ public interface IPluginExecutor
 public partial class PluginExecutor : IPluginExecutor
 {
 	private readonly ILogger<PluginExecutor> _logger;
-	private static Dictionary<string, Command.Plugin> _plugins;
+	private static Dictionary<string, Commands.Plugin> _plugins;
 
 	public PluginExecutor(IPluginLoader pluginLoader, ILogger<PluginExecutor> logger)
 	{
 		_logger = logger;
 		_plugins = pluginLoader.CreateCommands();
 	}
-
 
 	public object ExecutePlugin(string id, IEnumerable<object> args)
 	{

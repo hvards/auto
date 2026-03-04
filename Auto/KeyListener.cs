@@ -1,7 +1,6 @@
-﻿using Auto.Command;
+﻿using Auto.Commands;
 using Auto.Native;
 using Auto.Tasks;
-
 using static Auto.Native.Constants;
 
 namespace Auto;

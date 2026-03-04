@@ -1,5 +1,4 @@
-﻿using Auto.Command;
-
+﻿using Auto.Models;
 using BenchmarkDotNet.Attributes;
 
 namespace Benchmarks;

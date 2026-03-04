@@ -1,5 +1,6 @@
 <Project Sdk="WixToolset.Sdk/5.0.2">
     <PropertyGroup>
+        <AutoVersion Condition="'$(AutoVersion)' == ''">0.0.1</AutoVersion>
         <OutputType>Package</OutputType>
         <OutputName>Auto-$(AutoVersion)-x64</OutputName>
         <InstallerPlatform>x64</InstallerPlatform>

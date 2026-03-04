@@ -1,7 +1,6 @@
 ﻿using Auto;
-using Auto.Command;
+using Auto.Commands;
 using Auto.Native;
-
 using Moq;
 
 namespace UnitTests;

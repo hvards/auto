@@ -1,5 +1,4 @@
 ﻿using Auto.Handlers;
-
 using BenchmarkDotNet.Attributes;
 
 namespace Benchmarks;

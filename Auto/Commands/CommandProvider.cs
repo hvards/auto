@@ -1,9 +1,9 @@
-﻿using System.IO;
+﻿using Auto.Models;
+using Microsoft.Extensions.Logging;
+using System.IO;
 using System.Text.Json;
 
-using Microsoft.Extensions.Logging;
-
-namespace Auto.Command;
+namespace Auto.Commands;
 
 public interface ICommandProvider
 {
@@ -38,12 +38,12 @@ public partial class CommandProvider : ICommandProvider
 		{
 			command.ClipboardTextRequired = command.PowerShellArguments.Select(x => x.Value)
 												.Any(x => x.Any(y => y.ClipboardTextRequired)) ||
-											(command.PluginArguments?.Select(x => x.Value)
-												.Any(x => x.Any(y => y.ClipboardTextRequired)) ?? false);
+											command.PluginArguments.Select(x => x.Value)
+												.Any(x => x.Any(y => y.ClipboardTextRequired));
 			command.HighlightedTextRequired = command.PowerShellArguments.Select(x => x.Value)
 												  .Any(x => x.Any(y => y.HighlightedTextRequired)) ||
-											  (command.PluginArguments?.Select(x => x.Value)
-												  .Any(x => x.Any(y => y.HighlightedTextRequired)) ?? false);
+											  command.PluginArguments.Select(x => x.Value)
+												  .Any(x => x.Any(y => y.HighlightedTextRequired));
 		}
 
 		_commands = commands;

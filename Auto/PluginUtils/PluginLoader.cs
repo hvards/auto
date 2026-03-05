@@ -17,11 +17,6 @@ public interface IPluginLoader
 
 public class PluginLoader(IServiceProvider serviceProvider) : IPluginLoader
 {
-	private static Assembly LoadPlugin(string path)
-	{
-		var loadContext = new PluginLoadContext(path);
-		return loadContext.LoadFromAssemblyName(new AssemblyName(Path.GetFileNameWithoutExtension(path)));
-	}
 
 	private static List<string> GetDllPaths()
 	{
@@ -106,7 +101,8 @@ public class PluginLoader(IServiceProvider serviceProvider) : IPluginLoader
 	{
 		foreach (var dllPath in GetDllPaths())
 		{
-			yield return LoadPlugin(dllPath);
+			var loadContext = new PluginLoadContext(dllPath);
+			yield return loadContext.LoadFromAssemblyName(new AssemblyName(Path.GetFileNameWithoutExtension(dllPath)));
 		}
 	}
 
@@ -133,32 +129,23 @@ public class PluginLoader(IServiceProvider serviceProvider) : IPluginLoader
 		}
 	}
 
-	private static IEnumerable<(Guid id, string name)> GetAvailablePlugins()
+	private static IEnumerable<ICommand> GetAllCommands()
 	{
 		foreach (var command in GetBuiltInPluginInstances())
-			yield return (command.Id, command.Name);
+			yield return command;
 
 		foreach (var assembly in GetDllAssemblies())
 			foreach (var command in GetCommands(assembly))
-				yield return (command.Id, command.Name);
+				yield return command;
 	}
 
 	public static IEnumerable<PluginDetail> GetAvailablePluginDetails()
-	{
-		foreach (var command in GetBuiltInPluginInstances())
-			yield return new PluginDetail(command.Id, command.Name,
-				command.Description, command.ExpectedArguments);
-
-		foreach (var assembly in GetDllAssemblies())
-			foreach (var command in GetCommands(assembly))
-				yield return new PluginDetail(command.Id, command.Name,
-					command.Description, command.ExpectedArguments);
-	}
+		=> GetAllCommands().Select(c => new PluginDetail(c.Id, c.Name, c.Description, c.ExpectedArguments));
 
 	public static string GetPluginName(string guidString)
 	{
 		if (!Guid.TryParse(guidString, out var guid)) return null;
-		return GetAvailablePlugins().FirstOrDefault(p => p.id == guid).name;
+		return GetAllCommands().FirstOrDefault(c => c.Id == guid)?.Name;
 	}
 
 	public static string ResolvePlugin(string nameOrId)
@@ -166,9 +153,8 @@ public class PluginLoader(IServiceProvider serviceProvider) : IPluginLoader
 		if (Guid.TryParse(nameOrId, out var guid))
 			return guid.ToString();
 
-		var (id, name) = GetAvailablePlugins()
-			.FirstOrDefault(p => p.name.Equals(nameOrId, StringComparison.OrdinalIgnoreCase));
-
-		return name != null ? id.ToString() : null;
+		return GetAllCommands()
+			.FirstOrDefault(c => c.Name.Equals(nameOrId, StringComparison.OrdinalIgnoreCase))
+			?.Id.ToString();
 	}
 }

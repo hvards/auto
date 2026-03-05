@@ -11,7 +11,7 @@ public interface IPluginExecutor
 public partial class PluginExecutor : IPluginExecutor
 {
 	private readonly ILogger<PluginExecutor> _logger;
-	private static Dictionary<string, Commands.Plugin> _plugins;
+	private readonly Dictionary<string, Commands.Plugin> _plugins;
 
 	public PluginExecutor(IPluginLoader pluginLoader, ILogger<PluginExecutor> logger)
 	{

@@ -13,6 +13,14 @@ public interface IKeyboardHandler
 
 public class KeyboardHandler(INativeMethods nativeMethods) : IKeyboardHandler
 {
+	private const ushort VkLControl = (ushort)Keys.LControlKey;
+	private const ushort VkRMenu = (ushort)Keys.RMenu;
+	private const ushort VkShift = (ushort)Keys.ShiftKey;
+
+	private const int ModifierShift = 1;
+	private const int ModifierCtrl = 2;
+	private const int ModifierAltGr = 6;
+
 	public void ReleaseAllKeys()
 	{
 		foreach (int key in Enum.GetValues<Keys>())
@@ -34,13 +42,13 @@ public class KeyboardHandler(INativeMethods nativeMethods) : IKeyboardHandler
 		var keyScan = nativeMethods.KeyScan(ch[0]);
 		switch (keyScan.Modifier)
 		{
-			case 6:
+			case ModifierAltGr:
 				SendWithAltGr(keyScan.VirtualKey);
 				break;
-			case 2:
+			case ModifierCtrl:
 				SendWithLCtrl(keyScan.VirtualKey);
 				break;
-			case 1:
+			case ModifierShift:
 				SendWithLShift(keyScan.VirtualKey);
 				break;
 			default:
@@ -52,16 +60,16 @@ public class KeyboardHandler(INativeMethods nativeMethods) : IKeyboardHandler
 	public void ClickKey(ushort vk, nint? action) =>
 		nativeMethods.SendKeyboardInput(GetKeyboardInputArr(vk, action: action));
 
-	public void CopyHighlightedText() => SendWithLCtrl(0x43);
+	public void CopyHighlightedText() => SendWithLCtrl((ushort)Keys.C);
 
 	private void SendWithAltGr(ushort vk) => nativeMethods.SendKeyboardInput([
-		GetKeyboardInput(162, true), GetKeyboardInput(165, true), GetKeyboardInput(vk, true),
-		GetKeyboardInput(vk, false), GetKeyboardInput(165, false), GetKeyboardInput(162, false)
+		GetKeyboardInput(VkLControl, true), GetKeyboardInput(VkRMenu, true), GetKeyboardInput(vk, true),
+		GetKeyboardInput(vk, false), GetKeyboardInput(VkRMenu, false), GetKeyboardInput(VkLControl, false)
 	]);
 
-	private void SendWithLShift(ushort vk) => nativeMethods.SendKeyboardInput(GetKeyboardInputArr(vk, 16));
+	private void SendWithLShift(ushort vk) => nativeMethods.SendKeyboardInput(GetKeyboardInputArr(vk, VkShift));
 
-	private void SendWithLCtrl(ushort vk) => nativeMethods.SendKeyboardInput(GetKeyboardInputArr(vk, 0xA2));
+	private void SendWithLCtrl(ushort vk) => nativeMethods.SendKeyboardInput(GetKeyboardInputArr(vk, VkLControl));
 
 	private static KeyboardInput[] GetKeyboardInputArr(ushort vk, ushort modifier = 0, nint? action = null) =>
 		action == null

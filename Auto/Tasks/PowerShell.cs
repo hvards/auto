@@ -28,7 +28,7 @@ public class PowerShell : IPowerShell
 		var powerShellFolder = Path.Combine(
 			Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "auto", "powershell"
 		);
-		var powerShell = System.Management.Automation.PowerShell.Create(Iss);
+		using var powerShell = System.Management.Automation.PowerShell.Create(Iss);
 		powerShell.AddCommand(Path.Combine(powerShellFolder, file));
 
 		if (parameters != null)

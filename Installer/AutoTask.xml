@@ -19,7 +19,7 @@
     <StartWhenAvailable>false</StartWhenAvailable>
     <RunOnlyIfNetworkAvailable>false</RunOnlyIfNetworkAvailable>
     <IdleSettings>
-      <StopOnIdleEnd>true</StopOnIdleEnd>
+      <StopOnIdleEnd>false</StopOnIdleEnd>
       <RestartOnIdle>false</RestartOnIdle>
     </IdleSettings>
     <AllowStartOnDemand>true</AllowStartOnDemand>
@@ -32,8 +32,8 @@
   </Settings>
   <Actions Context="Author">
     <Exec>
-      <Command>powershell.exe</Command>
-      <Arguments>-NoProfile -WindowStyle Hidden -Command "&amp; 'C:\Program Files\Auto\Auto.exe'"</Arguments>
+      <Command>C:\Program Files\Auto\Auto.exe</Command>
+      <Arguments>start</Arguments>
     </Exec>
   </Actions>
 </Task>

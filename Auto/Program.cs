@@ -15,15 +15,6 @@ namespace Auto;
 public static class Program
 {
 	private static async Task<int> Main(string[] args)
-	{
-		if (args.Length > 0)
-			return await RunCli(args);
-
-		StartService();
-		return 0;
-	}
-
-	private static async Task<int> RunCli(string[] args)
 		=> await BuildCli().Parse(args).InvokeAsync();
 
 	internal static RootCommand BuildCli()
@@ -49,11 +40,12 @@ public static class Program
 		rootCommand.Subcommands.Add(EnableDisableCommand.CreateDisable(configDirOption));
 		rootCommand.Subcommands.Add(ListPluginsCommand.Create());
 		rootCommand.Subcommands.Add(ListKeysCommand.Create());
+		rootCommand.Subcommands.Add(StartCommand.Create());
 
 		return rootCommand;
 	}
 
-	private static void StartService()
+	internal static void StartService()
 	{
 		var serviceCollection = new ServiceCollection();
 		var configuration = new ConfigurationBuilder()
@@ -73,7 +65,7 @@ public static class Program
 
 	private static void ConfigureServices(IServiceCollection services)
 	{
-		services.AddLogging(config => { config.AddSerilog(); });
+		services.AddLogging(config => config.AddSerilog());
 
 		services.AddSingleton<KeyListener>();
 		services.AddSingleton<ICommandProvider, CommandProvider>();

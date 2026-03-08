@@ -36,14 +36,14 @@ public partial class CommandProvider : ICommandProvider
 		var commands = GetEnabledCommands(configFolder).ToList();
 		foreach (var command in commands)
 		{
-			command.ClipboardTextRequired = command.PowerShellArguments.Select(x => x.Value)
-												.Any(x => x.Any(y => y.ClipboardTextRequired)) ||
-											command.PluginArguments.Select(x => x.Value)
-												.Any(x => x.Any(y => y.ClipboardTextRequired));
-			command.HighlightedTextRequired = command.PowerShellArguments.Select(x => x.Value)
-												  .Any(x => x.Any(y => y.HighlightedTextRequired)) ||
-											  command.PluginArguments.Select(x => x.Value)
-												  .Any(x => x.Any(y => y.HighlightedTextRequired));
+			command.ClipboardTextRequired = (command.PowerShellArguments?.Select(x => x.Value)
+												.Any(x => x.Any(y => y.ClipboardTextRequired)) ?? false) ||
+											(command.PluginArguments?.Select(x => x.Value)
+												.Any(x => x.Any(y => y.ClipboardTextRequired)) ?? false);
+			command.HighlightedTextRequired = (command.PowerShellArguments?.Select(x => x.Value)
+												  .Any(x => x.Any(y => y.HighlightedTextRequired)) ?? false) ||
+											  (command.PluginArguments?.Select(x => x.Value)
+												  .Any(x => x.Any(y => y.HighlightedTextRequired)) ?? false);
 		}
 
 		_commands = commands;

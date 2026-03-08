@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
-     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
 
     <Package Name="Auto"
              Manufacturer="Auto"
@@ -13,6 +14,9 @@
 
         <MediaTemplate EmbedCab="yes" />
 
+        <ui:WixUI Id="WixUI_Minimal" />
+        <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+
         <StandardDirectory Id="ProgramFiles64Folder">
             <Directory Id="INSTALLFOLDER" Name="Auto" />
         </StandardDirectory>
@@ -23,26 +27,19 @@
                 <Exclude Files="!(bindpath.Auto)\**\*.pdb" />
                 <Exclude Files="!(bindpath.Auto)\ref\**" />
                 <Exclude Files="!(bindpath.Auto)\runtimes\unix\**" />
-                <!-- Exclude non-English localization -->
-                <Exclude Files="!(bindpath.Auto)\cs\**" />
-                <Exclude Files="!(bindpath.Auto)\de\**" />
-                <Exclude Files="!(bindpath.Auto)\es\**" />
-                <Exclude Files="!(bindpath.Auto)\fr\**" />
-                <Exclude Files="!(bindpath.Auto)\it\**" />
-                <Exclude Files="!(bindpath.Auto)\ja\**" />
-                <Exclude Files="!(bindpath.Auto)\ko\**" />
-                <Exclude Files="!(bindpath.Auto)\pl\**" />
-                <Exclude Files="!(bindpath.Auto)\pt-BR\**" />
-                <Exclude Files="!(bindpath.Auto)\ru\**" />
-                <Exclude Files="!(bindpath.Auto)\tr\**" />
-                <Exclude Files="!(bindpath.Auto)\zh-Hans\**" />
-                <Exclude Files="!(bindpath.Auto)\zh-Hant\**" />
             </Files>
         </ComponentGroup>
 
         <ComponentGroup Id="ScheduledTaskFiles" Directory="INSTALLFOLDER">
             <Component Id="TaskXmlFile" Guid="F6A7B8C9-D0E1-2345-F012-678901234567">
                 <File Id="AutoTaskXml" Source="AutoTask.xml" KeyPath="yes" />
+            </Component>
+        </ComponentGroup>
+
+        <ComponentGroup Id="PathRegistration" Directory="INSTALLFOLDER">
+            <Component Id="PathEntry" Guid="A2B3C4D5-E6F7-8901-A234-567890ABCDEF" KeyPath="yes">
+                <Environment Id="PATH" Name="PATH" Value="[INSTALLFOLDER]"
+                             Permanent="no" Part="last" Action="set" System="yes" />
             </Component>
         </ComponentGroup>
 
@@ -74,15 +71,30 @@
                       BinaryRef="Wix4UtilCA_X64"
                       DllEntry="WixQuietExec64" />
 
+        <!-- Kill running Auto.exe before upgrade/uninstall -->
+        <SetProperty Id="StopAutoProcess"
+                     Value="&quot;taskkill.exe&quot; /F /IM Auto.exe"
+                     Before="StopAutoProcess"
+                     Sequence="execute" />
+
+        <CustomAction Id="StopAutoProcess"
+                      Execute="deferred"
+                      Impersonate="no"
+                      Return="ignore"
+                      BinaryRef="Wix4UtilCA_X64"
+                      DllEntry="WixQuietExec64" />
+
         <!-- Schedule the custom actions -->
         <InstallExecuteSequence>
-            <Custom Action="CreateScheduledTask" After="InstallFiles" Condition="NOT Installed" />
+            <Custom Action="StopAutoProcess" Before="RemoveFiles" />
             <Custom Action="RemoveScheduledTask" Before="RemoveFiles" Condition="REMOVE=&quot;ALL&quot;" />
+            <Custom Action="CreateScheduledTask" After="InstallFiles" Condition="NOT Installed" />
         </InstallExecuteSequence>
 
         <Feature Id="MainFeature" Title="Auto" Level="1">
             <ComponentGroupRef Id="PublishedFiles" />
             <ComponentGroupRef Id="ScheduledTaskFiles" />
+            <ComponentGroupRef Id="PathRegistration" />
         </Feature>
 
     </Package>

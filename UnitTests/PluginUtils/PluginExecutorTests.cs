@@ -21,10 +21,10 @@ public class PluginExecutorTests
 	[Test]
 	public void ExecutePlugin_PluginNotFound_ReturnsNull()
 	{
-		_pluginLoaderMock.Setup(pl => pl.CreateCommands()).Returns(new Dictionary<string, Plugin>());
+		_pluginLoaderMock.Setup(pl => pl.CreateCommands()).Returns([]);
 		_subject = new PluginExecutor(_pluginLoaderMock.Object, new NullLogger<PluginExecutor>());
 
-		var result = _subject.ExecutePlugin("nonexistent", new List<object>());
+		var result = _subject.ExecutePlugin("nonexistent", []);
 
 		Assert.That(result, Is.Null);
 	}

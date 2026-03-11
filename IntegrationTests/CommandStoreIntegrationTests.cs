@@ -27,12 +27,12 @@ public class CommandStoreIntegrationTests
 
 	private static CommandEntry MakeCommand(
 		string name = "Test URL",
-		string trigger = "LCtrl+LWin+T",
+		string[]? trigger = null,
 		bool enabled = true,
 		ArgumentToken[]? actions = null,
 		Dictionary<string, CommandArgument[]>? pluginArgs = null,
 		Dictionary<string, CommandArgument[]>? psArgs = null,
-		string? sequence = null) => new()
+		string[]? sequence = null) => new()
 		{
 			Id = Guid.NewGuid(),
 			Name = name,
@@ -40,7 +40,7 @@ public class CommandStoreIntegrationTests
 			Enabled = enabled,
 			Trigger = new Trigger
 			{
-				Combination = sequence == null ? KeyNameResolver.ParseCombination(trigger) : [],
+				Combination = sequence == null ? KeyNameResolver.ParseCombination(trigger ?? ["LCtrl", "LWin", "T"]) : [],
 				Sequence = sequence != null ? KeyNameResolver.ParseSequence(sequence) : []
 			},
 			Actions = actions ?? [],
@@ -113,7 +113,7 @@ public class CommandStoreIntegrationTests
 		// Arrange
 		var (cmd, path) = SaveTestCommand();
 		var commands = CommandStore.LoadFile(path);
-		commands.First(c => c.Id == cmd.Id).Trigger.Combination = KeyNameResolver.ParseCombination("LCtrl+LWin+R");
+		commands.First(c => c.Id == cmd.Id).Trigger.Combination = KeyNameResolver.ParseCombination(["LCtrl", "LWin", "R"]);
 
 		// Act
 		CommandStore.SaveFile(path, commands);
@@ -177,7 +177,7 @@ public class CommandStoreIntegrationTests
 	{
 		// Arrange
 		const string pluginId = "21092f13-5366-4cba-90df-66bd123e66a5";
-		var cmd = MakeCommand("Open Example", "LCtrl+LWin+LAlt+R",
+		var cmd = MakeCommand("Open Example", ["LCtrl", "LWin", "LAlt", "R"],
 			actions: [PluginAction(pluginId)],
 			pluginArgs: new() { [pluginId] = [TextArg("https://example.com")] });
 		var path = _store.ResolvePath("test.json");
@@ -197,7 +197,7 @@ public class CommandStoreIntegrationTests
 	{
 		// Arrange
 		const string pluginId = "902a5fec-8684-4b83-a959-453d81de5479";
-		var cmd = MakeCommand("Paste Enter", "LCtrl+LWin+E",
+		var cmd = MakeCommand("Paste Enter", ["LCtrl", "LWin", "E"],
 			actions: [PluginAction(pluginId)],
 			pluginArgs: new() { [pluginId] = [TextArg("{Enter}")] });
 		var path = _store.ResolvePath("test.json");
@@ -214,7 +214,7 @@ public class CommandStoreIntegrationTests
 	public void Add_PowerShell_CreatesCorrectStructure()
 	{
 		// Arrange
-		var cmd = MakeCommand("Run Script", "LCtrl+LWin+LAlt+K",
+		var cmd = MakeCommand("Run Script", ["LCtrl", "LWin", "LAlt", "K"],
 			actions: [PsAction("StopProcs.ps1")],
 			psArgs: new() { ["StopProcs.ps1"] = [TextArg(@"C:\a\App")] });
 		var path = _store.ResolvePath("test.json");
@@ -234,7 +234,7 @@ public class CommandStoreIntegrationTests
 	{
 		// Arrange
 		const string pluginId = "902a5fec-8684-4b83-a959-453d81de5479";
-		var cmd = MakeCommand("Sequence Command", sequence: "A,S,F,C,E",
+		var cmd = MakeCommand("Sequence Command", sequence: ["A", "S", "F", "C", "E"],
 			actions: [PluginAction(pluginId)],
 			pluginArgs: new() { [pluginId] = [TextArg("test")] });
 		var path = _store.ResolvePath("test.json");
@@ -253,7 +253,7 @@ public class CommandStoreIntegrationTests
 	{
 		// Arrange
 		var cmd1 = MakeCommand("Cmd1", enabled: true);
-		var cmd2 = MakeCommand("Cmd2", trigger: "LAlt+LWin", enabled: false);
+		var cmd2 = MakeCommand("Cmd2", trigger: ["LAlt", "LWin"], enabled: false);
 		CommandStore.SaveFile(_store.ResolvePath("source.json"), [cmd1, cmd2]);
 
 		// Act
@@ -273,7 +273,7 @@ public class CommandStoreIntegrationTests
 	{
 		// Arrange
 		var cmd1 = MakeCommand("InFileA");
-		var cmd2 = MakeCommand("InFileB", trigger: "LAlt+LWin");
+		var cmd2 = MakeCommand("InFileB", trigger: ["LAlt", "LWin"]);
 		CommandStore.SaveFile(_store.ResolvePath("a.json"), [cmd1]);
 		CommandStore.SaveFile(_store.ResolvePath("sub/b.json"), [cmd2]);
 

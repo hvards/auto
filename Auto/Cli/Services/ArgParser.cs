@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using Auto.Models;
+using Auto.PluginUtils;
 
 namespace Auto.Cli.Services;
 
@@ -58,12 +59,16 @@ internal static partial class ArgParser
 			};
 
 		var colonIdx = match.Groups[1].ValueSpan.IndexOf(':');
+		var isPlugin = match.Groups[1].ValueSpan[..colonIdx].Equals("plugin", StringComparison.OrdinalIgnoreCase);
+		var value = match.Groups[2].Value;
+
+		if (isPlugin)
+			value = PluginLoader.ResolvePlugin(value) ?? value;
+
 		return new ArgumentToken
 		{
-			Type = match.Groups[1].ValueSpan[..colonIdx].Equals("plugin", StringComparison.OrdinalIgnoreCase)
-				? ArgumentType.Plugin
-				: ArgumentType.PowerShell,
-			Value = match.Groups[2].Value
+			Type = isPlugin ? ArgumentType.Plugin : ArgumentType.PowerShell,
+			Value = value
 		};
 	}
 
@@ -105,35 +110,17 @@ internal static partial class ArgParser
 		if (colonIdx < 0)
 			throw new ArgumentException($"Invalid argument format (missing ':'): {spec}");
 
+		var key = spec[..colonIdx];
+		var resolvedKey = PluginLoader.ResolvePlugin(key);
+
 		var arg = powerShell
 			? ParsePowerShellArg(spec[(colonIdx + 1)..])
 			: ParsePluginArg(spec[(colonIdx + 1)..]);
-		return (spec[..colonIdx], arg);
+		return (resolvedKey, arg);
 	}
 
 	internal static Dictionary<string, CommandArgument[]> GroupArgSpecs(string[] args, bool powerShell = false)
 		=> args.Select(s => ParseArgSpec(s, powerShell))
 			.GroupBy(x => x.Key, x => x.Arg)
 			.ToDictionary(g => g.Key, g => g.ToArray());
-
-	/// <summary>
-	/// Parses an --action value, accepting both %type:value and type:value formats.
-	/// </summary>
-	internal static ArgumentToken ParseAction(string raw)
-	{
-		if (raw.StartsWith('%'))
-			return ParseValue(raw);
-
-		var colonIdx = raw.IndexOf(':');
-		var prefix = colonIdx >= 0 ? raw[..colonIdx].ToLowerInvariant() : raw.ToLowerInvariant();
-
-		// Valueless types — support bare keyword and keyword: forms
-		if (prefix is "clipboard" or "highlighted")
-			return ParseValue($"%{prefix}");
-
-		if (colonIdx < 0)
-			throw new ArgumentException($"Invalid action format: {raw}");
-
-		return ParseValue($"%{raw}");
-	}
 }

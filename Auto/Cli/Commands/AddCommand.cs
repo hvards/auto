@@ -3,117 +3,107 @@ using Auto.Models;
 using Auto.PluginUtils;
 using System.CommandLine;
 using System.IO;
+
 using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli.Commands;
 
 public static class AddCommand
 {
+	private record AddInput(
+		string ConfigDir,
+		string Name,
+		string File,
+		string Description,
+		bool Disabled,
+		string[] Combination,
+		string[] Sequence,
+		string[] Plugins,
+		string[] PowerShellScripts,
+		string[] PluginArguments,
+		string[] PowerShellArguments
+	);
+
 	public static CliCommand Create(Option<string> configDirOption)
 	{
 		var command = new CliCommand("add") { Description = "Create a new command" }
 			.AddArgument<string>("name", "Command name", out var nameArg)
-			.AddOption<string>("--file", "Target JSON file (relative to commands dir, default: default.json)",
+			.AddOption("--file", "Target JSON file (relative to commands dir, default: default.json)",
 				out var fileOption, defaultValue: "default.json")
-			.AddOption<string>("--combination", "Key combination (e.g. LCtrl+LWin+LAlt+R)", out var combinationOption)
-			.AddOption<string>("--sequence", "Key sequence (e.g. E,X,A,M,P,L,E)", out var sequenceOption)
+			.AddOption<string[]>("--combination", "Key combination (e.g. LCtrl LWin LAlt R)", out var combinationOption)
+			.AddOption<string[]>("--sequence", "Key sequence (e.g. E X A M P L E)", out var sequenceOption)
 			.AddOption<string>("--description", "Command description", out var descOption)
 			.AddOption<bool>("--disabled", "Create as disabled", out var disabledOption)
-			.AddOption<string[]>("--action", "Action (repeatable, e.g. plugin:guid, ps:script.ps1)",
-				out var actionOption)
-			.AddOption<string>("--plugin", "Plugin name or GUID (e.g. StartProgram, KeyboardInput)",
-				out var pluginOption)
-			.AddOption<string>("--powershell", "PowerShell script to run", out var psScriptOption)
-			.AddOption<string[]>("--ps-arg", "PowerShell argument (script:paramName=value)", out var psArgOption)
-			.AddOption<string[]>(
-				"--plugin-arg", "Plugin argument (use with --plugin, or guid:value with --action)",
-				out var pluginArgOption);
+			.AddOption<string[]>("--plugin", "Plugin name or GUID", out var pluginOption)
+			.AddOption<string[]>("--powershell", "PowerShell script to run", out var psScriptOption)
+			.AddOption<string[]>("--arg", "Plugin argument (--arg <plugin> <values...>)",
+				out var argOption)
+			.AddOption<string[]>("--ps-arg", "PowerShell argument (--ps-arg <script> <param value>...)",
+				out var psArgOption);
 
-		command.SetAction(parseResult =>
-		{
-			var configDir = parseResult.GetValue(configDirOption);
-			var name = parseResult.GetValue(nameArg);
-			var file = parseResult.GetValue(fileOption);
-			var combination = parseResult.GetValue(combinationOption);
-			var sequence = parseResult.GetValue(sequenceOption);
-			var desc = parseResult.GetValue(descOption);
-			var disabled = parseResult.GetValue(disabledOption);
-			var plugin = parseResult.GetValue(pluginOption);
-			var psScript = parseResult.GetValue(psScriptOption);
-			var actions = parseResult.GetValue(actionOption) ?? [];
-			var psArgs = parseResult.GetValue(psArgOption) ?? [];
-			var pluginArgs = parseResult.GetValue(pluginArgOption) ?? [];
-
-			var store = new CommandStore(configDir);
-			var path = store.ResolvePath(file);
-
-			if (!KeyNameResolver.ParseTrigger(combination, sequence, out var parsedTrigger))
-				return 1;
-
-			var cmd = new CommandEntry
-			{
-				Id = Guid.NewGuid(),
-				Name = name,
-				Description = desc ?? string.Empty,
-				Enabled = !disabled,
-				Trigger = parsedTrigger,
-				Actions = [],
-				PowerShellArguments = [],
-				PluginArguments = []
-			};
-
-			var actionList = new List<ArgumentToken>();
-			Dictionary<string, CommandArgument[]> pluginArgGroups = [];
-
-			if (plugin != null)
-			{
-				var resolvedId = PluginLoader.ResolvePlugin(plugin);
-				if (resolvedId == null)
-				{
-					Console.Error.WriteLine($"Unknown plugin: {plugin}");
-					return 1;
-				}
-
-				actionList.Add(new ArgumentToken { Type = ArgumentType.Plugin, Value = resolvedId });
-				pluginArgGroups = new Dictionary<string, CommandArgument[]>
-				{
-					[resolvedId] = [.. pluginArgs.Select(ArgParser.ParsePluginArg)]
-				};
-				pluginArgs = [];
-			}
-
-			if (psScript != null)
-			{
-				actionList.Add(new ArgumentToken { Type = ArgumentType.PowerShell, Value = psScript });
-			}
-
-			try
-			{
-				foreach (var a in actions)
-					actionList.Add(ArgParser.ParseAction(a));
-
-				if (pluginArgGroups.Count == 0)
-					pluginArgGroups = ArgParser.GroupArgSpecs(pluginArgs);
-			}
-			catch (ArgumentException ex) { Console.Error.WriteLine(ex.Message); return 1; }
-
-			cmd.Actions = [.. actionList];
-			cmd.PowerShellArguments = ArgParser.GroupArgSpecs(psArgs, powerShell: true);
-			cmd.PluginArguments = pluginArgGroups;
-
-			var duplicate = store.LoadAll().FirstOrDefault(x =>
-				string.Equals(x.Command.Name, name, StringComparison.OrdinalIgnoreCase));
-			if (duplicate.Command != null)
-				Console.Error.WriteLine($"Warning: '{duplicate.Command.Name}' already exists (id: {duplicate.Command.Id})");
-
-			var existing = File.Exists(path) ? CommandStore.LoadFile(path) : [];
-			existing.Add(cmd);
-			CommandStore.SaveFile(path, existing);
-
-			Console.WriteLine($"Added '{name}' to {file} (id: {cmd.Id})");
-			return 0;
-		});
+		command.SetActionWithErrorHandling(pr => Execute(
+			new AddInput(
+				pr.GetValue(configDirOption),
+				pr.GetValue(nameArg),
+				pr.GetValue(fileOption),
+				pr.GetValue(descOption) ?? string.Empty,
+				pr.GetValue(disabledOption),
+				pr.GetValue(combinationOption) ?? [],
+				pr.GetValue(sequenceOption) ?? [],
+				pr.GetValue(pluginOption) ?? [],
+				pr.GetValue(psScriptOption) ?? [],
+				pr.GetValue(argOption) ?? [],
+				pr.GetValue(psArgOption) ?? []
+			)
+		));
 
 		return command;
+	}
+
+	private static void Execute(AddInput input)
+	{
+		var store = new CommandStore(input.ConfigDir);
+		var path = store.ResolvePath(input.File);
+
+		var trigger = KeyNameResolver.ParseTrigger(input.Combination, input.Sequence);
+
+		var cmd = new CommandEntry
+		{
+			Id = Guid.NewGuid(),
+			Name = input.Name,
+			Description = input.Description,
+			Enabled = !input.Disabled,
+			Trigger = trigger,
+			Actions = [],
+			PowerShellArguments = [],
+			PluginArguments = []
+		};
+
+		var actionList = new List<ArgumentToken>();
+
+		foreach (var plugin in input.Plugins)
+		{
+			var id = PluginLoader.ResolvePlugin(plugin);
+			actionList.Add(new ArgumentToken { Type = ArgumentType.Plugin, Value = id });
+		}
+		foreach (var ps in input.PowerShellScripts)
+		{
+			actionList.Add(new ArgumentToken { Type = ArgumentType.PowerShell, Value = ps });
+		}
+		cmd.Actions = [.. actionList];
+
+		cmd.PluginArguments = PluginHelper.GroupPluginArgs(input.PluginArguments);
+		cmd.PowerShellArguments = PluginHelper.GroupPsArgs(input.PowerShellArguments);
+
+		var duplicate = store.LoadAll().FirstOrDefault(x =>
+			string.Equals(x.Command.Name, input.Name, StringComparison.OrdinalIgnoreCase));
+		if (duplicate.Command != null)
+			Console.Error.WriteLine($"Warning: '{duplicate.Command.Name}' already exists (id: {duplicate.Command.Id})");
+
+		var existing = File.Exists(path) ? CommandStore.LoadFile(path) : [];
+		existing.Add(cmd);
+		CommandStore.SaveFile(path, existing);
+
+		Console.WriteLine($"Added '{input.Name}' to {input.File} (id: {cmd.Id})");
 	}
 }

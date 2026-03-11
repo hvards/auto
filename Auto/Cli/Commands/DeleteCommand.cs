@@ -6,28 +6,28 @@ namespace Auto.Cli.Commands;
 
 public static class DeleteCommand
 {
+	private record DeleteInput(string ConfigDir, string NameOrId);
+
 	public static CliCommand Create(Option<string> configDirOption)
 	{
 		var command = new CliCommand("delete") { Description = "Delete a command" }
 			.AddArgument<string>("name-or-id", "Command name or ID", out var nameArg);
 
-		command.SetAction(parseResult =>
-		{
-			var configDir = parseResult.GetValue(configDirOption);
-			var nameOrId = parseResult.GetValue(nameArg);
-
-			var store = new CommandStore(configDir);
-			if (!store.FindCommand(nameOrId, out var found))
-				return 1;
-			var (file, cmd) = found;
-
-			var commands = CommandStore.LoadFile(file);
-			commands.RemoveAll(c => c.Id == cmd.Id);
-			CommandStore.SaveFile(file, commands);
-			Console.WriteLine($"Deleted '{cmd.Name}'");
-			return 0;
-		});
+		command.SetActionWithErrorHandling(
+			pr => Execute(new DeleteInput(pr.GetValue(configDirOption), pr.GetValue(nameArg)))
+		);
 
 		return command;
+	}
+
+	private static void Execute(DeleteInput input)
+	{
+		var store = new CommandStore(input.ConfigDir);
+		var (file, cmd) = store.GetCommand(input.NameOrId);
+
+		var commands = CommandStore.LoadFile(file);
+		commands.RemoveAll(c => c.Id == cmd.Id);
+		CommandStore.SaveFile(file, commands);
+		Console.WriteLine($"Deleted '{cmd.Name}'");
 	}
 }

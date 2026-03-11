@@ -115,17 +115,6 @@ public class CommandStoreTests
 		Assert.That(all, Has.Count.EqualTo(3));
 	}
 
-
-	[Test]
-	public void GetRelativePath_ReturnsForwardSlashes()
-	{
-		var store = new CommandStore(_tempDir);
-		var abs = Path.Combine(_commandsDir, "sub", "test.json");
-		var rel = store.GetRelativePath(abs);
-		Assert.That(rel, Does.Not.Contain("\\"));
-		Assert.That(rel, Is.EqualTo("sub/test.json"));
-	}
-
 	private static CommandEntry CreateCommand(string name) => new()
 	{
 		Id = Guid.NewGuid(),

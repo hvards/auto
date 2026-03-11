@@ -16,7 +16,7 @@ public class CommandStore(string configDir)
 	}
 
 	public string GetRelativePath(string absolutePath)
-		=> Path.GetRelativePath(_commandsDir, absolutePath).Replace('\\', '/');
+		=> Path.GetRelativePath(_commandsDir, absolutePath);
 
 	public static List<CommandEntry> LoadFile(string path)
 		=> CommandSerializer.Deserialize(File.ReadAllText(path));
@@ -37,13 +37,10 @@ public class CommandStore(string configDir)
 		return byName.Command != null ? byName : null;
 	}
 
-	public bool FindCommand(string nameOrId, out (string File, CommandEntry Command) result)
+	public (string File, CommandEntry Command) GetCommand(string nameOrId)
 	{
 		var found = Find(nameOrId);
-		if (found != null) { result = found.Value; return true; }
-		result = default;
-		Console.Error.WriteLine($"Command not found: {nameOrId}");
-		return false;
+		return found ?? throw new ArgumentException($"Command not found: {nameOrId}");
 	}
 
 	public static void SaveFile(string path, List<CommandEntry> commands)

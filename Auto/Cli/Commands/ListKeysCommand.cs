@@ -1,5 +1,4 @@
 using Auto.Cli.Services;
-using Auto.Models;
 using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli.Commands;
@@ -10,12 +9,11 @@ public static class ListKeysCommand
 	{
 		var command = new CliCommand("list-keys") { Description = "List valid key names for triggers" };
 
-		command.SetAction(_ =>
+		command.SetActionWithErrorHandling(_ =>
 		{
 			PrintAliases();
 			Console.WriteLine();
 			PrintEnumKeys();
-			return 0;
 		});
 
 		return command;

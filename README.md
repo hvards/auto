@@ -19,35 +19,36 @@ auto get "Open Browser" --json
 
 # Add a command that launches a program on Ctrl+Win+B
 auto add "Open Browser" --file default.json `
-  --combination "LCtrl+LWin+B" `
+  --combination LCtrl LWin B `
   --plugin StartProgram `
-  --plugin-arg "https://google.com"
+  --arg StartProgram "https://google.com"
 
 # Add a command that types text on Ctrl+Win+E
 auto add "Type Email" --file default.json `
-  --combination "LCtrl+LWin+E" `
+  --combination LCtrl LWin E `
   --plugin KeyboardInput `
-  --plugin-arg "user@example.com"
+  --arg KeyboardInput "user@example.com"
 
 # Add a PowerShell script triggered by a key sequence
 auto add "Stop Procs" --file default.json `
-  --sequence "S,T,O,P" `
+  --sequence S T O P `
   --powershell "StopProcs.ps1" `
-  --ps-arg "StopProcs.ps1:Path=C:`scripts"
+  --ps-arg StopProcs.ps1 Path "C:`scripts"
 
 # Use clipboard or highlighted text as an argument
 auto add "Search Selection" --file default.json `
-  --combination "LCtrl+LWin+S" `
+  --combination LCtrl LWin S `
   --plugin StartProgram `
-  --plugin-arg "https://google.com/search?q=%{highlighted}"
+  --arg StartProgram "https://google.com/search?q=%{highlighted}"
 
 # Nested plugins — pass the output of one plugin as input to another
 auto add "Format and Paste" --file default.json `
-  --combination "LCtrl+LAlt+V" `
-  --action "plugin:KeyboardInput" `
-  --plugin-arg "KeyboardInput:%{plugin:Formatter-guid}" `
-  --plugin-arg "Formatter-guid:json" `
-  --plugin-arg "Formatter-guid:%{clipboard}"
+  --combination LCtrl LAlt V `
+  --plugin KeyboardInput `
+  --arg KeyboardInput "%{plugin:Formatter}"
+
+auto edit "Format and Paste" `
+  --arg Formatter json "%{clipboard}"
 
 # List available plugins
 auto list-plugins

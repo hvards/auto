@@ -44,7 +44,7 @@ public abstract class CliTestBase
 		Enabled = enabled,
 		Trigger = new Trigger
 		{
-			Combination = KeyNameResolver.ParseCombination("LCtrl+LWin+T"),
+			Combination = KeyNameResolver.ParseCombination(["LCtrl", "LWin", "T"]),
 			Sequence = []
 		},
 		Actions = [new ArgumentToken { Type = ArgumentType.Plugin, Value = PluginLoader.ResolvePlugin("StartProgram") }],

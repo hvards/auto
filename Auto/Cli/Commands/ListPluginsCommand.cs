@@ -13,10 +13,10 @@ public static class ListPluginsCommand
 		var command = new CliCommand("list-plugins") { Description = "List available plugins" }
 			.AddOption<bool>("--json", "Output as JSON", out var jsonOption);
 
-		command.SetAction(parseResult =>
+		command.SetActionWithErrorHandling(pr =>
 		{
 			var plugins = PluginLoader.GetAvailablePluginDetails();
-			if (parseResult.GetValue(jsonOption))
+			if (pr.GetValue(jsonOption))
 			{
 				PrintJsonResult(plugins);
 			}
@@ -24,8 +24,6 @@ public static class ListPluginsCommand
 			{
 				PrintTableResult(plugins);
 			}
-
-			return 0;
 		});
 
 		return command;

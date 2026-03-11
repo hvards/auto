@@ -27,4 +27,21 @@ internal static class CliCommandExtensions
 		command.Arguments.Add(argument);
 		return command;
 	}
+
+	internal static void SetActionWithErrorHandling(this CliCommand command, Action<ParseResult> action)
+	{
+		command.SetAction(pr =>
+		{
+			try
+			{
+				action(pr);
+				return 0;
+			}
+			catch (ArgumentException e)
+			{
+				Console.Error.WriteLine(e.Message);
+				return 1;
+			}
+		});
+	}
 }

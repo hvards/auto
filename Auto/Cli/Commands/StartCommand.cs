@@ -13,9 +13,9 @@ public static class StartCommand
 		var command = new CliCommand("start", "Start the background service");
 		command.Options.Add(foregroundOption);
 
-		command.SetAction(ctx =>
+		command.SetActionWithErrorHandling(pr =>
 		{
-			if (ctx.GetValue(foregroundOption))
+			if (pr.GetValue(foregroundOption))
 			{
 				KillExistingInstances();
 				Program.StartService();
@@ -30,8 +30,6 @@ public static class StartCommand
 					CreateNoWindow = true,
 				});
 			}
-
-			return 0;
 		});
 
 		return command;

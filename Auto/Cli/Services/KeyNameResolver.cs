@@ -37,14 +37,14 @@ public static class KeyNameResolver
 		return Enum.GetName((Keys)code) ?? code.ToString();
 	}
 
-	public static HashSet<ushort> ParseCombination(string input)
+	public static HashSet<ushort> ParseCombination(string[] keys)
 	{
-		return [.. input.Split('+', StringSplitOptions.RemoveEmptyEntries).Select(k => ParseKey(k.Trim()))];
+		return [.. keys.Select(k => ParseKey(k.Trim()))];
 	}
 
-	public static ushort[] ParseSequence(string input)
+	public static ushort[] ParseSequence(string[] keys)
 	{
-		return [.. input.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(k => ParseKey(k.Trim()))];
+		return [.. keys.Select(k => ParseKey(k.Trim()))];
 	}
 
 	public static string FormatCombination(HashSet<ushort> combination)
@@ -59,18 +59,12 @@ public static class KeyNameResolver
 		return string.Join(",", sequence.Select(FormatKey));
 	}
 
-	public static bool ParseTrigger(string combination, string sequence, out Trigger result)
+	public static Trigger ParseTrigger(string[] combination, string[] sequence)
 	{
-		result = default;
-		try
+		return new Trigger
 		{
-			result = new Trigger
-			{
-				Combination = combination != null ? ParseCombination(combination) : [],
-				Sequence = sequence != null ? ParseSequence(sequence) : []
-			};
-		}
-		catch (ArgumentException ex) { Console.Error.WriteLine(ex.Message); return false; }
-		return true;
+			Combination = combination.Length > 0 ? ParseCombination(combination) : [],
+			Sequence = sequence.Length > 0 ? ParseSequence(sequence) : []
+		};
 	}
 }

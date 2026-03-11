@@ -9,36 +9,34 @@ namespace Auto.Cli.Commands;
 
 public static class GetCommand
 {
+	private record GetInput(string ConfigDir, string NameOrId, bool Json);
+
 	public static CliCommand Create(Option<string> configDirOption)
 	{
 		var command = new CliCommand("get") { Description = "Show command details" }
 			.AddArgument<string>("name-or-id", "Command name or ID", out var nameArg)
 			.AddOption<bool>("--json", "Output as JSON", out var jsonOption);
 
-		command.SetAction(parseResult =>
-		{
-			var configDir = parseResult.GetValue(configDirOption);
-			var nameOrId = parseResult.GetValue(nameArg);
-			var json = parseResult.GetValue(jsonOption);
-
-			var store = new CommandStore(configDir);
-			if (!store.FindCommand(nameOrId, out var found))
-				return 1;
-			var (file, cmd) = found;
-
-			if (json)
-			{
-				PrintJsonCommand(cmd);
-			}
-			else
-			{
-				PrintTableCommand(cmd, store.GetRelativePath(file));
-			}
-
-			return 0;
-		});
+		command.SetActionWithErrorHandling(pr => Execute(
+			new GetInput(pr.GetValue(configDirOption), pr.GetValue(nameArg), pr.GetValue(jsonOption)
+		)));
 
 		return command;
+	}
+
+	private static void Execute(GetInput input)
+	{
+		var store = new CommandStore(input.ConfigDir);
+		var (file, cmd) = store.GetCommand(input.NameOrId);
+
+		if (input.Json)
+		{
+			PrintJsonCommand(cmd);
+		}
+		else
+		{
+			PrintTableCommand(cmd, store.GetRelativePath(file));
+		}
 	}
 
 	private static void PrintJsonCommand(CommandEntry cmd)
@@ -51,10 +49,11 @@ public static class GetCommand
 		Console.WriteLine($"Id:          {cmd.Id}");
 		Console.WriteLine($"Enabled:     {cmd.Enabled}");
 		Console.WriteLine($"File:        {filePath}");
+		Console.WriteLine("Trigger:");
 		if (cmd.Trigger.Combination is { Count: > 0 })
-			Console.WriteLine($"Trigger:     {KeyNameResolver.FormatCombination(cmd.Trigger.Combination)}");
+			Console.WriteLine($"  Combination:     {KeyNameResolver.FormatCombination(cmd.Trigger.Combination)}");
 		if (cmd.Trigger.Sequence is { Length: > 0 })
-			Console.WriteLine($"Sequence:    {KeyNameResolver.FormatSequence(cmd.Trigger.Sequence)}");
+			Console.WriteLine($"  Sequence:    {KeyNameResolver.FormatSequence(cmd.Trigger.Sequence)}");
 		if (cmd.Actions.Length > 0)
 		{
 			Console.WriteLine("Actions:");
@@ -63,9 +62,7 @@ public static class GetCommand
 				if (action.Type == ArgumentType.Plugin)
 				{
 					var pluginName = PluginLoader.GetPluginName(action.Value);
-					Console.WriteLine(pluginName != null
-						? $"  Plugin: {pluginName} ({action.Value})"
-						: $"  Plugin: {action.Value}");
+					Console.WriteLine($"  Plugin: {pluginName} ({action.Value})");
 				}
 				else
 				{

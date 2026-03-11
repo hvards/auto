@@ -2,109 +2,105 @@ using Auto.Cli.Services;
 using Auto.Models;
 using Auto.PluginUtils;
 using System.CommandLine;
+
 using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli.Commands;
 
 public static class EditCommand
 {
+	private record EditInput(
+		string ConfigDir,
+		string NameOrId,
+		string[] Combination,
+		string[] Sequence,
+		string Description,
+		string NewName,
+		string[] Plugins,
+		string[] PowerShellScripts,
+		string[] PluginArguments,
+		string[] PowerShellArguments
+	);
+
 	public static CliCommand Create(Option<string> configDirOption)
 	{
 		var command = new CliCommand("edit") { Description = "Modify an existing command" }
 			.AddArgument<string>("name-or-id", "Command name or ID", out var nameArg)
-			.AddOption<string>("--combination", "New key combination", out var combinationOption)
-			.AddOption<string>("--sequence", "New key sequence", out var sequenceOption)
+			.AddOption<string[]>("--combination", "New key combination", out var combinationOption)
+			.AddOption<string[]>("--sequence", "New key sequence", out var sequenceOption)
 			.AddOption<string>("--description", "New description", out var descOption)
 			.AddOption<string>("--name", "New name", out var renameOption)
-			.AddOption<string>("--plugin", "Replace actions with plugin (name or GUID)", out var pluginOption)
-			.AddOption<string[]>("--plugin-arg",
-				"Plugin argument (use with --plugin, or guid:value with --action)",
-				out var pluginArgOption)
-			.AddOption<string>("--powershell", "Replace actions with PowerShell script", out var psScriptOption)
-			.AddOption<string[]>(
-				"--action", "Replace actions (repeatable, e.g. plugin:guid, ps:script.ps1, %clipboard)",
-				out var actionOption)
-			.AddOption<string[]>("--ps-arg", "PowerShell argument (script:paramName=value)", out var psArgOption);
+			.AddOption<string[]>("--plugin", "Set plugin(s) to execute (name or GUID)", out var pluginOption)
+			.AddOption<string[]>("--powershell", "Set PowerShell script(s) to execute", out var psScriptOption)
+			.AddOption<string[]>("--arg", "Plugin argument (--arg <plugin> <values...>)", out var argOption)
+			.AddOption<string[]>("--ps-arg",
+				"PowerShell argument (--ps-arg <script> <param value>...)",
+				out var psArgOption);
 
-		command.SetAction(parseResult =>
-		{
-			var configDir = parseResult.GetValue(configDirOption);
-			var nameOrId = parseResult.GetValue(nameArg);
-
-			var store = new CommandStore(configDir);
-			if (!store.FindCommand(nameOrId, out var found))
-				return 1;
-			var (file, cmd) = found;
-			var commands = CommandStore.LoadFile(file);
-			var target = commands.First(c => c.Id == cmd.Id);
-
-			var combination = parseResult.GetValue(combinationOption);
-			var sequence = parseResult.GetValue(sequenceOption);
-			var desc = parseResult.GetValue(descOption);
-			var rename = parseResult.GetValue(renameOption);
-			var plugin = parseResult.GetValue(pluginOption);
-			var pluginArgs = parseResult.GetValue(pluginArgOption) ?? [];
-			var psScript = parseResult.GetValue(psScriptOption);
-			var actions = parseResult.GetValue(actionOption) ?? [];
-			var psArgs = parseResult.GetValue(psArgOption) ?? [];
-
-			try
-			{
-				if (combination != null)
-					target.Trigger.Combination = KeyNameResolver.ParseCombination(combination);
-				if (sequence != null)
-					target.Trigger.Sequence = KeyNameResolver.ParseSequence(sequence);
-			}
-			catch (ArgumentException ex) { Console.Error.WriteLine(ex.Message); return 1; }
-
-			if (desc != null)
-				target.Description = desc;
-			if (rename != null)
-				target.Name = rename;
-
-			try
-			{
-				if (plugin != null)
-				{
-					var resolvedId = PluginLoader.ResolvePlugin(plugin);
-					if (resolvedId == null)
-					{
-						Console.Error.WriteLine($"Unknown plugin: {plugin}");
-						return 1;
-					}
-
-					target.Actions = [new ArgumentToken { Type = ArgumentType.Plugin, Value = resolvedId }];
-					target.PluginArguments = new Dictionary<string, CommandArgument[]>
-					{
-						[resolvedId] = [.. pluginArgs.Select(ArgParser.ParsePluginArg)]
-					};
-					target.PowerShellArguments = [];
-				}
-				else if (psScript != null)
-				{
-					target.Actions = [new ArgumentToken { Type = ArgumentType.PowerShell, Value = psScript }];
-					target.PluginArguments = [];
-					target.PowerShellArguments = [];
-				}
-				else if (actions.Length > 0)
-				{
-					target.Actions = [.. actions.Select(ArgParser.ParseAction)];
-					target.PluginArguments = ArgParser.GroupArgSpecs(pluginArgs);
-					target.PowerShellArguments = ArgParser.GroupArgSpecs(psArgs, powerShell: true);
-				}
-				else if (pluginArgs.Length > 0 || psArgs.Length > 0)
-				{
-					Console.Error.WriteLine("--plugin-arg and --ps-arg require --plugin, --powershell, or --action");
-					return 1;
-				}
-			}
-			catch (ArgumentException ex) { Console.Error.WriteLine(ex.Message); return 1; }
-
-			CommandStore.SaveFile(file, commands);
-			Console.WriteLine($"Updated '{target.Name}'");
-			return 0;
-		});
+		command.SetActionWithErrorHandling(pr => Execute(
+			new EditInput(
+				pr.GetValue(configDirOption),
+				pr.GetValue(nameArg),
+				pr.GetValue(combinationOption),
+				pr.GetValue(sequenceOption),
+				pr.GetValue(descOption),
+				pr.GetValue(renameOption),
+				pr.GetValue(pluginOption) ?? [],
+				pr.GetValue(psScriptOption) ?? [],
+				pr.GetValue(argOption) ?? [],
+				pr.GetValue(psArgOption) ?? []
+			)
+		));
 
 		return command;
+	}
+
+	private static void Execute(EditInput input)
+	{
+		var store = new CommandStore(input.ConfigDir);
+		var (file, cmd) = store.GetCommand(input.NameOrId);
+		var commands = CommandStore.LoadFile(file);
+		var target = commands.First(c => c.Id == cmd.Id);
+
+		if (input.Combination is { Length: > 0 })
+			target.Trigger.Combination = KeyNameResolver.ParseCombination(input.Combination);
+		if (input.Sequence is { Length: > 0 })
+			target.Trigger.Sequence = KeyNameResolver.ParseSequence(input.Sequence);
+
+		target.Description = input.Description ?? target.Description;
+		target.Name = input.NewName ?? target.Name;
+
+		if (input.Plugins.Length > 0 || input.PowerShellScripts.Length > 0)
+		{
+			var actionList = new List<ArgumentToken>();
+
+			foreach (var plugin in input.Plugins)
+			{
+				var id = PluginLoader.ResolvePlugin(plugin);
+				actionList.Add(new ArgumentToken { Type = ArgumentType.Plugin, Value = id });
+			}
+
+			foreach (var ps in input.PowerShellScripts)
+				actionList.Add(new ArgumentToken { Type = ArgumentType.PowerShell, Value = ps });
+
+			target.Actions = [.. actionList];
+
+			target.PluginArguments = PluginHelper.GroupPluginArgs(input.PluginArguments);
+			target.PowerShellArguments = PluginHelper.GroupPsArgs(input.PowerShellArguments);
+		}
+		else if (input.PluginArguments.Length > 0 || input.PowerShellArguments.Length > 0)
+		{
+			foreach (var (key, value) in PluginHelper.GroupPluginArgs(input.PluginArguments))
+				target.PluginArguments[key] = value;
+
+			var psActionSet = target.Actions
+				.Where(a => a.Type == ArgumentType.PowerShell)
+				.Select(a => a.Value).ToHashSet(StringComparer.OrdinalIgnoreCase);
+			foreach (var (key, value) in PluginHelper.GroupPsArgs(input.PowerShellArguments))
+				target.PowerShellArguments[key] = value;
+		}
+
+		CommandStore.SaveFile(file, commands);
+		Console.WriteLine($"Updated '{target.Name}'");
 	}
 }

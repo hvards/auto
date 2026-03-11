@@ -1,5 +1,6 @@
 using Auto.Cli.Services;
 using Auto.Models;
+using Auto.PluginUtils;
 
 namespace IntegrationTests.Cli;
 
@@ -9,20 +10,17 @@ public class EditCommandTests : CliTestBase
 	[Test]
 	public async Task Edit_UpdatesTrigger()
 	{
-		// Arrange
 		SeedCommand();
 
-		// Act
-		var (exit, stdout, _) = await InvokeAsync("edit", "Test", "--combination", "LCtrl+LWin+R");
+		var (exit, stdout, _) = await InvokeAsync("edit", "Test", "--combination", "LCtrl", "LWin", "R");
 
-		// Assert
 		Assert.That(exit, Is.Zero);
 		Assert.That(stdout.TrimEnd(), Is.EqualTo("Updated 'Test'"));
 
 		var store = new CommandStore(TempDir);
 		var result = store.Find("Test");
 		Assert.That(result, Is.Not.Null);
-		var expected = KeyNameResolver.FormatCombination(KeyNameResolver.ParseCombination("LCtrl+LWin+R"));
+		var expected = KeyNameResolver.FormatCombination(KeyNameResolver.ParseCombination(["LCtrl", "LWin", "R"]));
 		Assert.That(KeyNameResolver.FormatCombination(result!.Value.Command.Trigger.Combination),
 			Is.EqualTo(expected));
 	}
@@ -30,13 +28,10 @@ public class EditCommandTests : CliTestBase
 	[Test]
 	public async Task Edit_RenamesCommand()
 	{
-		// Arrange
 		SeedCommand();
 
-		// Act
 		var (exit, stdout, _) = await InvokeAsync("edit", "Test", "--name", "Renamed");
 
-		// Assert
 		Assert.That(exit, Is.Zero);
 		Assert.That(stdout.TrimEnd(), Is.EqualTo("Updated 'Renamed'"));
 
@@ -46,17 +41,13 @@ public class EditCommandTests : CliTestBase
 	}
 
 	[Test]
-	public async Task Edit_ReplacesActionsWithActionFlag()
+	public async Task Edit_ReplacesActionsWithPowerShell()
 	{
-		// Arrange
 		SeedCommand();
-		var psScript = "test.ps1";
 
-		// Act
 		var (exit, stdout, _) = await InvokeAsync(
-			"edit", "Test", "--action", $"ps:{psScript}");
+			"edit", "Test", "--powershell", "test.ps1");
 
-		// Assert
 		Assert.That(exit, Is.Zero);
 		Assert.That(stdout.TrimEnd(), Is.EqualTo("Updated 'Test'"));
 
@@ -65,21 +56,73 @@ public class EditCommandTests : CliTestBase
 		Assert.That(result, Is.Not.Null);
 		Assert.That(result!.Value.Command.Actions, Has.Length.EqualTo(1));
 		Assert.That(result.Value.Command.Actions[0].Type, Is.EqualTo(ArgumentType.PowerShell));
-		Assert.That(result.Value.Command.Actions[0].Value, Is.EqualTo(psScript));
+		Assert.That(result.Value.Command.Actions[0].Value, Is.EqualTo("test.ps1"));
 	}
 
 	[Test]
-	public async Task Edit_PluginArgWithoutContext_ReturnsError()
+	public async Task Edit_ArgWithoutContext_ReturnsError()
 	{
-		// Arrange
 		SeedCommand();
 
-		// Act
 		var (exit, _, stderr) = await InvokeAsync(
-			"edit", "Test", "--plugin-arg", "someguid:value");
+			"edit", "Test", "--arg", "someguid", "value");
 
-		// Assert
 		Assert.That(exit, Is.EqualTo(1));
-		Assert.That(stderr.TrimEnd(), Is.EqualTo("--plugin-arg and --ps-arg require --plugin, --powershell, or --action"));
+		Assert.That(stderr.TrimEnd(), Is.EqualTo("Unknown plugin: someguid"));
+	}
+
+	[Test]
+	public async Task Edit_ReplacesWithMultiplePlugins()
+	{
+		SeedCommand();
+
+		var startProgramGuid = PluginLoader.ResolvePlugin("StartProgram")!;
+		var keyboardInputGuid = PluginLoader.ResolvePlugin("KeyboardInput")!;
+
+		var (exit1, _, _) = await InvokeAsync(
+			"edit", "Test",
+			"--plugin", "StartProgram",
+			"--plugin", "KeyboardInput",
+			"--arg", "StartProgram", "https://new.example.com");
+		Assert.That(exit1, Is.Zero);
+
+		var (exit2, stdout, _) = await InvokeAsync(
+			"edit", "Test",
+			"--arg", "KeyboardInput", "typed text");
+
+		Assert.That(exit2, Is.Zero);
+		Assert.That(stdout.TrimEnd(), Is.EqualTo("Updated 'Test'"));
+
+		var store = new CommandStore(TempDir);
+		var result = store.Find("Test");
+		Assert.That(result, Is.Not.Null);
+		Assert.That(result!.Value.Command.Actions, Has.Length.EqualTo(2));
+		Assert.That(result.Value.Command.Actions[0].Value, Is.EqualTo(startProgramGuid));
+		Assert.That(result.Value.Command.Actions[1].Value, Is.EqualTo(keyboardInputGuid));
+	}
+
+	[Test]
+	public async Task Edit_MergesPluginArgs()
+	{
+		SeedCommand();
+
+		var startProgramGuid = PluginLoader.ResolvePlugin("StartProgram")!;
+		var keyboardInputGuid = PluginLoader.ResolvePlugin("KeyboardInput")!;
+
+		var (exit, stdout, _) = await InvokeAsync(
+			"edit", "Test",
+			"--arg", "KeyboardInput", "hello world");
+
+		Assert.That(exit, Is.Zero);
+		Assert.That(stdout.TrimEnd(), Is.EqualTo("Updated 'Test'"));
+
+		var store = new CommandStore(TempDir);
+		var result = store.Find("Test");
+		Assert.That(result, Is.Not.Null);
+		Assert.That(result!.Value.Command.PluginArguments[startProgramGuid][0].Tokens[0].Value,
+			Is.EqualTo("https://example.com"));
+		Assert.That(result.Value.Command.PluginArguments[keyboardInputGuid], Has.Length.EqualTo(1));
+		Assert.That(result.Value.Command.PluginArguments[keyboardInputGuid][0].Tokens[0].Value,
+			Is.EqualTo("hello world"));
 	}
 }

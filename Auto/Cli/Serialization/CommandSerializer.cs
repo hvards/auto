@@ -23,7 +23,7 @@ public static class CommandSerializer
 
 	private static object ProjectEntry(CommandEntry x) => new
 	{
-		Trigger = new { x.Trigger.Combination, Sequence = x.Trigger.Sequence ?? Array.Empty<ushort>() },
+		Trigger = new { x.Trigger.Combination, Sequence = x.Trigger.Sequence ?? [] },
 		x.Actions,
 		PowerShellArguments = SortDictionary(x.PowerShellArguments),
 		PluginArguments = SortDictionary(x.PluginArguments),

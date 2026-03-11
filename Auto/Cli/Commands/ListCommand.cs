@@ -1,12 +1,14 @@
 using Auto.Cli.Serialization;
 using Auto.Cli.Services;
 using System.CommandLine;
+
 using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli.Commands;
 
 public static class ListCommand
 {
+	private record ListInput(string ConfigDir, string File, bool Enabled, bool Disabled, string Search, bool Json);
 	public static CliCommand Create(Option<string> configDirOption)
 	{
 		var command = new CliCommand("list") { Description = "List all commands" }
@@ -16,45 +18,47 @@ public static class ListCommand
 			.AddOption<string>("--search", "Filter by name/description", out var searchOption)
 			.AddOption<bool>("--json", "Output as JSON", out var jsonOption);
 
-		command.SetAction(parseResult =>
-		{
-			var configDir = parseResult.GetValue(configDirOption);
-			var file = parseResult.GetValue(fileOption);
-			var enabled = parseResult.GetValue(enabledOption);
-			var disabled = parseResult.GetValue(disabledOption);
-			var search = parseResult.GetValue(searchOption);
-			var json = parseResult.GetValue(jsonOption);
-
-			var store = new CommandStore(configDir);
-			var all = store.LoadAll();
-
-			if (file != null)
-			{
-				var resolved = store.ResolvePath(file);
-				all = [.. all.Where(x => x.File.Equals(resolved, StringComparison.OrdinalIgnoreCase))];
-			}
-			if (enabled || disabled)
-				all = [.. all.Where(x => (enabled && x.Command.Enabled) || (disabled && !x.Command.Enabled))];
-			if (search != null)
-				all = [.. all.Where(x =>
-					x.Command.Name.Contains(search, StringComparison.OrdinalIgnoreCase) ||
-					x.Command.Description.Contains(search, StringComparison.OrdinalIgnoreCase))];
-
-			var sorted = all.OrderBy(x => x.Command.Name).ToList();
-
-			if (json)
-			{
-				PrintJsonResult(sorted);
-			}
-			else
-			{
-				PrintTableResult(sorted, store, all.Count);
-			}
-
-			return 0;
-		});
+		command.SetActionWithErrorHandling(pr => Execute(
+			new ListInput(
+				pr.GetValue(configDirOption),
+				pr.GetValue(fileOption),
+				pr.GetValue(enabledOption),
+				pr.GetValue(disabledOption),
+				pr.GetValue(searchOption),
+				pr.GetValue(jsonOption)
+			)
+		));
 
 		return command;
+	}
+
+	private static void Execute(ListInput input)
+	{
+		var store = new CommandStore(input.ConfigDir);
+		var all = store.LoadAll();
+
+		if (input.File != null)
+		{
+			var resolved = store.ResolvePath(input.File);
+			all = [.. all.Where(x => x.File.Equals(resolved, StringComparison.OrdinalIgnoreCase))];
+		}
+		if (input.Enabled || input.Disabled)
+			all = [.. all.Where(x => (input.Enabled && x.Command.Enabled) || (input.Disabled && !x.Command.Enabled))];
+		if (input.Search != null)
+			all = [.. all.Where(x =>
+				x.Command.Name.Contains(input.Search, StringComparison.OrdinalIgnoreCase) ||
+				x.Command.Description.Contains(input.Search, StringComparison.OrdinalIgnoreCase))];
+
+		var sorted = all.OrderBy(x => x.Command.Name).ToList();
+
+		if (input.Json)
+		{
+			PrintJsonResult(sorted);
+		}
+		else
+		{
+			PrintTableResult(sorted, store, all.Count);
+		}
 	}
 
 	private static void PrintJsonResult(List<(string File, Models.CommandEntry Command)> result)

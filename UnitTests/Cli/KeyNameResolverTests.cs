@@ -58,14 +58,14 @@ public class KeyNameResolverTests
 	[Test]
 	public void ParseCombination_MultipleKeys()
 	{
-		var result = KeyNameResolver.ParseCombination("LCtrl+LWin+LAlt+R");
+		var result = KeyNameResolver.ParseCombination(["LCtrl", "LWin", "LAlt", "R"]);
 		Assert.That(result.SetEquals(new HashSet<ushort> { 162, 91, 164, 82 }));
 	}
 
 	[Test]
 	public void ParseSequence_MultipleKeys()
 	{
-		var result = KeyNameResolver.ParseSequence("A,S,F,C,E");
+		var result = KeyNameResolver.ParseSequence(["A", "S", "F", "C", "E"]);
 		Assert.That(result, Is.EqualTo(new ushort[] { 65, 83, 70, 67, 69 }));
 	}
 

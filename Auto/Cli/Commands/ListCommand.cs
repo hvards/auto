@@ -8,7 +8,7 @@ namespace Auto.Cli.Commands;
 
 public static class ListCommand
 {
-	private record ListInput(string ConfigDir, string File, bool Enabled, bool Disabled, string Search, bool Json);
+	private record ListInput(string ConfigDir, string? File, bool Enabled, bool Disabled, string? Search, bool Json);
 	public static CliCommand Create(Option<string> configDirOption)
 	{
 		var command = new CliCommand("list") { Description = "List all commands" }
@@ -20,7 +20,7 @@ public static class ListCommand
 
 		command.SetActionWithErrorHandling(pr => Execute(
 			new ListInput(
-				pr.GetValue(configDirOption),
+				pr.GetValue(configDirOption) ?? string.Empty,
 				pr.GetValue(fileOption),
 				pr.GetValue(enabledOption),
 				pr.GetValue(disabledOption),

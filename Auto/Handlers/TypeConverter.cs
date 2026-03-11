@@ -7,7 +7,7 @@ public static class TypeConverter
 	private delegate bool TryParseDelegate<T>(string input, out T result);
 
 	// ReSharper disable once UnusedMember.Global
-	public static bool TryParse<T>(string input, out T result)
+	public static bool TryParse<T>(string input, out T? result)
 	{
 		var method = typeof(T).GetMethod("TryParse", [typeof(string), typeof(T).MakeByRefType()]);
 		if (method == null)
@@ -20,7 +20,9 @@ public static class TypeConverter
 		return tryParse(input, out result);
 	}
 
-	private static dynamic GetDefaultValue(Type type) => type.IsValueType ? Activator.CreateInstance(type) : null;
+	private static dynamic? GetDefaultValue(Type type)
+		=> type.IsValueType ? Activator.CreateInstance(type) : null;
+
 	private static bool IsList(Type type) => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>);
 
 	private static dynamic ConvertToArray(string arg, Type type, bool array)
@@ -40,24 +42,24 @@ public static class TypeConverter
 			return result;
 		}
 
-		var list = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(type));
+		var list = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(type))!;
 		foreach (var r in res)
-			list!.Add(r);
+			list.Add(r);
 		return list;
 	}
 
-	private static bool TryParseType(string input, Type type, out dynamic result)
+	private static bool TryParseType(string input, Type type, out dynamic? result)
 	{
 		result = GetDefaultValue(type);
 
 		var method = typeof(TypeConverter).GetMethod("TryParse")!.MakeGenericMethod(type);
-		var parameters = new object[] { input, result };
+		var parameters = new object?[] { input, result };
 		var success = (bool)method.Invoke(null, parameters)!;
 		result = parameters[1];
 		return success;
 	}
 
-	public static dynamic Convert(string input, Type type)
+	public static dynamic? Convert(string input, Type type)
 	{
 		if (!IsList(type) && !type.IsArray)
 			return TryParseType(input, type, out var res)
@@ -65,7 +67,7 @@ public static class TypeConverter
 				: input;
 
 		var elementType = type.IsArray
-			? type.GetElementType()
+			? type.GetElementType() ?? typeof(string)
 			: type.GetGenericArguments().Single();
 		return ConvertToArray(input, elementType, type.IsArray);
 	}

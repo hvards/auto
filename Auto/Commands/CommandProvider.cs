@@ -7,13 +7,13 @@ namespace Auto.Commands;
 
 public interface ICommandProvider
 {
-	public bool TryGetCommand(HashSet<ushort> pressedKeys, ushort vkCode, out Command command);
+	public bool TryGetCommand(HashSet<ushort> pressedKeys, ushort vkCode, out Command? command);
 }
 
 public partial class CommandProvider : ICommandProvider
 {
 	private readonly ILogger<CommandProvider> _logger;
-	private List<Command> _commands;
+	private List<Command> _commands = [];
 
 	public CommandProvider(ILogger<CommandProvider> logger)
 	{
@@ -21,7 +21,7 @@ public partial class CommandProvider : ICommandProvider
 		InitializeCommands();
 	}
 
-	public bool TryGetCommand(HashSet<ushort> pressedKeys, ushort vkCode, out Command command)
+	public bool TryGetCommand(HashSet<ushort> pressedKeys, ushort vkCode, out Command? command)
 	{
 		command = _commands.FirstOrDefault(x => x.Trigger.Check(pressedKeys, vkCode));
 		return command != null;
@@ -64,7 +64,7 @@ public partial class CommandProvider : ICommandProvider
 	{
 		try
 		{
-			return JsonSerializer.Deserialize<List<Command>>(File.ReadAllText(file));
+			return JsonSerializer.Deserialize<List<Command>>(File.ReadAllText(file)) ?? [];
 		}
 		catch (Exception ex)
 		{

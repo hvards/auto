@@ -14,7 +14,9 @@ public static class DeleteCommand
 			.AddArgument<string>("name-or-id", "Command name or ID", out var nameArg);
 
 		command.SetActionWithErrorHandling(
-			pr => Execute(new DeleteInput(pr.GetValue(configDirOption), pr.GetValue(nameArg)))
+			pr => Execute(
+				new DeleteInput(pr.GetValue(configDirOption) ?? string.Empty, pr.GetValue(nameArg) ?? string.Empty)
+			)
 		);
 
 		return command;

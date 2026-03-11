@@ -14,8 +14,8 @@ public static class EditCommand
 		string NameOrId,
 		string[] Combination,
 		string[] Sequence,
-		string Description,
-		string NewName,
+		string? Description,
+		string? NewName,
 		string[] Plugins,
 		string[] PowerShellScripts,
 		string[] PluginArguments,
@@ -39,10 +39,10 @@ public static class EditCommand
 
 		command.SetActionWithErrorHandling(pr => Execute(
 			new EditInput(
-				pr.GetValue(configDirOption),
-				pr.GetValue(nameArg),
-				pr.GetValue(combinationOption),
-				pr.GetValue(sequenceOption),
+				pr.GetValue(configDirOption) ?? string.Empty,
+				pr.GetValue(nameArg) ?? string.Empty,
+				pr.GetValue(combinationOption) ?? [],
+				pr.GetValue(sequenceOption) ?? [],
 				pr.GetValue(descOption),
 				pr.GetValue(renameOption),
 				pr.GetValue(pluginOption) ?? [],
@@ -62,11 +62,10 @@ public static class EditCommand
 		var commands = CommandStore.LoadFile(file);
 		var target = commands.First(c => c.Id == cmd.Id);
 
-		if (input.Combination is { Length: > 0 })
+		if (input.Combination.Length > 0)
 			target.Trigger.Combination = KeyNameResolver.ParseCombination(input.Combination);
-		if (input.Sequence is { Length: > 0 })
+		if (input.Sequence.Length > 0)
 			target.Trigger.Sequence = KeyNameResolver.ParseSequence(input.Sequence);
-
 		target.Description = input.Description ?? target.Description;
 		target.Name = input.NewName ?? target.Name;
 

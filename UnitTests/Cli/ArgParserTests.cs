@@ -15,7 +15,7 @@ public class ArgParserTests
 
 		// Assert
 		Assert.That(token.Type, Is.EqualTo(ArgumentType.Clipboard));
-		Assert.That(token.Value, Is.Null);
+		Assert.That(token.Value, Is.Empty);
 	}
 
 	[Test]
@@ -36,7 +36,7 @@ public class ArgParserTests
 
 		// Assert
 		Assert.That(token.Type, Is.EqualTo(ArgumentType.Highlighted));
-		Assert.That(token.Value, Is.Null);
+		Assert.That(token.Value, Is.Empty);
 	}
 
 	[Test]

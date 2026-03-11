@@ -16,14 +16,14 @@ public class Trigger
 	}
 
 	private ushort[] _sequence = [];
-	private bool[] _sequencePosition;
+	private bool[] _sequencePosition = [];
 	private bool _sequenceEnabled;
 	public bool MacroTriggered { get; private set; }
 
 	public bool Check(HashSet<ushort> pressedKeys, ushort lastKey)
 	{
 		MacroTriggered = TestMacro(lastKey);
-		return MacroTriggered || (pressedKeys != null && pressedKeys.Count != 0 && pressedKeys.SetEquals(Combination));
+		return MacroTriggered || (pressedKeys.Count != 0 && pressedKeys.SetEquals(Combination));
 	}
 
 	private bool TestMacro(ushort key)

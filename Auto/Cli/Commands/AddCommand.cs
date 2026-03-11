@@ -14,7 +14,7 @@ public static class AddCommand
 		string ConfigDir,
 		string Name,
 		string File,
-		string Description,
+		string? Description,
 		bool Disabled,
 		string[] Combination,
 		string[] Sequence,
@@ -43,10 +43,10 @@ public static class AddCommand
 
 		command.SetActionWithErrorHandling(pr => Execute(
 			new AddInput(
-				pr.GetValue(configDirOption),
-				pr.GetValue(nameArg),
-				pr.GetValue(fileOption),
-				pr.GetValue(descOption) ?? string.Empty,
+				pr.GetValue(configDirOption) ?? string.Empty,
+				pr.GetValue(nameArg) ?? string.Empty,
+				pr.GetValue(fileOption) ?? string.Empty,
+				pr.GetValue(descOption),
 				pr.GetValue(disabledOption),
 				pr.GetValue(combinationOption) ?? [],
 				pr.GetValue(sequenceOption) ?? [],
@@ -71,7 +71,7 @@ public static class AddCommand
 		{
 			Id = Guid.NewGuid(),
 			Name = input.Name,
-			Description = input.Description,
+			Description = input.Description ?? string.Empty,
 			Enabled = !input.Disabled,
 			Trigger = trigger,
 			Actions = [],

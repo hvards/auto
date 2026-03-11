@@ -16,7 +16,7 @@ public interface INativeMethods
 
 public partial class NativeMethods : INativeMethods
 {
-	private LowLevelKeyboardProc _keyboardHook;
+	private LowLevelKeyboardProc? _keyboardHook;
 
 	public KeyScanResult KeyScan(char ch)
 	{

@@ -67,7 +67,7 @@ public class TypeConverterTests
 		var expectedResult = new List<int> { 12, 13, 14 };
 		var result = TypeConverter.Convert(input, typeof(List<int>));
 
-		Assert.That(result.Count, Is.EqualTo(3));
+		Assert.That(result?.Count, Is.EqualTo(3));
 		for (var i = 0; i < result.Count; i++)
 			Assert.That(result[i], Is.EqualTo(expectedResult[i]));
 	}

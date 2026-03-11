@@ -18,7 +18,10 @@ public static class GetCommand
 			.AddOption<bool>("--json", "Output as JSON", out var jsonOption);
 
 		command.SetActionWithErrorHandling(pr => Execute(
-			new GetInput(pr.GetValue(configDirOption), pr.GetValue(nameArg), pr.GetValue(jsonOption)
+			new GetInput(
+				pr.GetValue(configDirOption) ?? string.Empty, 
+				pr.GetValue(nameArg) ?? string.Empty, 
+				pr.GetValue(jsonOption)
 		)));
 
 		return command;
@@ -61,7 +64,7 @@ public static class GetCommand
 			{
 				if (action.Type == ArgumentType.Plugin)
 				{
-					var pluginName = PluginLoader.GetPluginName(action.Value);
+					var pluginName = PluginLoader.GetPluginName(action.Value ?? string.Empty);
 					Console.WriteLine($"  Plugin: {pluginName} ({action.Value})");
 				}
 				else

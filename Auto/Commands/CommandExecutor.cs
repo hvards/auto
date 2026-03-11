@@ -6,22 +6,22 @@ namespace Auto.Commands;
 
 public interface ICommandExecutor
 {
-	List<string> ExecuteCommand(Command command, string clipboard = null, string highlighted = null);
+	List<string?> ExecuteCommand(Command command, string? clipboard = null, string? highlighted = null);
 }
 
 public class CommandExecutor(IPluginExecutor pluginExecutor, IPowerShell powerShell) : ICommandExecutor
 {
-	public List<string> ExecuteCommand(Command command, string clipboard = null, string highlighted = null)
+	public List<string?> ExecuteCommand(Command command, string? clipboard = null, string? highlighted = null)
 	{
 		return ExecuteCommand(command.Actions, command.PowerShellArguments, command.PluginArguments,
 			clipboard, highlighted);
 	}
 
-	private List<string> ExecuteCommand(
+	private List<string?> ExecuteCommand(
 		ArgumentToken[] tokens,
 		Dictionary<string, CommandArgument[]> powershellArguments,
 		Dictionary<string, CommandArgument[]> pluginArguments,
-		string clipboard = null, string highlighted = null)
+		string? clipboard = null, string? highlighted = null)
 	{
 		var powerShellExecutionResult = new Dictionary<string, string>();
 		var res = tokens.Select(ExecuteArgumentToken).ToList();
@@ -38,7 +38,7 @@ public class CommandExecutor(IPluginExecutor pluginExecutor, IPowerShell powerSh
 				});
 		}
 
-		string ExecuteArgumentToken(ArgumentToken token)
+		string? ExecuteArgumentToken(ArgumentToken token)
 		{
 			switch (token.Type)
 			{
@@ -51,7 +51,7 @@ public class CommandExecutor(IPluginExecutor pluginExecutor, IPowerShell powerSh
 						return result;
 					powershellArguments.TryGetValue(token.Value, out var scriptArgs);
 					result = powerShell.Execute(token.Value,
-						scriptArgs?.Select(x => (x.ParameterName, ExecuteArgument(x))).ToList());
+						scriptArgs?.Select(x => (x.ParameterName, ExecuteArgument(x))).ToList() ?? []);
 					powerShellExecutionResult.Add(token.Value, result);
 					return result;
 				case ArgumentType.Plugin:
@@ -65,7 +65,7 @@ public class CommandExecutor(IPluginExecutor pluginExecutor, IPowerShell powerSh
 			}
 		}
 
-		IEnumerable<object> GetPluginArgumentValues(CommandArgument[] arguments)
+		IEnumerable<object?> GetPluginArgumentValues(CommandArgument[] arguments)
 		{
 			foreach (var argument in arguments)
 			{

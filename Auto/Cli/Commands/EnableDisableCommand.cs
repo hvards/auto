@@ -18,7 +18,11 @@ public static class EnableDisableCommand
 			.AddArgument<string>("name-or-id", "Command name or ID", out var nameArg);
 
 		command.SetActionWithErrorHandling(pr =>
-			Execute(new EnableDisableInput(pr.GetValue(configDirOption), pr.GetValue(nameArg), enable))
+			Execute(new EnableDisableInput(
+				pr.GetValue(configDirOption) ?? string.Empty, 
+				pr.GetValue(nameArg) ?? string.Empty, 
+				enable)
+			)
 		);
 
 		return command;

@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Auto.Plugins;
 
-public class KeyboardInputPlugin(IServiceProvider serviceProvider) : ICommand
+public class KeyboardInputPlugin(IServiceProvider? serviceProvider) : ICommand
 {
 	public string Name => "KeyboardInput";
 	public string Description => "Send keyboard input.";
@@ -21,12 +21,12 @@ public class KeyboardInputPlugin(IServiceProvider serviceProvider) : ICommand
 		}
 	];
 
-	public object Execute(object[] args)
+	public object? Execute(object?[] args)
 	{
-		var input = (string)args[0];
+		var input = (string)(args[0] ?? string.Empty);
 
-		serviceProvider.GetService<IKeyboardHandler>().ReleaseAllKeys();
-		serviceProvider.GetService<ISendInput>().Keyboard(input);
+		serviceProvider?.GetService<IKeyboardHandler>()?.ReleaseAllKeys();
+		serviceProvider?.GetService<ISendInput>()?.Keyboard(input);
 		return false;
 	}
 }

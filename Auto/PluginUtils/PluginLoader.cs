@@ -48,7 +48,7 @@ public class PluginLoader(IServiceProvider serviceProvider) : IPluginLoader
 		return paths;
 	}
 
-	private static IEnumerable<ICommand> GetBuiltInPluginInstances(IServiceProvider serviceProvider = null)
+	private static IEnumerable<ICommand> GetBuiltInPluginInstances(IServiceProvider? serviceProvider = null)
 	{
 		yield return new KeyboardInputPlugin(serviceProvider);
 		yield return new StartProgramPlugin();
@@ -63,7 +63,7 @@ public class PluginLoader(IServiceProvider serviceProvider) : IPluginLoader
 			result.Add(command.Id.ToString(), new Plugin
 			{
 				Action = command.Execute,
-				ArgumentTypes = command.ExpectedArguments.Select(x => x.Type).ToArray(),
+				ArgumentTypes = [.. command.ExpectedArguments.Select(x => x.Type)],
 				StaThreadRequired = false
 			});
 		}
@@ -85,7 +85,7 @@ public class PluginLoader(IServiceProvider serviceProvider) : IPluginLoader
 					? StaHandler.Execute(GetAssemblyPlugins)
 					: GetAssemblyPlugins();
 
-				foreach (var (id, plugin) in plugins)
+				foreach (var (id, plugin) in plugins ?? [])
 					result.Add(id, plugin);
 			}
 			catch
@@ -114,7 +114,7 @@ public class PluginLoader(IServiceProvider serviceProvider) : IPluginLoader
 			{
 				Action = command.Execute,
 				StaThreadRequired = staThread,
-				ArgumentTypes = command.ExpectedArguments.Select(x => x.Type).ToArray()
+				ArgumentTypes = [.. command.ExpectedArguments.Select(x => x.Type)]
 			});
 		}
 	}
@@ -146,7 +146,7 @@ public class PluginLoader(IServiceProvider serviceProvider) : IPluginLoader
 	{
 		return !Guid.TryParse(guidString, out var guid)
 			? string.Empty 
-			: (GetAllCommands().FirstOrDefault(c => c.Id == guid)?.Name);
+			: (GetAllCommands().FirstOrDefault(c => c.Id == guid)?.Name) ?? string.Empty;
 	}
 
 	public static string ResolvePlugin(string nameOrId)

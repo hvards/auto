@@ -5,7 +5,7 @@ namespace Auto.PluginUtils;
 
 public interface IPluginExecutor
 {
-	object ExecutePlugin(string id, IEnumerable<object> args);
+	object? ExecutePlugin(string id, IEnumerable<object?> args);
 }
 
 public partial class PluginExecutor : IPluginExecutor
@@ -19,7 +19,7 @@ public partial class PluginExecutor : IPluginExecutor
 		_plugins = pluginLoader.CreateCommands();
 	}
 
-	public object ExecutePlugin(string id, IEnumerable<object> args)
+	public object? ExecutePlugin(string id, IEnumerable<object?> args)
 	{
 		if (!_plugins.TryGetValue(id, out var plugin))
 		{
@@ -29,7 +29,7 @@ public partial class PluginExecutor : IPluginExecutor
 
 		try
 		{
-			var arguments = new object[plugin.ArgumentTypes.Length];
+			var arguments = new object?[plugin.ArgumentTypes.Length];
 
 			var i = 0;
 			foreach (var argument in args)

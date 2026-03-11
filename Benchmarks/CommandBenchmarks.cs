@@ -16,22 +16,22 @@ public class CommandBenchmarks
 	{
 		_letters = Enumerable.Range('a', 'i').Select(x => (ushort)x).ToArray();
 		_sequenceTriggers =
-			(from letter in _letters
+			[.. from letter in _letters
 			 from letter2 in _letters
 			 select new Trigger
 			 {
 				 Sequence = Enumerable.Range(letter, letter2).Select(x => (ushort)x).ToArray(),
 				 Combination = []
 			 }
-			).ToArray();
+			];
 
-		_combinations = GetPowerSet(Enumerable.Range(1, 12).Select(x => (ushort)x).ToList())
-			.Select(x => new HashSet<ushort>(x)).ToArray();
-		_combinationTriggers = _combinations.Select(x => new Trigger
+		_combinations = [.. GetPowerSet(Enumerable.Range(1, 12).Select(x => (ushort)x).ToList())
+			.Select(x => new HashSet<ushort>(x))];
+		_combinationTriggers = [.. _combinations.Select(x => new Trigger
 		{
 			Combination = x,
-			Sequence = null
-		}).ToArray();
+			Sequence = []
+		})];
 	}
 
 	[Benchmark]
@@ -41,7 +41,7 @@ public class CommandBenchmarks
 		{
 			foreach (var trigger in _sequenceTriggers)
 			{
-				trigger.Check(null, letter);
+				trigger.Check([letter], letter);
 			}
 		}
 	}

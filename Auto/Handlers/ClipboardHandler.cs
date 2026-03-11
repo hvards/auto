@@ -24,7 +24,7 @@ public class ClipboardHandler(IKeyboardHandler keyboardHandler) : IClipboardHand
 		if (copyHighlightedText)
 			DeleteClipboard();
 
-		return clipboardText?.Trim();
+		return clipboardText?.Trim() ?? string.Empty;
 	}
 
 	private static void DeleteClipboard() => StaHandler.Execute(ResetClipboard);

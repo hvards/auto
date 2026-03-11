@@ -6,7 +6,7 @@ namespace Benchmarks;
 [MemoryDiagnoser]
 public class TypeConverterBenchmarks
 {
-	private string? inputString;
+	private string inputString = string.Empty;
 
 	[IterationSetup]
 	public void IterationSetup()

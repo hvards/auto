@@ -46,7 +46,7 @@ public class KeyListener
 		PressedKeys.Add(vkCode);
 
 		return _commandProvider.TryGetCommand(PressedKeys, vkCode, out var command)
-			? _execute.QueueCommand(command)
+			? _execute.QueueCommand(command!)
 			: _nativeMethods.CallNextHook(_hookId, nCode, wParam, lParam);
 	}
 }

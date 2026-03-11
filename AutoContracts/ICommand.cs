@@ -36,5 +36,5 @@ public interface ICommand
 	/// If return object is input for another plugin it will be used as is, if not the <c>.ToString()</c> method will
 	/// be called instead.
 	/// </returns>
-	object Execute(object[] args);
+	object? Execute(object?[] args);
 }

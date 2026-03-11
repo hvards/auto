@@ -4,7 +4,7 @@ namespace Auto.Handlers;
 
 public static class StaHandler
 {
-	public static T Execute<T>(Func<T> func)
+	public static T? Execute<T>(Func<T> func)
 	{
 		var result = default(T);
 		var thread = new Thread(() =>

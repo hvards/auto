@@ -24,10 +24,10 @@ public class StartProgramPlugin : ICommand
 		}
 	];
 
-	public object Execute(object[] args)
+	public object? Execute(object?[] args)
 	{
-		var program = (string)args[0];
-		var arguments = args.Length > 1 ? (string)args[1] : string.Empty;
+		var program = (string)(args[0] ?? string.Empty);
+		var arguments = args.Length > 1 ? (string)(args[1] ?? string.Empty) : string.Empty;
 		const bool hidden = false;
 
 		var psi = GetCmdProcessStartInfo();

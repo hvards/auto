@@ -64,7 +64,7 @@ public class CommandExecutorTests
 			Actions = [new ArgumentToken { Type = ArgumentType.PowerShell, Value = "script" }],
 			PowerShellArguments = []
 		};
-		_powerShellMock.Setup(x => x.Execute("script", It.IsAny<List<(string, string)>>()))
+		_powerShellMock.Setup(x => x.Execute("script", It.IsAny<List<(string?, string)>>()))
 			.Returns("powershell result");
 
 		// Act

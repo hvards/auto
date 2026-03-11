@@ -8,12 +8,12 @@ namespace Auto.Tasks;
 
 public interface IPowerShell
 {
-	string Execute(string file, IList<(string name, string value)> parameters);
+	string Execute(string file, IList<(string? name, string value)> parameters);
 }
 
 public class PowerShell : IPowerShell
 {
-	private static RunspacePool _runspacePool;
+	private static RunspacePool? _runspacePool;
 	private static readonly InitialSessionState Iss = InitialSessionState.CreateDefault();
 
 	public PowerShell()
@@ -23,7 +23,7 @@ public class PowerShell : IPowerShell
 		_runspacePool.Open();
 	}
 
-	public string Execute(string file, IList<(string name, string value)> parameters)
+	public string Execute(string file, IList<(string? name, string value)> parameters)
 	{
 		var powerShellFolder = Path.Combine(
 			Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "auto", "powershell"
@@ -31,22 +31,19 @@ public class PowerShell : IPowerShell
 		using var powerShell = System.Management.Automation.PowerShell.Create(Iss);
 		powerShell.AddCommand(Path.Combine(powerShellFolder, file));
 
-		if (parameters != null)
+		foreach (var parameter in parameters)
 		{
-			foreach (var parameter in parameters)
+			var multi = parameter.value.StartsWith("#Multi:");
+			if (multi)
 			{
-				var multi = parameter.value.StartsWith("#Multi:");
-				if (multi)
+				foreach (var param in parameter.value[7..].Split("\n"))
 				{
-					foreach (var param in parameter.value[7..].Split("\n"))
-					{
-						powerShell.AddParameter(parameter.name, param);
-					}
+					powerShell.AddParameter(parameter.name, param);
 				}
-				else
-				{
-					powerShell.AddParameter(parameter.name, parameter.value);
-				}
+			}
+			else
+			{
+				powerShell.AddParameter(parameter.name, parameter.value);
 			}
 		}
 		var result = powerShell.Invoke();

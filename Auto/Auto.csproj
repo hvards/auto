@@ -10,6 +10,7 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+				<Nullable>enable</Nullable>
     </PropertyGroup>
     
     <ItemGroup>

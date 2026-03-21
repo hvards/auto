@@ -154,8 +154,15 @@ public class PluginLoader(IServiceProvider serviceProvider) : IPluginLoader
 		if (Guid.TryParse(nameOrId, out var guid))
 			return guid.ToString();
 
-		return GetAllCommands()
-			.FirstOrDefault(c => c.Name.Equals(nameOrId, StringComparison.OrdinalIgnoreCase))
-			?.Id.ToString() ?? throw new ArgumentException($"Unknown plugin: {nameOrId}");
+		return GetAllCommands().FirstOrDefault(c => c.Name.Equals(nameOrId))?.Id.ToString() 
+			?? throw new ArgumentException($"Unknown plugin: {nameOrId}");
+	}
+
+	public static string? TryResolvePlugin(string nameOrId)
+	{
+		if (Guid.TryParse(nameOrId, out var guid))
+			return guid.ToString();
+
+		return GetAllCommands().FirstOrDefault(c => c.Name.Equals(nameOrId))?.Id.ToString();
 	}
 }

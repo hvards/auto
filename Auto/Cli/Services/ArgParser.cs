@@ -1,31 +1,28 @@
 using System.Text.RegularExpressions;
 using Auto.Models;
-using Auto.PluginUtils;
 
 namespace Auto.Cli.Services;
 
 internal static partial class ArgParser
 {
-	[GeneratedRegex(@"%\{(clipboard|highlighted|(?:plugin|powershell|ps):([^}]+))\}", RegexOptions.IgnoreCase)]
+	[GeneratedRegex(@"%\{([^}]+)\}", RegexOptions.IgnoreCase)]
 	private static partial Regex TokenPattern();
-	internal static CommandArgument ParsePluginArg(string arg)
+
+	internal static CommandArgument ParsePluginArgument(string arg)
 	{
 		return new CommandArgument { Tokens = [.. Tokenize(arg)] };
 	}
 
-	internal static CommandArgument ParsePowerShellArg(string arg)
+	internal static CommandArgument ParsePowerShellArgument(string arg)
 	{
-		if (!arg.StartsWith('%'))
-		{
-			var eqIdx = arg.IndexOf('=');
-			if (eqIdx > 0)
-				return new CommandArgument
-				{
-					ParameterName = arg[..eqIdx],
-					Tokens = [.. Tokenize(arg[(eqIdx + 1)..])]
-				};
-		}
-		return ParsePluginArg(arg);
+		var eqIdx = arg.IndexOf('=');
+		return eqIdx > 0
+			? new CommandArgument
+			{
+				ParameterName = arg[..eqIdx],
+				Tokens = [.. Tokenize(arg[(eqIdx + 1)..])]
+			}
+			: ParsePluginArgument(arg);
 	}
 
 	private static ArgumentToken[] Tokenize(string raw)
@@ -38,89 +35,13 @@ internal static partial class ArgParser
 			if (match.Index > lastEnd)
 				tokens.Add(new ArgumentToken { Type = ArgumentType.Text, Value = raw[lastEnd..match.Index] });
 
-			tokens.Add(MatchToToken(match));
+			tokens.Add(new ArgumentToken { Type = ArgumentType.Variable, Value = match.Groups[1].Value });
 			lastEnd = match.Index + match.Length;
 		}
 
 		if (lastEnd < raw.Length)
 			tokens.Add(new ArgumentToken { Type = ArgumentType.Text, Value = raw[lastEnd..] });
 
-		return tokens.Count > 0 ? [.. tokens] : [new ArgumentToken { Type = ArgumentType.Text, Value = raw }];
+		return [.. tokens];
 	}
-
-	private static ArgumentToken MatchToToken(Match match)
-	{
-		if (!match.Groups[2].Success)
-			return new ArgumentToken
-			{
-				Type = match.Groups[1].ValueSpan.Equals("clipboard", StringComparison.OrdinalIgnoreCase)
-					? ArgumentType.Clipboard
-					: ArgumentType.Highlighted
-			};
-
-		var colonIdx = match.Groups[1].ValueSpan.IndexOf(':');
-		var isPlugin = match.Groups[1].ValueSpan[..colonIdx].Equals("plugin", StringComparison.OrdinalIgnoreCase);
-		var value = match.Groups[2].Value;
-
-		if (isPlugin)
-			value = PluginLoader.ResolvePlugin(value) ?? value;
-
-		return new ArgumentToken
-		{
-			Type = isPlugin ? ArgumentType.Plugin : ArgumentType.PowerShell,
-			Value = value
-		};
-	}
-
-	internal static ArgumentToken ParseValue(string raw)
-	{
-		if (raw.StartsWith('%'))
-		{
-			var lower = raw.ToLowerInvariant();
-			if (lower == "%clipboard")
-				return new ArgumentToken { Type = ArgumentType.Clipboard };
-			if (lower == "%highlighted")
-				return new ArgumentToken { Type = ArgumentType.Highlighted };
-
-			var colonIdx = raw.IndexOf(':', 1);
-			if (colonIdx >= 0)
-			{
-				var prefix = raw[1..colonIdx].ToLowerInvariant();
-				var value = raw[(colonIdx + 1)..];
-				var type = prefix switch
-				{
-					"plugin" => (ArgumentType?)ArgumentType.Plugin,
-					"ps" or "powershell" => ArgumentType.PowerShell,
-					_ => null
-				};
-				if (type != null)
-				{
-					if (string.IsNullOrEmpty(value))
-						throw new ArgumentException($"Missing value after %{prefix}:");
-					return new ArgumentToken { Type = type.Value, Value = value };
-				}
-			}
-		}
-		return new ArgumentToken { Type = ArgumentType.Text, Value = raw };
-	}
-
-	internal static (string Key, CommandArgument Arg) ParseArgSpec(string spec, bool powerShell = false)
-	{
-		var colonIdx = spec.IndexOf(':');
-		if (colonIdx < 0)
-			throw new ArgumentException($"Invalid argument format (missing ':'): {spec}");
-
-		var key = spec[..colonIdx];
-		var resolvedKey = PluginLoader.ResolvePlugin(key);
-
-		var arg = powerShell
-			? ParsePowerShellArg(spec[(colonIdx + 1)..])
-			: ParsePluginArg(spec[(colonIdx + 1)..]);
-		return (resolvedKey, arg);
-	}
-
-	internal static Dictionary<string, CommandArgument[]> GroupArgSpecs(string[] args, bool powerShell = false)
-		=> args.Select(s => ParseArgSpec(s, powerShell))
-			.GroupBy(x => x.Key, x => x.Arg)
-			.ToDictionary(g => g.Key, g => g.ToArray());
 }

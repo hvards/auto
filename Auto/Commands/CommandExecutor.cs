@@ -1,4 +1,4 @@
-﻿using Auto.Models;
+using Auto.Models;
 using Auto.PluginUtils;
 using Auto.Tasks;
 
@@ -13,72 +13,71 @@ public class CommandExecutor(IPluginExecutor pluginExecutor, IPowerShell powerSh
 {
 	public List<string?> ExecuteCommand(Command command, string? clipboard = null, string? highlighted = null)
 	{
-		return ExecuteCommand(command.Actions, command.PowerShellArguments, command.PluginArguments,
-			clipboard, highlighted);
+		var variables = new Dictionary<string, object?>()
+		{
+			["Clipboard"] = clipboard,
+			["Highlighted"] = highlighted
+		};
+		var results = new List<string?>();
+
+		foreach (var action in command.Actions.OrderBy(a => a.Order))
+		{
+			var result = action.Type switch
+			{
+				ActionType.Plugin => ExecutePlugin(action, variables),
+				ActionType.PowerShell => ExecutePowerShell(action, variables),
+				_ => null
+			};
+
+			if (action.Variable != null)
+				variables[action.Variable] = result;
+
+			results.Add(result?.ToString());
+		}
+
+		return results;
 	}
 
-	private List<string?> ExecuteCommand(
-		ArgumentToken[] tokens,
-		Dictionary<string, CommandArgument[]> powershellArguments,
-		Dictionary<string, CommandArgument[]> pluginArguments,
-		string? clipboard = null, string? highlighted = null)
+	private object? ExecutePlugin(CommandAction action, Dictionary<string, object?> variables)
 	{
-		var powerShellExecutionResult = new Dictionary<string, string>();
-		var res = tokens.Select(ExecuteArgumentToken).ToList();
+		var args = ResolveArguments(action.Arguments, variables);
+		return pluginExecutor.ExecutePlugin(action.Target, args);
+	}
 
-		return res;
+	private string? ExecutePowerShell(CommandAction action, Dictionary<string, object?> variables)
+	{
+		var parameters = action.Arguments
+			.Select(a => (a.ParameterName, ResolveArgument(a, variables)?.ToString() ?? string.Empty))
+			.ToList();
+		return powerShell.Execute(action.Target, parameters);
+	}
 
-		string ExecuteArgument(CommandArgument argument)
+	private static IEnumerable<object?> ResolveArguments(CommandArgument[] arguments, Dictionary<string, object?> variables)
+	{
+		foreach (var arg in arguments)
 		{
-			return argument.Tokens.Aggregate(string.Empty,
-				(current, next) =>
-				{
-					current += ExecuteArgumentToken(next);
-					return current;
-				});
-		}
-
-		string? ExecuteArgumentToken(ArgumentToken token)
-		{
-			switch (token.Type)
+			if (arg.Tokens.Length == 1 && arg.Tokens[0].Type == ArgumentType.Variable)
 			{
-				case ArgumentType.Clipboard:
-					return clipboard;
-				case ArgumentType.Highlighted:
-					return highlighted;
-				case ArgumentType.PowerShell:
-					if (powerShellExecutionResult.TryGetValue(token.Value, out var result))
-						return result;
-					powershellArguments.TryGetValue(token.Value, out var scriptArgs);
-					result = powerShell.Execute(token.Value,
-						scriptArgs?.Select(x => (x.ParameterName, ExecuteArgument(x))).ToList() ?? []);
-					powerShellExecutionResult.Add(token.Value, result);
-					return result;
-				case ArgumentType.Plugin:
-					var pluginArgs = GetPluginArgumentValues(pluginArguments[token.Value]);
-					return pluginExecutor.ExecutePlugin(token.Value, pluginArgs)?.ToString() ?? string.Empty;
-				case ArgumentType.Text:
-					return token.Value;
-				case ArgumentType.NotSet:
-				default:
-					return null;
+				variables.TryGetValue(arg.Tokens[0].Value, out var raw);
+				yield return raw;
+			}
+			else
+			{
+				yield return ResolveArgument(arg, variables);
 			}
 		}
+	}
 
-		IEnumerable<object?> GetPluginArgumentValues(CommandArgument[] arguments)
+	private static object? ResolveArgument(CommandArgument argument, Dictionary<string, object?> variables)
+	{
+		if (argument.Tokens.Length == 1 && argument.Tokens[0].Type == ArgumentType.Variable) 
+			return variables[argument.Tokens[0].Value];
+
+		return string.Concat(argument.Tokens.Select(t => t.Type switch
 		{
-			foreach (var argument in arguments)
-			{
-				if (argument.Tokens.Length == 1 && argument.Tokens[0].Type == ArgumentType.Plugin)
-				{
-					var args = GetPluginArgumentValues(pluginArguments[argument.Tokens[0].Value]);
-					yield return pluginExecutor.ExecutePlugin(argument.Tokens[0].Value, args);
-				}
-				else
-				{
-					yield return ExecuteArgument(argument);
-				}
-			}
-		}
+			ArgumentType.Variable => variables.TryGetValue(t.Value, out var v) ? v?.ToString() ?? "" : "",
+			ArgumentType.Text => t.Value,
+			_ => ""
+		}));
 	}
 }

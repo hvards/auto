@@ -31,21 +31,9 @@ public class PowerShell : IPowerShell
 		using var powerShell = System.Management.Automation.PowerShell.Create(Iss);
 		powerShell.AddCommand(Path.Combine(powerShellFolder, file));
 
-		foreach (var parameter in parameters)
-		{
-			var multi = parameter.value.StartsWith("#Multi:");
-			if (multi)
-			{
-				foreach (var param in parameter.value[7..].Split("\n"))
-				{
-					powerShell.AddParameter(parameter.name, param);
-				}
-			}
-			else
-			{
-				powerShell.AddParameter(parameter.name, parameter.value);
-			}
-		}
+		foreach (var (name, value) in parameters)
+			powerShell.AddParameter(name, value);
+
 		var result = powerShell.Invoke();
 		return ResultToString(result);
 	}

@@ -1,4 +1,4 @@
-﻿using Auto.Models;
+using Auto.Models;
 using Microsoft.Extensions.Logging;
 using System.IO;
 using System.Text.Json;
@@ -36,17 +36,15 @@ public partial class CommandProvider : ICommandProvider
 		var commands = GetEnabledCommands(configFolder).ToList();
 		foreach (var command in commands)
 		{
-			command.ClipboardTextRequired = (command.PowerShellArguments?.Select(x => x.Value)
-												.Any(x => x.Any(y => y.ClipboardTextRequired)) ?? false) ||
-											(command.PluginArguments?.Select(x => x.Value)
-												.Any(x => x.Any(y => y.ClipboardTextRequired)) ?? false);
-			command.HighlightedTextRequired = (command.PowerShellArguments?.Select(x => x.Value)
-												  .Any(x => x.Any(y => y.HighlightedTextRequired)) ?? false) ||
-											  (command.PluginArguments?.Select(x => x.Value)
-												  .Any(x => x.Any(y => y.HighlightedTextRequired)) ?? false);
+			command.ClipboardTextRequired = VariableReferenced(command, "Clipboard");
+			command.HighlightedTextRequired = VariableReferenced(command, "Highlighted");
 		}
 
 		_commands = commands;
+
+		bool VariableReferenced(Command command, string variableName)
+			=> command.Actions.SelectMany(a => a.Arguments).SelectMany(a => a.Tokens)
+				.Any(a => a.Type == ArgumentType.Variable && a.Value.Equals(variableName));
 	}
 
 	private IEnumerable<Command> GetEnabledCommands(string folder)

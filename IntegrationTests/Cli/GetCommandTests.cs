@@ -19,19 +19,19 @@ public class GetCommandTests : CliTestBase
 		// Assert
 		Assert.That(exit, Is.Zero);
 		var trigger = KeyNameResolver.FormatCombination(cmd.Trigger.Combination);
+		var startProgramGuid = PluginLoader.ResolvePlugin("StartProgram");
 		var expected = string.Join(Environment.NewLine,
-			"Name:        Test",
-			"Description: Test description",
+			$"Name:        Test",
+			$"Description: Test description",
 			$"Id:          {cmd.Id}",
-			"Enabled:     True",
-			"File:        test.json",
-			"Trigger:",
+			$"Enabled:     True",
+			$"File:        test.json",
+			$"Trigger:",
 			$"  Combination:     {trigger}",
-			"Actions:",
-			$"  Plugin: StartProgram ({PluginLoader.ResolvePlugin("StartProgram")})",
-			"Plugin Arguments:",
-			$"  {PluginLoader.ResolvePlugin("StartProgram")}:",
-			"    [Text:https://example.com]",
+			$"Actions:",
+			$"  [0] Plugin: StartProgram ({startProgramGuid})",
+			$"    Args:",
+			$"      https://example.com",
 			"");
 		Assert.That(stdout, Is.EqualTo(expected));
 	}

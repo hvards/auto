@@ -8,10 +8,6 @@ public class ArgumentToken
 
 public enum ArgumentType
 {
-	NotSet,
 	Text,
-	PowerShell,
-	Clipboard,
-	Highlighted,
-	Plugin
+	Variable
 }

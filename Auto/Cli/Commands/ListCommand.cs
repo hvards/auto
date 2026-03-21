@@ -8,8 +8,8 @@ namespace Auto.Cli.Commands;
 
 public static class ListCommand
 {
-	private record ListInput(string ConfigDir, string? File, bool Enabled, bool Disabled, string? Search, bool Json);
-	public static CliCommand Create(Option<string> configDirOption)
+	private record ListInput(string? File, bool Enabled, bool Disabled, string? Search, bool Json);
+	public static CliCommand Create(Func<ParseResult, CommandStore> resolveStore)
 	{
 		var command = new CliCommand("list") { Description = "List all commands" }
 			.AddOption<string>("--file", "Filter by file path", out var fileOption)
@@ -19,8 +19,8 @@ public static class ListCommand
 			.AddOption<bool>("--json", "Output as JSON", out var jsonOption);
 
 		command.SetActionWithErrorHandling(pr => Execute(
+			resolveStore(pr),
 			new ListInput(
-				pr.GetValue(configDirOption) ?? string.Empty,
 				pr.GetValue(fileOption),
 				pr.GetValue(enabledOption),
 				pr.GetValue(disabledOption),
@@ -32,9 +32,8 @@ public static class ListCommand
 		return command;
 	}
 
-	private static void Execute(ListInput input)
+	private static void Execute(CommandStore store, ListInput input)
 	{
-		var store = new CommandStore(input.ConfigDir);
 		var all = store.LoadAll();
 
 		if (input.File != null)

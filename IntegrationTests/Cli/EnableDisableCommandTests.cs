@@ -1,5 +1,3 @@
-using Auto.Cli.Services;
-
 namespace IntegrationTests.Cli;
 
 [TestFixture]
@@ -17,10 +15,7 @@ public class EnableDisableCommandTests : CliTestBase
 		// Assert
 		Assert.That(exit, Is.Zero);
 		Assert.That(stdout.TrimEnd(), Is.EqualTo("Enabled 'Test'"));
-
-		var store = new CommandStore(TempDir);
-		var result = store.Find("Test");
-		Assert.That(result!.Value.Command.Enabled, Is.True);
+		Assert.That(TestCommandStore.Find("Test")!.Value.Command.Enabled, Is.True);
 	}
 
 	[Test]
@@ -35,9 +30,6 @@ public class EnableDisableCommandTests : CliTestBase
 		// Assert
 		Assert.That(exit, Is.Zero);
 		Assert.That(stdout.TrimEnd(), Is.EqualTo("Disabled 'Test'"));
-
-		var store = new CommandStore(TempDir);
-		var result = store.Find("Test");
-		Assert.That(result!.Value.Command.Enabled, Is.False);
+		Assert.That(TestCommandStore.Find("Test")!.Value.Command.Enabled, Is.False);
 	}
 }

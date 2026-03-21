@@ -25,14 +25,9 @@ public static class CommandSerializer
 	{
 		Trigger = new { x.Trigger.Combination, Sequence = x.Trigger.Sequence ?? [] },
 		x.Actions,
-		PowerShellArguments = SortDictionary(x.PowerShellArguments),
-		PluginArguments = SortDictionary(x.PluginArguments),
 		x.Enabled,
 		x.Name,
 		x.Description,
 		x.Id
 	};
-
-	private static SortedDictionary<string, CommandArgument[]> SortDictionary(
-		Dictionary<string, CommandArgument[]> dict) => new(dict ?? []);
 }

@@ -32,8 +32,7 @@ public class CommandStore(string configDir)
 			var byId = all.FirstOrDefault(x => x.Command.Id == id);
 			if (byId.Command != null) return byId;
 		}
-		var byName = all.FirstOrDefault(x =>
-			string.Equals(x.Command.Name, nameOrId, StringComparison.OrdinalIgnoreCase));
+		var byName = all.FirstOrDefault(x => string.Equals(x.Command.Name, nameOrId));
 		return byName.Command != null ? byName : null;
 	}
 
@@ -41,6 +40,16 @@ public class CommandStore(string configDir)
 	{
 		var found = Find(nameOrId);
 		return found ?? throw new ArgumentException($"Command not found: {nameOrId}");
+	}
+
+	public CommandEntry Update(string nameOrId, Action<CommandEntry> update)
+	{
+		var (file, cmd) = GetCommand(nameOrId);
+		var commands = LoadFile(file);
+		var target = commands.First(c => c.Id == cmd.Id);
+		update(target);
+		SaveFile(file, commands);
+		return target;
 	}
 
 	public static void SaveFile(string path, List<CommandEntry> commands)

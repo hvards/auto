@@ -1,5 +1,3 @@
-using Auto.Cli.Services;
-
 namespace IntegrationTests.Cli;
 
 [TestFixture]
@@ -17,9 +15,7 @@ public class DeleteCommandTests : CliTestBase
 		// Assert
 		Assert.That(exit, Is.Zero);
 		Assert.That(stdout.TrimEnd(), Is.EqualTo("Deleted 'Test'"));
-
-		var store = new CommandStore(TempDir);
-		Assert.That(store.Find("Test"), Is.Null);
+		Assert.That(TestCommandStore.Find("Test"), Is.Null);
 	}
 
 	[Test]

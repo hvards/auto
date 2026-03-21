@@ -7,7 +7,9 @@ using Auto.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using Auto.Cli.Services;
 using System.CommandLine;
+using System.CommandLine.Parsing;
 using System.IO;
 
 namespace Auto;
@@ -28,16 +30,20 @@ public static class Program
 			Hidden = true
 		};
 
+		CommandStore ResolveStore(ParseResult pr) =>
+			new(pr.GetValue(configDirOption) ?? string.Empty);
+
 		var rootCommand = new RootCommand("Auto");
 		rootCommand.Options.Add(configDirOption);
 
-		rootCommand.Subcommands.Add(ListCommand.Create(configDirOption));
-		rootCommand.Subcommands.Add(GetCommand.Create(configDirOption));
-		rootCommand.Subcommands.Add(AddCommand.Create(configDirOption));
-		rootCommand.Subcommands.Add(EditCommand.Create(configDirOption));
-		rootCommand.Subcommands.Add(DeleteCommand.Create(configDirOption));
-		rootCommand.Subcommands.Add(EnableDisableCommand.CreateEnable(configDirOption));
-		rootCommand.Subcommands.Add(EnableDisableCommand.CreateDisable(configDirOption));
+		rootCommand.Subcommands.Add(ListCommand.Create(ResolveStore));
+		rootCommand.Subcommands.Add(GetCommand.Create(ResolveStore));
+		rootCommand.Subcommands.Add(AddCommand.Create(ResolveStore));
+		rootCommand.Subcommands.Add(EditCommand.Create(ResolveStore));
+		rootCommand.Subcommands.Add(ActionCommand.Create(ResolveStore));
+		rootCommand.Subcommands.Add(DeleteCommand.Create(ResolveStore));
+		rootCommand.Subcommands.Add(EnableDisableCommand.CreateEnable(ResolveStore));
+		rootCommand.Subcommands.Add(EnableDisableCommand.CreateDisable(ResolveStore));
 		rootCommand.Subcommands.Add(ListPluginsCommand.Create());
 		rootCommand.Subcommands.Add(ListKeysCommand.Create());
 		rootCommand.Subcommands.Add(StartCommand.Create());

@@ -1,15 +1,16 @@
 ﻿using Auto.Handlers;
 using Auto.InputUtils;
+
 using static Auto.Native.Constants;
 
 namespace Auto.Tasks;
 
-public interface ISendInput
+internal interface ISendInput
 {
 	void Keyboard(string input);
 }
 
-public class SendInput(IKeyboardHandler keyboardHandler) : ISendInput
+internal class SendInput(IKeyboardHandler keyboardHandler) : ISendInput
 {
 	public static bool BlockInput { get; private set; }
 

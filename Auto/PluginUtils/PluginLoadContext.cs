@@ -3,7 +3,7 @@ using System.Runtime.Loader;
 
 namespace Auto.PluginUtils;
 
-public class PluginLoadContext(string pluginPath) : AssemblyLoadContext
+internal class PluginLoadContext(string pluginPath) : AssemblyLoadContext
 {
 	private readonly AssemblyDependencyResolver _resolver = new(pluginPath);
 

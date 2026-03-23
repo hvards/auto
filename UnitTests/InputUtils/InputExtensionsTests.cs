@@ -3,7 +3,7 @@
 namespace UnitTests.InputUtils;
 
 [TestFixture]
-public class InputExtensionsTests
+internal class InputExtensionsTests
 {
 	[Test]
 	public void GetTokens_ShouldReturnSingleToken_WhenInputIsSingleCharacter()

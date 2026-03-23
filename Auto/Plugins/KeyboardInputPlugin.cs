@@ -1,11 +1,13 @@
 using Auto.Handlers;
 using Auto.Tasks;
+
 using AutoContracts;
+
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Auto.Plugins;
 
-public class KeyboardInputPlugin(IServiceProvider? serviceProvider) : ICommand
+internal class KeyboardInputPlugin(IServiceProvider? serviceProvider) : ICommand
 {
 	public string Name => "KeyboardInput";
 	public string Description => "Send keyboard input.";

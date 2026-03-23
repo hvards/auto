@@ -1,20 +1,22 @@
+using System.CommandLine;
+using System.IO;
+
 using Auto.Cli.Commands;
+using Auto.Cli.Services;
 using Auto.Commands;
 using Auto.Handlers;
 using Auto.Native;
 using Auto.PluginUtils;
 using Auto.Tasks;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+
 using Serilog;
-using Auto.Cli.Services;
-using System.CommandLine;
-using System.CommandLine.Parsing;
-using System.IO;
 
 namespace Auto;
 
-public static class Program
+internal static class Program
 {
 	private static async Task<int> Main(string[] args)
 		=> await BuildCli().Parse(args).InvokeAsync();

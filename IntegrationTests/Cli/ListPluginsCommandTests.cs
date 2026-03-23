@@ -3,7 +3,7 @@ using System.Text.Json;
 namespace IntegrationTests.Cli;
 
 [TestFixture]
-public class ListPluginsCommandTests : CliTestBase
+internal class ListPluginsCommandTests : CliTestBase
 {
 	[Test]
 	public async Task ListPlugins_ShowsBuiltInPlugins()

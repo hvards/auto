@@ -4,7 +4,7 @@ using Auto.Models;
 namespace UnitTests.Cli;
 
 [TestFixture]
-public class ActionValidatorTests
+internal class ActionValidatorTests
 {
 	[Test]
 	public void ComputeOrder_EmptyActions_ReturnsEmptyDict()
@@ -26,8 +26,8 @@ public class ActionValidatorTests
 			new CommandAction
 			{
 				Type = ActionType.Plugin, Target = "plugin",
-				Arguments = [new CommandArgument { 
-					Tokens = [new ArgumentToken { Type = ArgumentType.Variable, Value = variableName }] 
+				Arguments = [new CommandArgument {
+					Tokens = [new ArgumentToken { Type = ArgumentType.Variable, Value = variableName }]
 				}]
 			}
 		};
@@ -48,8 +48,8 @@ public class ActionValidatorTests
 			new CommandAction
 			{
 				Type = ActionType.Plugin, Target = "pluginA",
-				Arguments = [new CommandArgument { 
-					Tokens = [new ArgumentToken { Type = ArgumentType.Variable, Value = "unknown" }] 
+				Arguments = [new CommandArgument {
+					Tokens = [new ArgumentToken { Type = ArgumentType.Variable, Value = "unknown" }]
 				}]
 			}
 		};
@@ -179,15 +179,15 @@ public class ActionValidatorTests
 			{
 				Type = ActionType.Plugin, Target = "pluginB",
 				Variable = "Step2",
-				Arguments = [new CommandArgument { 
-					Tokens = [new ArgumentToken { Type = ArgumentType.Variable, Value = "Step1" }] 
+				Arguments = [new CommandArgument {
+					Tokens = [new ArgumentToken { Type = ArgumentType.Variable, Value = "Step1" }]
 				}]
 			},
 			new CommandAction
 			{
 				Type = ActionType.Plugin, Target = "pluginC",
-				Arguments = [new CommandArgument { 
-					Tokens = [new ArgumentToken { Type = ArgumentType.Variable, Value = "Step2" }] 
+				Arguments = [new CommandArgument {
+					Tokens = [new ArgumentToken { Type = ArgumentType.Variable, Value = "Step2" }]
 				}]
 			}
 		};
@@ -278,8 +278,8 @@ public class ActionValidatorTests
 			new CommandAction
 			{
 				Type = ActionType.Plugin, Target = "B",
-				Arguments = [new CommandArgument { 
-					Tokens = [new ArgumentToken { Type = ArgumentType.Text, Value = "literal" }] 
+				Arguments = [new CommandArgument {
+					Tokens = [new ArgumentToken { Type = ArgumentType.Text, Value = "literal" }]
 				}]
 			}
 		};

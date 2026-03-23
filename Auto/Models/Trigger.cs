@@ -1,6 +1,6 @@
 namespace Auto.Models;
 
-public class Trigger
+internal class Trigger
 {
 	public HashSet<ushort> Combination { get; set; } = [];
 	public ushort[] Sequence

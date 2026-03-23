@@ -1,16 +1,18 @@
-using Auto.Models;
-using Microsoft.Extensions.Logging;
 using System.IO;
 using System.Text.Json;
 
+using Auto.Models;
+
+using Microsoft.Extensions.Logging;
+
 namespace Auto.Commands;
 
-public interface ICommandProvider
+internal interface ICommandProvider
 {
 	public bool TryGetCommand(HashSet<ushort> pressedKeys, ushort vkCode, out Command? command);
 }
 
-public partial class CommandProvider : ICommandProvider
+internal partial class CommandProvider : ICommandProvider
 {
 	private readonly ILogger<CommandProvider> _logger;
 	private List<Command> _commands = [];

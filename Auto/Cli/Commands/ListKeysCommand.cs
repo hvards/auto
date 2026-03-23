@@ -1,9 +1,10 @@
 using Auto.Cli.Services;
+
 using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli.Commands;
 
-public static class ListKeysCommand
+internal static class ListKeysCommand
 {
 	public static CliCommand Create()
 	{

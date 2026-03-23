@@ -4,7 +4,7 @@ using Auto.Models;
 namespace UnitTests.Cli;
 
 [TestFixture]
-public class ArgParserTests
+internal class ArgParserTests
 {
 	[TestCase("Highlighted")]
 	[TestCase("Clipboard")]

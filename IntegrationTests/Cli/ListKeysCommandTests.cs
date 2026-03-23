@@ -1,7 +1,7 @@
 namespace IntegrationTests.Cli;
 
 [TestFixture]
-public class ListKeysCommandTests : CliTestBase
+internal class ListKeysCommandTests : CliTestBase
 {
 	[Test]
 	public async Task ListKeys_ReturnsZeroAndShowsAliases()

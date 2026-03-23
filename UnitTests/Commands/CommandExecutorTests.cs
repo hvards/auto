@@ -2,12 +2,13 @@ using Auto.Commands;
 using Auto.Models;
 using Auto.PluginUtils;
 using Auto.Tasks;
+
 using Moq;
 
 namespace UnitTests.Commands;
 
 [TestFixture]
-public class CommandExecutorTests
+internal class CommandExecutorTests
 {
 	private Mock<IPluginExecutor> _pluginExecutorMock;
 	private Mock<IPowerShell> _powerShellMock;
@@ -33,9 +34,11 @@ public class CommandExecutorTests
 		// Arrange
 		var command = GetCommandWithActions(new CommandAction
 		{
-			Type = ActionType.Plugin, Target = "plugin", Order = 0,
-			Arguments = [new CommandArgument { 
-				Tokens = [new ArgumentToken { Type = ArgumentType.Variable, Value = variableName }] 
+			Type = ActionType.Plugin,
+			Target = "plugin",
+			Order = 0,
+			Arguments = [new CommandArgument {
+				Tokens = [new ArgumentToken { Type = ArgumentType.Variable, Value = variableName }]
 			}]
 		});
 		_pluginExecutorMock.Setup(x => x.ExecutePlugin("plugin", It.IsAny<IEnumerable<object?>>()))
@@ -99,7 +102,9 @@ public class CommandExecutorTests
 		// Arrange
 		var command = GetCommandWithActions(new CommandAction
 		{
-			Type = ActionType.Plugin, Target = "plugin", Order = 0,
+			Type = ActionType.Plugin,
+			Target = "plugin",
+			Order = 0,
 			Arguments = [
 				new CommandArgument { Tokens = [new ArgumentToken { Type = ArgumentType.Text, Value = "text" }] }
 			]
@@ -121,14 +126,18 @@ public class CommandExecutorTests
 		// Arrange
 		var command = GetCommandWithActions(new CommandAction
 		{
-			Type = ActionType.Plugin, Target = "pluginA", Order = 0,
+			Type = ActionType.Plugin,
+			Target = "pluginA",
+			Order = 0,
 			Variable = "Step1",
 			Arguments = [
 				new CommandArgument { Tokens = [new ArgumentToken { Type = ArgumentType.Text, Value = "input" }] }
 			]
 		}, new CommandAction
 		{
-			Type = ActionType.Plugin, Target = "pluginB", Order = 1,
+			Type = ActionType.Plugin,
+			Target = "pluginB",
+			Order = 1,
 			Arguments = [
 				new CommandArgument { Tokens = [new ArgumentToken { Type = ArgumentType.Variable, Value = "Step1" }] }
 			]
@@ -153,12 +162,16 @@ public class CommandExecutorTests
 		// Arrange
 		var command = GetCommandWithActions(new CommandAction
 		{
-			Type = ActionType.Plugin, Target = "pluginA", Order = 0,
+			Type = ActionType.Plugin,
+			Target = "pluginA",
+			Order = 0,
 			Variable = "Result",
 			Arguments = []
 		}, new CommandAction
 		{
-			Type = ActionType.Plugin, Target = "pluginB", Order = 1,
+			Type = ActionType.Plugin,
+			Target = "pluginB",
+			Order = 1,
 			Arguments = [
 				new CommandArgument { Tokens = [new ArgumentToken { Type = ArgumentType.Variable, Value = "Result" }] }
 			]

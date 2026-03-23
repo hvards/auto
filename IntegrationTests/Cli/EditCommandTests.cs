@@ -3,7 +3,7 @@ using Auto.Cli.Services;
 namespace IntegrationTests.Cli;
 
 [TestFixture]
-public class EditCommandTests : CliTestBase
+internal class EditCommandTests : CliTestBase
 {
 	[Test]
 	public async Task Edit_UpdatesTrigger()

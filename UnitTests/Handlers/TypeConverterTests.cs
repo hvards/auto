@@ -3,7 +3,7 @@ using Auto.Handlers;
 namespace UnitTests.Handlers;
 
 [TestFixture]
-public class TypeConverterTests
+internal class TypeConverterTests
 {
 	[TestCase("123", true, 123)]
 	[TestCase("abc", false, 0)]

@@ -1,10 +1,11 @@
-﻿using Auto.Native.Models;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
+
+using Auto.Native.Models;
 
 namespace Auto.Native;
 
-public interface INativeMethods
+internal interface INativeMethods
 {
 	KeyScanResult KeyScan(char ch);
 	void SendKeyboardInput(KeyboardInput[] keyboardInputs);
@@ -14,7 +15,7 @@ public interface INativeMethods
 	nint CallNextHook(nint hookId, int nCode, nint wParam, KeyboardInput lParam);
 }
 
-public partial class NativeMethods : INativeMethods
+internal partial class NativeMethods : INativeMethods
 {
 	private LowLevelKeyboardProc? _keyboardHook;
 

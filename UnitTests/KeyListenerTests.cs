@@ -1,12 +1,13 @@
 ﻿using Auto;
 using Auto.Commands;
 using Auto.Native;
+
 using Moq;
 
 namespace UnitTests;
 
 [TestFixture]
-public class KeyListenerTests
+internal class KeyListenerTests
 {
 	private Mock<ICommandProvider> _commandProvider;
 	private Mock<IExecute> _execute;

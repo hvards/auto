@@ -1,13 +1,15 @@
+using System.CommandLine;
+
 using Auto.Cli.Serialization;
 using Auto.Cli.Services;
 using Auto.Models;
 using Auto.PluginUtils;
-using System.CommandLine;
+
 using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli.Commands;
 
-public static class GetCommand
+internal static class GetCommand
 {
 	private record GetInput(string NameOrId, bool Json);
 

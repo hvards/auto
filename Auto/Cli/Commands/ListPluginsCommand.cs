@@ -1,10 +1,12 @@
-using Auto.PluginUtils;
 using System.Text.Json;
+
+using Auto.PluginUtils;
+
 using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli.Commands;
 
-public static class ListPluginsCommand
+internal static class ListPluginsCommand
 {
 	private static readonly JsonSerializerOptions WriteOptions = new() { WriteIndented = true };
 

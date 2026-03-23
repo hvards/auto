@@ -16,6 +16,8 @@
     <ItemGroup>
         <InternalsVisibleTo Include="UnitTests" />
         <InternalsVisibleTo Include="IntegrationTests" />
+        <InternalsVisibleTo Include="Benchmarks" />
+        <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
     </ItemGroup>
 
     <ItemGroup>

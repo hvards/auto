@@ -1,12 +1,13 @@
+using System.CommandLine;
+
 using Auto.Cli.Services;
 using Auto.Models;
-using System.CommandLine;
 
 using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli.Commands;
 
-public static class ActionEditCommand
+internal static class ActionEditCommand
 {
 	private record Input(
 		string NameOrId,

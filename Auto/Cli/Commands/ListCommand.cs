@@ -1,12 +1,13 @@
+using System.CommandLine;
+
 using Auto.Cli.Serialization;
 using Auto.Cli.Services;
-using System.CommandLine;
 
 using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli.Commands;
 
-public static class ListCommand
+internal static class ListCommand
 {
 	private record ListInput(string? File, bool Enabled, bool Disabled, string? Search, bool Json);
 	public static CliCommand Create(Func<ParseResult, CommandStore> resolveStore)
@@ -66,8 +67,8 @@ public static class ListCommand
 	}
 
 	private static void PrintTableResult(
-		List<(string File, Models.CommandEntry command)> result, 
-		CommandStore store, 
+		List<(string File, Models.CommandEntry command)> result,
+		CommandStore store,
 		int totalCount)
 	{
 		foreach (var (f, cmd) in result)

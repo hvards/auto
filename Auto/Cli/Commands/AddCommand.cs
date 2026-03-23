@@ -1,13 +1,14 @@
-using Auto.Cli.Services;
-using Auto.Models;
 using System.CommandLine;
 using System.IO;
+
+using Auto.Cli.Services;
+using Auto.Models;
 
 using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli.Commands;
 
-public static class AddCommand
+internal static class AddCommand
 {
 	private record AddInput(
 		string Name,

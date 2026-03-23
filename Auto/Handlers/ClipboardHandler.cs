@@ -2,12 +2,12 @@
 
 namespace Auto.Handlers;
 
-public interface IClipboardHandler
+internal interface IClipboardHandler
 {
 	string GetClipboardText(bool copyHighlighted = false);
 }
 
-public class ClipboardHandler(IKeyboardHandler keyboardHandler) : IClipboardHandler
+internal class ClipboardHandler(IKeyboardHandler keyboardHandler) : IClipboardHandler
 {
 	private const int COPY_DELAY = 75;
 

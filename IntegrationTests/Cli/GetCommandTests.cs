@@ -1,11 +1,12 @@
+using System.Text.Json;
+
 using Auto.Cli.Services;
 using Auto.PluginUtils;
-using System.Text.Json;
 
 namespace IntegrationTests.Cli;
 
 [TestFixture]
-public class GetCommandTests : CliTestBase
+internal class GetCommandTests : CliTestBase
 {
 	[Test]
 	public async Task Get_ShowsDetail()

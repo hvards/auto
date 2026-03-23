@@ -1,13 +1,14 @@
+using System.CommandLine;
+
 using Auto.Cli.Services;
 using Auto.Models;
 using Auto.PluginUtils;
-using System.CommandLine;
 
 using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli.Commands;
 
-public static class ActionAddCommand
+internal static class ActionAddCommand
 {
 	private record ActionAddInput(
 		string NameOrId,

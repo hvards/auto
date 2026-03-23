@@ -1,12 +1,12 @@
 namespace Auto.Models;
 
-public class ArgumentToken
+internal class ArgumentToken
 {
 	public ArgumentType Type { get; set; }
 	public string Value { get; set; } = string.Empty;
 }
 
-public enum ArgumentType
+internal enum ArgumentType
 {
 	Text,
 	Variable

@@ -1,14 +1,15 @@
 ﻿using Auto.Handlers;
+
 using Microsoft.Extensions.Logging;
 
 namespace Auto.PluginUtils;
 
-public interface IPluginExecutor
+internal interface IPluginExecutor
 {
 	object? ExecutePlugin(string id, IEnumerable<object?> args);
 }
 
-public partial class PluginExecutor : IPluginExecutor
+internal partial class PluginExecutor : IPluginExecutor
 {
 	private readonly ILogger<PluginExecutor> _logger;
 	private readonly Dictionary<string, Commands.Plugin> _plugins;

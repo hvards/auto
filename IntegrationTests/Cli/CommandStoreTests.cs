@@ -1,11 +1,10 @@
-using Auto.Cli.Serialization;
 using Auto.Cli.Services;
 using Auto.Models;
 
 namespace IntegrationTests.Cli;
 
 [TestFixture]
-public class CommandStoreTests : CliTestBase
+internal class CommandStoreTests : CliTestBase
 {
 	[Test]
 	public void LoadAll_EmptyDir_ReturnsEmpty()
@@ -118,28 +117,28 @@ public class CommandStoreTests : CliTestBase
 		bool enabled = true,
 		CommandAction[]? actions = null,
 		string[]? sequence = null) => new()
-	{
-		Id = Guid.NewGuid(),
-		Name = name,
-		Description = "",
-		Enabled = enabled,
-		Trigger = new Trigger
 		{
-			Combination = sequence == null ? KeyNameResolver.ParseCombination(trigger ?? ["LCtrl", "LWin", "T"]) : [],
-			Sequence = sequence != null ? KeyNameResolver.ParseSequence(sequence) : []
-		},
-		Actions = actions ?? []
-	};
+			Id = Guid.NewGuid(),
+			Name = name,
+			Description = "",
+			Enabled = enabled,
+			Trigger = new Trigger
+			{
+				Combination = sequence == null ? KeyNameResolver.ParseCombination(trigger ?? ["LCtrl", "LWin", "T"]) : [],
+				Sequence = sequence != null ? KeyNameResolver.ParseSequence(sequence) : []
+			},
+			Actions = actions ?? []
+		};
 
 	private static CommandAction PluginAction(string id, int order = 0, string? variable = null,
 		params CommandArgument[] args) => new()
-	{
-		Type = ActionType.Plugin,
-		Target = id,
-		Order = order,
-		Variable = variable,
-		Arguments = args
-	};
+		{
+			Type = ActionType.Plugin,
+			Target = id,
+			Order = order,
+			Variable = variable,
+			Arguments = args
+		};
 
 	private static CommandAction PsAction(string script, int order = 0, params CommandArgument[] args) => new()
 	{

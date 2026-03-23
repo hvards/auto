@@ -1,17 +1,18 @@
-﻿using Microsoft.PowerShell;
-using System.IO;
+﻿using System.IO;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Text;
 
+using Microsoft.PowerShell;
+
 namespace Auto.Tasks;
 
-public interface IPowerShell
+internal interface IPowerShell
 {
 	string Execute(string file, IList<(string? name, string value)> parameters);
 }
 
-public class PowerShell : IPowerShell
+internal class PowerShell : IPowerShell
 {
 	private static RunspacePool? _runspacePool;
 	private static readonly InitialSessionState Iss = InitialSessionState.CreateDefault();

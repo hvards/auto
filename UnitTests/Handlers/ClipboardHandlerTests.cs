@@ -1,10 +1,11 @@
 ﻿using Auto.Handlers;
+
 using Moq;
 
 namespace UnitTests.Handlers;
 
 [TestFixture]
-public class ClipboardHandlerTests
+internal class ClipboardHandlerTests
 {
 	private Mock<IKeyboardHandler> _keyboardHandlerMock;
 	private ClipboardHandler _subject;

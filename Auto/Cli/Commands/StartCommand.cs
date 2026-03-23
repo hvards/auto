@@ -1,10 +1,11 @@
 using System.CommandLine;
 using System.Diagnostics;
+
 using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli.Commands;
 
-public static class StartCommand
+internal static class StartCommand
 {
 	public static CliCommand Create()
 	{

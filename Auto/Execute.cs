@@ -1,15 +1,17 @@
-﻿using Auto.Handlers;
+﻿using System.Collections.Concurrent;
+
+using Auto.Handlers;
+
 using Microsoft.Extensions.Logging;
-using System.Collections.Concurrent;
 
 namespace Auto;
 
-public interface IExecute
+internal interface IExecute
 {
 	nint QueueCommand(Models.Command s);
 }
 
-public partial class Execute : IExecute
+internal partial class Execute : IExecute
 {
 	private readonly IClipboardHandler _clipboardHandler;
 	private readonly IKeyboardHandler _keyboardHandler;

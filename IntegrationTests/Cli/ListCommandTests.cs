@@ -3,7 +3,7 @@ using System.Text.Json;
 namespace IntegrationTests.Cli;
 
 [TestFixture]
-public class ListCommandTests : CliTestBase
+internal class ListCommandTests : CliTestBase
 {
 	[Test]
 	public async Task List_ShowsCommands()

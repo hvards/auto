@@ -1,6 +1,6 @@
 ﻿namespace Auto.PluginUtils;
 
-public class PluginInfo
+internal class PluginInfo
 {
 	public Guid Id { get; init; }
 	public string EntryPoint { get; init; } = string.Empty;

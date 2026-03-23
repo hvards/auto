@@ -1,10 +1,11 @@
-using Auto.Models;
 using System.Windows.Forms;
+
+using Auto.Models;
 
 namespace UnitTests.Commands;
 
 [TestFixture]
-public class TriggerTests
+internal class TriggerTests
 {
 	[TestCase(Keys.A, Keys.B)]
 	[TestCase(Keys.A, Keys.A, Keys.B)]
@@ -31,10 +32,12 @@ public class TriggerTests
 	public void IsMacroOrKeyComboPressed_ShouldReturnFalse_IfMacroNotPressed(params Keys[] keys)
 	{
 		// Arrange
-		var command = new Command { 
-			Trigger = new Trigger { 
-				Sequence = [(ushort)Keys.A, (ushort)Keys.B, (ushort)Keys.C] 
-			} 
+		var command = new Command
+		{
+			Trigger = new Trigger
+			{
+				Sequence = [(ushort)Keys.A, (ushort)Keys.B, (ushort)Keys.C]
+			}
 		};
 
 		// Act & Assert

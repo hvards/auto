@@ -3,7 +3,7 @@ using Auto.Cli.Services;
 namespace UnitTests.Cli;
 
 [TestFixture]
-public class KeyNameResolverTests
+internal class KeyNameResolverTests
 {
 	[TestCase("LControlKey", (ushort)162)]
 	[TestCase("LCtrl", (ushort)162)]

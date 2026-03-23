@@ -1,10 +1,11 @@
+using System.IO;
+
 using Auto.Cli.Serialization;
 using Auto.Models;
-using System.IO;
 
 namespace Auto.Cli.Services;
 
-public class CommandStore(string configDir)
+internal class CommandStore(string configDir)
 {
 	private readonly string _commandsDir = Path.Combine(configDir, "commands");
 
@@ -17,9 +18,6 @@ public class CommandStore(string configDir)
 
 	public string GetRelativePath(string absolutePath)
 		=> Path.GetRelativePath(_commandsDir, absolutePath);
-
-	public static List<CommandEntry> LoadFile(string path)
-		=> CommandSerializer.Deserialize(File.ReadAllText(path));
 
 	public List<(string File, CommandEntry Command)> LoadAll()
 		=> [.. GetFiles().SelectMany(f => LoadFile(f).Select(c => (f, c)))];
@@ -51,6 +49,11 @@ public class CommandStore(string configDir)
 		SaveFile(file, commands);
 		return target;
 	}
+	public string ResolvePath(string relativePath)
+		=> Path.GetFullPath(Path.Combine(_commandsDir, relativePath));
+
+	public static List<CommandEntry> LoadFile(string path)
+		=> CommandSerializer.Deserialize(File.ReadAllText(path));
 
 	public static void SaveFile(string path, List<CommandEntry> commands)
 	{
@@ -60,6 +63,4 @@ public class CommandStore(string configDir)
 		File.WriteAllText(path, CommandSerializer.Serialize(commands));
 	}
 
-	public string ResolvePath(string relativePath)
-		=> Path.GetFullPath(Path.Combine(_commandsDir, relativePath));
 }

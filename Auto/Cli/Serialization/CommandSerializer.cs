@@ -1,9 +1,10 @@
-using Auto.Models;
 using System.Text.Json;
+
+using Auto.Models;
 
 namespace Auto.Cli.Serialization;
 
-public static class CommandSerializer
+internal static class CommandSerializer
 {
 	private static readonly JsonSerializerOptions WriteOptions = new() { WriteIndented = true };
 

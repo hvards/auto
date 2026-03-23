@@ -1,14 +1,17 @@
-﻿using Auto.Handlers;
+﻿using System.Windows.Forms;
+
+using Auto.Handlers;
 using Auto.Native;
 using Auto.Native.Models;
+
 using Moq;
-using System.Windows.Forms;
+
 using static Auto.Native.Constants;
 
 namespace UnitTests.Handlers;
 
 [TestFixture]
-public class KeyboardHandlerTests
+internal class KeyboardHandlerTests
 {
 	private Mock<INativeMethods> _nativeMethods;
 

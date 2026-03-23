@@ -1,9 +1,10 @@
-using AutoContracts;
 using System.Diagnostics;
+
+using AutoContracts;
 
 namespace Auto.Plugins;
 
-public class StartProgramPlugin : ICommand
+internal class StartProgramPlugin : ICommand
 {
 	public string Name => "StartProgram";
 	public string Description => "Start program";

@@ -5,7 +5,7 @@ using Auto.PluginUtils;
 namespace IntegrationTests.Cli;
 
 [TestFixture]
-public class ActionCommandTests : CliTestBase
+internal class ActionCommandTests : CliTestBase
 {
 	[Test]
 	public async Task ActionAdd_AppendsAction()
@@ -54,7 +54,7 @@ public class ActionCommandTests : CliTestBase
 	{
 		// Arrange
 		await InvokeAsync("add", "Test", "--combination", "LCtrl", "T");
-		await InvokeAsync("action", "add", "Test", 
+		await InvokeAsync("action", "add", "Test",
 			"--plugin", "StartProgram", "--arg", "https://example.com", "--var", "TestCommandResult");
 
 		// Act

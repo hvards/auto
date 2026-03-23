@@ -1,6 +1,6 @@
 namespace Auto.Models;
 
-public class CommandAction
+internal class CommandAction
 {
 	public ActionType Type { get; set; }
 	public string Target { get; set; } = string.Empty;
@@ -9,4 +9,4 @@ public class CommandAction
 	public CommandArgument[] Arguments { get; set; } = [];
 }
 
-public enum ActionType { Plugin, PowerShell }
+internal enum ActionType { Plugin, PowerShell }

@@ -2,7 +2,7 @@ using System.Collections;
 
 namespace Auto.Handlers;
 
-public static class TypeConverter
+internal static class TypeConverter
 {
 	private delegate bool TryParseDelegate<T>(string input, out T result);
 

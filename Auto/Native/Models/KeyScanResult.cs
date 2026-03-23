@@ -1,6 +1,6 @@
 ﻿namespace Auto.Native.Models;
 
-public class KeyScanResult
+internal class KeyScanResult
 {
 	public ushort VirtualKey { get; init; }
 	public int Modifier { get; init; }

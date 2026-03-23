@@ -1,11 +1,12 @@
+using System.Text.Json;
+
 using Auto.Cli.Serialization;
 using Auto.Models;
-using System.Text.Json;
 
 namespace UnitTests.Cli;
 
 [TestFixture]
-public class CommandSerializationTests
+internal class CommandSerializationTests
 {
 	[Test]
 	public void Serialize_SortsCommandsByName()

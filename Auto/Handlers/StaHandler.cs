@@ -2,7 +2,7 @@ using System.Windows.Threading;
 
 namespace Auto.Handlers;
 
-public static class StaHandler
+internal static class StaHandler
 {
 	public static T? Execute<T>(Func<T> func)
 	{

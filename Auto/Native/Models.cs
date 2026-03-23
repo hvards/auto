@@ -3,7 +3,7 @@
 namespace Auto.Native;
 
 [StructLayout(LayoutKind.Sequential)]
-public struct KeyboardInput
+internal struct KeyboardInput
 {
 	public ushort wVk;
 	public ushort wScan;
@@ -13,7 +13,7 @@ public struct KeyboardInput
 }
 
 [StructLayout(LayoutKind.Sequential)]
-public struct MouseInput
+internal struct MouseInput
 {
 	public int dx;
 	public int dy;
@@ -24,7 +24,7 @@ public struct MouseInput
 }
 
 [StructLayout(LayoutKind.Sequential)]
-public struct HardwareInput
+internal struct HardwareInput
 {
 	public uint uMsg;
 	public ushort wParamL;
@@ -32,20 +32,20 @@ public struct HardwareInput
 }
 
 [StructLayout(LayoutKind.Explicit)]
-public struct InputUnion
+internal struct InputUnion
 {
 	[FieldOffset(0)] public MouseInput mi;
 	[FieldOffset(0)] public KeyboardInput ki;
 	[FieldOffset(0)] public HardwareInput hi;
 }
 
-public struct Input
+internal struct Input
 {
 	public int type;
 	public InputUnion u;
 }
 
-public enum InputType
+internal enum InputType
 {
 	Mouse = 0,
 	Keyboard = 1,
@@ -53,7 +53,7 @@ public enum InputType
 }
 
 [Flags]
-public enum KeyEventF
+internal enum KeyEventF
 {
 	KeyDown = 0x0000,
 	ExtendedKey = 0x0001,

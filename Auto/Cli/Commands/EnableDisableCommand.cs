@@ -1,10 +1,12 @@
-using Auto.Cli.Services;
 using System.CommandLine;
+
+using Auto.Cli.Services;
+
 using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli.Commands;
 
-public static class EnableDisableCommand
+internal static class EnableDisableCommand
 {
 	private record EnableDisableInput(string NameOrId, bool Enable);
 

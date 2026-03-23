@@ -4,12 +4,12 @@ using Auto.Tasks;
 
 namespace Auto.Commands;
 
-public interface ICommandExecutor
+internal interface ICommandExecutor
 {
 	List<string?> ExecuteCommand(Command command, string? clipboard = null, string? highlighted = null);
 }
 
-public class CommandExecutor(IPluginExecutor pluginExecutor, IPowerShell powerShell) : ICommandExecutor
+internal class CommandExecutor(IPluginExecutor pluginExecutor, IPowerShell powerShell) : ICommandExecutor
 {
 	public List<string?> ExecuteCommand(Command command, string? clipboard = null, string? highlighted = null)
 	{
@@ -70,7 +70,7 @@ public class CommandExecutor(IPluginExecutor pluginExecutor, IPowerShell powerSh
 
 	private static object? ResolveArgument(CommandArgument argument, Dictionary<string, object?> variables)
 	{
-		if (argument.Tokens.Length == 1 && argument.Tokens[0].Type == ArgumentType.Variable) 
+		if (argument.Tokens.Length == 1 && argument.Tokens[0].Type == ArgumentType.Variable)
 			return variables[argument.Tokens[0].Value];
 
 		return string.Concat(argument.Tokens.Select(t => t.Type switch

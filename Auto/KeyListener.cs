@@ -1,11 +1,12 @@
 ﻿using Auto.Commands;
 using Auto.Native;
 using Auto.Tasks;
+
 using static Auto.Native.Constants;
 
 namespace Auto;
 
-public class KeyListener
+internal class KeyListener
 {
 	private readonly ICommandProvider _commandProvider;
 	private readonly IExecute _execute;

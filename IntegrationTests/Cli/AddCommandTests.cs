@@ -4,7 +4,7 @@ using Auto.PluginUtils;
 namespace IntegrationTests.Cli;
 
 [TestFixture]
-public class AddCommandTests : CliTestBase
+internal class AddCommandTests : CliTestBase
 {
 	[Test]
 	public async Task Add_CreatesCommand()

@@ -1,9 +1,10 @@
 ﻿using Auto.Native;
+
 using static Auto.Native.Constants;
 
 namespace Auto.Handlers;
 
-public interface IKeyboardHandler
+internal interface IKeyboardHandler
 {
 	void ReleaseAllKeys();
 	void SendChar(string ch, nint? action = null);
@@ -11,7 +12,7 @@ public interface IKeyboardHandler
 	void CopyHighlightedText();
 }
 
-public class KeyboardHandler(INativeMethods nativeMethods) : IKeyboardHandler
+internal class KeyboardHandler(INativeMethods nativeMethods) : IKeyboardHandler
 {
 	private const ushort VkLControl = (ushort)Keys.LControlKey;
 	private const ushort VkRMenu = (ushort)Keys.RMenu;

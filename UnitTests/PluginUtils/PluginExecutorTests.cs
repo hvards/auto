@@ -1,12 +1,14 @@
 ﻿using Auto.Commands;
 using Auto.PluginUtils;
+
 using Microsoft.Extensions.Logging.Abstractions;
+
 using Moq;
 
 namespace UnitTests.PluginUtils;
 
 [TestFixture]
-public class PluginExecutorTests
+internal class PluginExecutorTests
 {
 	private Mock<IPluginLoader> _pluginLoaderMock;
 	private PluginExecutor _subject;

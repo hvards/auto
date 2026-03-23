@@ -1,7 +1,7 @@
 namespace IntegrationTests.Cli;
 
 [TestFixture]
-public class EnableDisableCommandTests : CliTestBase
+internal class EnableDisableCommandTests : CliTestBase
 {
 	[Test]
 	public async Task Enable_TogglesOn()

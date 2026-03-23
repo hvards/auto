@@ -2,7 +2,7 @@ using Auto.Models;
 
 namespace Auto.Cli.Services;
 
-public static class KeyNameResolver
+internal static class KeyNameResolver
 {
 	private static readonly Dictionary<string, ushort> Aliases = new(StringComparer.OrdinalIgnoreCase)
 	{

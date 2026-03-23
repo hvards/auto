@@ -1,4 +1,5 @@
 using System.CommandLine;
+
 using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli;

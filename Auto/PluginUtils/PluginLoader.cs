@@ -1,21 +1,23 @@
-using Auto.Commands;
-using Auto.Handlers;
-using Auto.Plugins;
-using AutoContracts;
 using System.IO;
 using System.Reflection;
 using System.Text.Json;
 
+using Auto.Commands;
+using Auto.Handlers;
+using Auto.Plugins;
+
+using AutoContracts;
+
 namespace Auto.PluginUtils;
 
-public record PluginDetail(Guid Id, string Name, string Description, List<PluginArgument> ExpectedArguments);
+internal record PluginDetail(Guid Id, string Name, string Description, List<PluginArgument> ExpectedArguments);
 
-public interface IPluginLoader
+internal interface IPluginLoader
 {
 	Dictionary<string, Plugin> CreateCommands();
 }
 
-public class PluginLoader(IServiceProvider serviceProvider) : IPluginLoader
+internal class PluginLoader(IServiceProvider serviceProvider) : IPluginLoader
 {
 
 	private static List<string> GetDllPaths()
@@ -145,7 +147,7 @@ public class PluginLoader(IServiceProvider serviceProvider) : IPluginLoader
 	public static string GetPluginName(string guidString)
 	{
 		return !Guid.TryParse(guidString, out var guid)
-			? string.Empty 
+			? string.Empty
 			: (GetAllCommands().FirstOrDefault(c => c.Id == guid)?.Name) ?? string.Empty;
 	}
 
@@ -154,7 +156,7 @@ public class PluginLoader(IServiceProvider serviceProvider) : IPluginLoader
 		if (Guid.TryParse(nameOrId, out var guid))
 			return guid.ToString();
 
-		return GetAllCommands().FirstOrDefault(c => c.Name.Equals(nameOrId))?.Id.ToString() 
+		return GetAllCommands().FirstOrDefault(c => c.Name.Equals(nameOrId))?.Id.ToString()
 			?? throw new ArgumentException($"Unknown plugin: {nameOrId}");
 	}
 

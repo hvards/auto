@@ -5,7 +5,7 @@ using Auto.PluginUtils;
 
 namespace IntegrationTests.Cli;
 
-public abstract class CliTestBase
+internal abstract class CliTestBase
 {
 	private string _tempDir = null!;
 	protected CommandStore TestCommandStore => new(_tempDir);

@@ -1,12 +1,13 @@
+using System.CommandLine;
+
 using Auto.Cli.Services;
 using Auto.Models;
-using System.CommandLine;
 
 using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli.Commands;
 
-public static class ActionDeleteCommand
+internal static class ActionDeleteCommand
 {
 	private record Input(
 		string NameOrId,
@@ -28,7 +29,7 @@ public static class ActionDeleteCommand
 		));
 
 		return command;
-	}	
+	}
 
 	private static void Execute(CommandStore store, Input input)
 	{
@@ -49,7 +50,7 @@ public static class ActionDeleteCommand
 
 	private static CommandAction GetActionToDelete(CommandAction[] actions, int index)
 	{
-		if (index < 0 || index >= actions.Length) 
+		if (index < 0 || index >= actions.Length)
 			throw new ArgumentException($"Index {index} out of range (0..{actions.Length - 1})");
 
 		return actions.OrderBy(a => a.Order).ToArray()[index];

@@ -2,7 +2,7 @@
 
 namespace Auto.InputUtils;
 
-public static partial class InputExtensions
+internal static partial class InputExtensions
 {
 	public static IEnumerable<InputToken> GetTokens(this string input)
 	{

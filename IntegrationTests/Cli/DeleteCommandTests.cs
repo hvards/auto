@@ -1,7 +1,7 @@
 namespace IntegrationTests.Cli;
 
 [TestFixture]
-public class DeleteCommandTests : CliTestBase
+internal class DeleteCommandTests : CliTestBase
 {
 	[Test]
 	public async Task Delete_RemovesCommand()

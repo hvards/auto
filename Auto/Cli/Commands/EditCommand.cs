@@ -1,11 +1,12 @@
-using Auto.Cli.Services;
 using System.CommandLine;
+
+using Auto.Cli.Services;
 
 using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli.Commands;
 
-public static class EditCommand
+internal static class EditCommand
 {
 	private record EditInput(
 		string NameOrId,

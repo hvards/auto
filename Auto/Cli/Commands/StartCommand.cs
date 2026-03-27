@@ -16,6 +16,8 @@ internal static class StartCommand
 
 		command.SetActionWithErrorHandling(pr =>
 		{
+			AdminCheck.WarnIfNotAdmin();
+
 			if (pr.GetValue(foregroundOption))
 			{
 				KillExistingInstances();

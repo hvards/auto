@@ -46,6 +46,7 @@ internal static class Program
 		rootCommand.Subcommands.Add(DeleteCommand.Create(ResolveStore));
 		rootCommand.Subcommands.Add(EnableDisableCommand.CreateEnable(ResolveStore));
 		rootCommand.Subcommands.Add(EnableDisableCommand.CreateDisable(ResolveStore));
+		rootCommand.Subcommands.Add(ExecuteCommand.Create(ResolveStore));
 		rootCommand.Subcommands.Add(ListPluginsCommand.Create());
 		rootCommand.Subcommands.Add(ListKeysCommand.Create());
 		rootCommand.Subcommands.Add(StartCommand.Create());
@@ -54,6 +55,13 @@ internal static class Program
 	}
 
 	internal static void StartService()
+	{
+		var serviceProvider = InitializeServiceProvider();
+		_ = serviceProvider.GetRequiredService<KeyListener>();
+		Application.Run();
+	}
+
+	internal static IServiceProvider InitializeServiceProvider()
 	{
 		var serviceCollection = new ServiceCollection();
 		var configuration = new ConfigurationBuilder()
@@ -66,9 +74,7 @@ internal static class Program
 
 		ConfigureServices(serviceCollection);
 
-		var serviceProvider = serviceCollection.BuildServiceProvider();
-		_ = serviceProvider.GetRequiredService<KeyListener>();
-		Application.Run();
+		return serviceCollection.BuildServiceProvider();
 	}
 
 	private static void ConfigureServices(IServiceCollection services)

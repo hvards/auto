@@ -45,7 +45,7 @@ internal abstract class CliTestBase
 			Enabled = enabled,
 			Trigger = new Trigger
 			{
-				Combination = KeyNameResolver.ParseCombination(["LCtrl", "LWin", "T"]),
+				Combination = [.. KeyNameResolver.ParseInput(["LCtrl", "LWin", "T"])],
 				Sequence = []
 			},
 			Actions =

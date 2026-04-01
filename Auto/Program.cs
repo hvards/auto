@@ -35,13 +35,16 @@ internal static class Program
 		CommandStore ResolveStore(ParseResult pr) =>
 			new(pr.GetValue(configDirOption) ?? string.Empty);
 
+		var serviceProvider = InitializeCliServiceProvider();
+		var triggerCreator = serviceProvider.GetRequiredService<ITriggerCreator>();
+
 		var rootCommand = new RootCommand("Auto");
 		rootCommand.Options.Add(configDirOption);
 
 		rootCommand.Subcommands.Add(ListCommand.Create(ResolveStore));
 		rootCommand.Subcommands.Add(GetCommand.Create(ResolveStore));
-		rootCommand.Subcommands.Add(AddCommand.Create(ResolveStore));
-		rootCommand.Subcommands.Add(EditCommand.Create(ResolveStore));
+		rootCommand.Subcommands.Add(AddCommand.Create(ResolveStore, triggerCreator));
+		rootCommand.Subcommands.Add(EditCommand.Create(ResolveStore, triggerCreator));
 		rootCommand.Subcommands.Add(ActionCommand.Create(ResolveStore));
 		rootCommand.Subcommands.Add(DeleteCommand.Create(ResolveStore));
 		rootCommand.Subcommands.Add(EnableDisableCommand.CreateEnable(ResolveStore));
@@ -61,26 +64,18 @@ internal static class Program
 		Application.Run();
 	}
 
-	internal static IServiceProvider InitializeServiceProvider()
+	internal static IServiceProvider InitializeCliServiceProvider()
 	{
-		var serviceCollection = new ServiceCollection();
-		var configuration = new ConfigurationBuilder()
-			.SetBasePath(AppContext.BaseDirectory)
-			.AddJsonFile("appsettings.json")
-			.Build();
-		Log.Logger = new LoggerConfiguration()
-			.ReadFrom.Configuration(configuration)
-			.CreateLogger();
-
-		ConfigureServices(serviceCollection);
-
-		return serviceCollection.BuildServiceProvider();
+		var services = CreateBaseServiceCollection();
+		services.AddSingleton<IKeyRecorder, KeyRecorder>();
+		services.AddSingleton<ITriggerCreator, TriggerCreator>();
+		return services.BuildServiceProvider();
 	}
 
-	private static void ConfigureServices(IServiceCollection services)
+	internal static IServiceProvider InitializeServiceProvider()
 	{
+		var services = CreateBaseServiceCollection();
 		services.AddLogging(config => config.AddSerilog());
-
 		services.AddSingleton<KeyListener>();
 		services.AddSingleton<ICommandProvider, CommandProvider>();
 		services.AddSingleton<IExecute, Execute>();
@@ -91,6 +86,20 @@ internal static class Program
 		services.AddSingleton<IPluginExecutor, PluginExecutor>();
 		services.AddSingleton<Commands.ICommandExecutor, CommandExecutor>();
 		services.AddSingleton<IPowerShell, PowerShell>();
-		services.AddSingleton<INativeMethods, NativeMethods>();
+		return services.BuildServiceProvider();
+	}
+
+	private static ServiceCollection CreateBaseServiceCollection()
+	{
+		var serviceCollection = new ServiceCollection();
+		var configuration = new ConfigurationBuilder()
+			.SetBasePath(AppContext.BaseDirectory)
+			.AddJsonFile("appsettings.json")
+			.Build();
+		Log.Logger = new LoggerConfiguration()
+			.ReadFrom.Configuration(configuration)
+			.CreateLogger();
+		serviceCollection.AddSingleton<INativeMethods, NativeMethods>();
+		return serviceCollection;
 	}
 }

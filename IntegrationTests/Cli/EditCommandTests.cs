@@ -20,7 +20,7 @@ internal class EditCommandTests : CliTestBase
 
 		var result = TestCommandStore.Find("Test");
 		Assert.That(result, Is.Not.Null);
-		var expected = KeyNameResolver.FormatCombination(KeyNameResolver.ParseCombination(["LCtrl", "LWin", "R"]));
+		var expected = KeyNameResolver.FormatCombination([.. KeyNameResolver.ParseInput(["LCtrl", "LWin", "R"])]);
 		Assert.That(KeyNameResolver.FormatCombination(result!.Value.Command.Trigger.Combination),
 			Is.EqualTo(expected));
 	}

@@ -10,27 +10,32 @@ internal static class EditCommand
 {
 	private record EditInput(
 		string NameOrId,
-		string[] Combination,
-		string[] Sequence,
+		string[]? Combination,
+		string[]? Sequence,
 		string? Description,
 		string? NewName
 	);
 
-	public static CliCommand Create(Func<ParseResult, CommandStore> resolveStore)
+	public static CliCommand Create(
+		Func<ParseResult, CommandStore> resolveStore,
+		ITriggerCreator triggerCreator)
 	{
 		var command = new CliCommand("edit") { Description = "Modify an existing command" }
 			.AddArgument<string>("name-or-id", "Command name or ID", out var nameArg)
-			.AddOption<string[]>("--combination", "New key combination", out var combinationOption)
-			.AddOption<string[]>("--sequence", "New key sequence", out var sequenceOption)
+			.AddOption<string[]>("--combination", "New key combination, or omit value to record interactively",
+				out var combinationOption, argumentRequired: false)
+			.AddOption<string[]>("--sequence", "New key sequence, or omit value to record interactively",
+				out var sequenceOption, argumentRequired: false)
 			.AddOption<string>("--description", "New description", out var descOption)
 			.AddOption<string>("--name", "New name", out var renameOption);
 
 		command.SetActionWithErrorHandling(pr => Execute(
 			resolveStore(pr),
+			triggerCreator,
 			new EditInput(
 				pr.GetValue(nameArg) ?? string.Empty,
-				pr.GetValue(combinationOption) ?? [],
-				pr.GetValue(sequenceOption) ?? [],
+				pr.GetResult(combinationOption) != null ? pr.GetValue(combinationOption) : null,
+				pr.GetResult(sequenceOption) != null ? pr.GetValue(sequenceOption) : null,
 				pr.GetValue(descOption),
 				pr.GetValue(renameOption)
 			)
@@ -39,14 +44,19 @@ internal static class EditCommand
 		return command;
 	}
 
-	private static void Execute(CommandStore store, EditInput input)
+	private static void Execute(CommandStore store, ITriggerCreator triggerCreator, EditInput input)
 	{
 		var cmd = store.Update(input.NameOrId, target =>
 		{
-			if (input.Combination.Length > 0)
-				target.Trigger.Combination = KeyNameResolver.ParseCombination(input.Combination);
-			if (input.Sequence.Length > 0)
-				target.Trigger.Sequence = KeyNameResolver.ParseSequence(input.Sequence);
+			if (input.Combination != null)
+			{
+				target.Trigger.Combination = triggerCreator.GetCombination(input.Combination);
+			}
+			if (input.Sequence != null)
+			{
+				target.Trigger.Sequence = triggerCreator.GetSequence(input.Sequence);
+			}
+
 			target.Description = input.Description ?? target.Description;
 			target.Name = input.NewName ?? target.Name;
 		});

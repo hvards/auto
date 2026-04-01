@@ -37,14 +37,9 @@ internal static class KeyNameResolver
 		return Enum.GetName((Keys)code) ?? code.ToString();
 	}
 
-	public static HashSet<ushort> ParseCombination(string[] keys)
+	public static IEnumerable<ushort> ParseInput(string[] input)
 	{
-		return [.. keys.Select(k => ParseKey(k.Trim()))];
-	}
-
-	public static ushort[] ParseSequence(string[] keys)
-	{
-		return [.. keys.Select(k => ParseKey(k.Trim()))];
+		return input.Select(ParseKey);
 	}
 
 	public static string FormatCombination(HashSet<ushort> combination)
@@ -63,8 +58,8 @@ internal static class KeyNameResolver
 	{
 		return new Trigger
 		{
-			Combination = combination.Length > 0 ? ParseCombination(combination) : [],
-			Sequence = sequence.Length > 0 ? ParseSequence(sequence) : []
+			Combination = combination.Length > 0 ? [.. ParseInput(combination)] : [],
+			Sequence = sequence.Length > 0 ? [.. ParseInput(sequence)] : []
 		};
 	}
 }

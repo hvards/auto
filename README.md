@@ -9,10 +9,14 @@ Run without arguments to start the background listener. Run with a subcommand to
 Commands are stored as JSON files in `~/.config/auto/commands/`.
 
 ```powershell
-# Create a command
+# Create a command with explicit keys
 auto add "Open example.com" --combination LCtrl LWin B
-auto add "Stop process" --file scripts.json --sequence S T O P --description "Kill runaway processes"
+auto add "Stop process" --file scripts.json --sequence S T O P --description "Stop process"
 auto add "Disabled Example" --combination LCtrl D --disabled
+
+# Create a command with interactive key recording
+auto add "Open example.com" --combination
+auto add "Stop process" --sequence
 
 # Adding actions
 auto action add "Open Browser" --plugin StartProgram --arg "https://www.example.com"
@@ -38,6 +42,7 @@ auto action edit "Format and Paste" 0 --var ""
 
 # Edit command
 auto edit "Open example.com" --combination LCtrl LWin LAlt B
+auto edit "Open example.com" --combination  # Record interactively
 auto edit "Open example.com" --name "Go to example.com" --description "Opens example.com in default browser"
 
 # --- Other commands ---

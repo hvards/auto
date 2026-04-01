@@ -12,6 +12,7 @@ internal interface INativeMethods
 	bool IsKeyPressed(int vk);
 	nint GetCurrentProcessHandle();
 	nint SetKeyboardHook(NativeMethods.LowLevelKeyboardProc lpfn, nint handle);
+	bool RemoveKeyboardHook(nint hookId);
 	nint CallNextHook(nint hookId, int nCode, nint wParam, KeyboardInput lParam);
 }
 
@@ -69,6 +70,12 @@ internal partial class NativeMethods : INativeMethods
 		return SetWindowsHookExW(Constants.WH_KEYBOARD_LL, lpfn, handle, 0);
 	}
 
+	public bool RemoveKeyboardHook(nint hookId)
+	{
+		_keyboardHook = null;
+		return UnhookWindowsHookEx(hookId);
+	}
+
 	public nint CallNextHook(nint hookId, int nCode, nint wParam, KeyboardInput lParam)
 	{
 		return CallNextHookEx(hookId, nCode, wParam, ref lParam);
@@ -87,6 +94,10 @@ internal partial class NativeMethods : INativeMethods
 
 	[LibraryImport("user32.dll", SetLastError = true)]
 	private static partial nint SetWindowsHookExW(int idHook, LowLevelKeyboardProc lpfn, nint hMod, uint dwThreadId);
+
+	[LibraryImport("user32.dll", SetLastError = true)]
+	[return: MarshalAs(UnmanagedType.Bool)]
+	private static partial bool UnhookWindowsHookEx(IntPtr hhk);
 
 	[LibraryImport("user32.dll", SetLastError = true)]
 	private static partial nint CallNextHookEx(nint hhk, int nCode, nint wParam, ref KeyboardInput lParam);

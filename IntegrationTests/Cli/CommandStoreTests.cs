@@ -124,8 +124,8 @@ internal class CommandStoreTests : CliTestBase
 			Enabled = enabled,
 			Trigger = new Trigger
 			{
-				Combination = sequence == null ? KeyNameResolver.ParseCombination(trigger ?? ["LCtrl", "LWin", "T"]) : [],
-				Sequence = sequence != null ? KeyNameResolver.ParseSequence(sequence) : []
+				Combination = sequence == null ? [.. KeyNameResolver.ParseInput(trigger ?? ["LCtrl", "LWin", "T"])] : [],
+				Sequence = sequence != null ? [.. KeyNameResolver.ParseInput(sequence)] : []
 			},
 			Actions = actions ?? []
 		};
@@ -139,14 +139,6 @@ internal class CommandStoreTests : CliTestBase
 			Variable = variable,
 			Arguments = args
 		};
-
-	private static CommandAction PsAction(string script, int order = 0, params CommandArgument[] args) => new()
-	{
-		Type = ActionType.PowerShell,
-		Target = script,
-		Order = order,
-		Arguments = args
-	};
 
 	private static CommandArgument TextArg(string value) => new()
 	{

@@ -6,8 +6,14 @@ namespace Auto.Cli;
 
 internal static class CliCommandExtensions
 {
-	internal static CliCommand AddOption<T>(this CliCommand command, string name, string description,
-		out Option<T> option, bool required = false, T? defaultValue = default)
+	internal static CliCommand AddOption<T>(
+		this CliCommand command,
+		string name,
+		string description,
+		out Option<T> option,
+		bool required = false,
+		bool argumentRequired = true,
+		T? defaultValue = default)
 	{
 		option = new Option<T>(name)
 		{
@@ -17,6 +23,8 @@ internal static class CliCommandExtensions
 		};
 		if (!EqualityComparer<T>.Default.Equals(defaultValue, default))
 			option.DefaultValueFactory = _ => defaultValue!;
+		if (!argumentRequired)
+			option.Arity = ArgumentArity.ZeroOrMore;
 		command.Options.Add(option);
 		return command;
 	}

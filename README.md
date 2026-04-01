@@ -52,6 +52,7 @@ auto delete
 auto enable
 auto disable
 auto list-plugins
+auto list-powershell
 auto start
 ```
 

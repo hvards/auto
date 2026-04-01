@@ -64,6 +64,20 @@ auto start
 
 Custom plugins are loaded from `~/.config/auto/plugins/`. Each plugin is a subdirectory containing a `plugin.json` and a .NET assembly implementing `ICommand`.
 
+### Creating a Plugin
+
+A dotnet template is included for creating new plugins:
+
+```powershell
+# Install the template
+dotnet new install ./templates/auto-plugin
+
+# Create a new plugin
+dotnet new auto-plugin -n MyPlugin --description "What my plugin does"
+```
+
+Building the plugin automatically deploys it to `~/.config/auto/plugins/`.
+
 ## Building
 
 ```powershell

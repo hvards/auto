@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Auto",
+  "classifications": ["Auto", "Plugin"],
+  "identity": "Auto.Plugin.Template",
+  "name": "Auto Plugin",
+  "shortName": "auto-plugin",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "AutoPlugin",
+  "preferNameDirectory": true,
+  "symbols": {
+    "pluginId": {
+      "type": "generated",
+      "generator": "guid",
+      "replaces": "PLUGIN-GUID",
+      "parameters": {
+        "format": "D"
+      }
+    },
+    "description": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "My custom plugin",
+      "replaces": "PLUGIN-DESCRIPTION"
+    }
+  }
+}

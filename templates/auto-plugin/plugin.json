@@ -1,0 +1,5 @@
+{
+  "Id": "PLUGIN-GUID",
+  "Name": "AutoPlugin",
+  "EntryPoint": "AutoPlugin.dll"
+}

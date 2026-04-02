@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 
 namespace Auto.InputUtils;
 
@@ -8,26 +8,28 @@ internal static partial class InputExtensions
 	{
 		foreach (Match match in TokenRegex().Matches(input))
 		{
-			if (match.Groups["brace"].Success)
+			if (match.Groups["escaped"].Success)
 			{
 				yield return new InputToken
 				{
-					Value = match.Groups["key"].Value,
+					Value = match.Groups["escaped"].Value[0].ToString(),
 					InputAction = InputAction.NotSet
 				};
 			}
-			else if (match.Groups["bracket"].Success)
+			else if (match.Groups["brace"].Success)
 			{
-				var actionChar = match.Groups["action"].Value;
-				var action = actionChar switch
+				var prefix = match.Groups["prefix"].Value;
+				var key = match.Groups["key"].Value;
+				var action = prefix switch
 				{
+					"+" => InputAction.Down,
+					"-" => InputAction.Up,
 					"!" => InputAction.Sleep,
-					"1" => InputAction.Down,
-					_ => InputAction.Up
+					_ => InputAction.NotSet
 				};
 				yield return new InputToken
 				{
-					Value = match.Groups["key"].Value,
+					Value = key,
 					InputAction = action
 				};
 			}
@@ -42,7 +44,7 @@ internal static partial class InputExtensions
 		}
 	}
 
-	[GeneratedRegex(@"(?<brace>\{(?<key>[^}]*)\})|(?<bracket>\[(?<action>[01!]):(?<key>[^\]]*)\])|(?<char>.)",
+	[GeneratedRegex(@"(?<escaped>\{\{|\}\})|(?<brace>\{(?<prefix>[+\-!])?(?<key>[^}]*)\})|(?<char>.)",
 		RegexOptions.Compiled)]
 	private static partial Regex TokenRegex();
 }

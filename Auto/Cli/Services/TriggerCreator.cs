@@ -22,12 +22,12 @@ internal class TriggerCreator(IKeyRecorder keyRecorder) : ITriggerCreator
 
 	public HashSet<ushort> GetCombination(string[]? input)
 	{
-		return [.. GetTrigger(input, () => keyRecorder.Record(false))];
+		return [.. GetTrigger(input, keyRecorder.RecordCombination)];
 	}
 
 	public ushort[] GetSequence(string[]? input)
 	{
-		return [.. GetTrigger(input, () => keyRecorder.Record(true))];
+		return [.. GetTrigger(input, keyRecorder.RecordSequence)];
 	}
 
 	private static IEnumerable<ushort> GetTrigger(string[]? input, Func<IEnumerable<ushort>> recordInput)

@@ -53,6 +53,7 @@ auto enable
 auto disable
 auto list-plugins
 auto list-powershell
+auto record-input
 auto start
 ```
 
@@ -64,6 +65,29 @@ auto start
 | **KeyboardInput** | Send keyboard input |
 
 Custom plugins are loaded from `~/.config/auto/plugins/`. Each plugin is a subdirectory containing a `plugin.json` and a .NET assembly implementing `ICommand`.
+
+### Keyboard Input Syntax
+
+The KeyboardInput plugin uses a token syntax for its input argument. Key names use the `System.Windows.Forms.Keys` enum (e.g. `Enter`, `LControlKey`, `Tab`, `F1`).
+
+| Syntax | Description | Example |
+|---|---|---|
+| `{KeyName}` | Press a named key | `{Enter}`, `{Tab}`, `{F1}` |
+| `{+KeyName}` | Hold key down | `{+LControlKey}` |
+| `{-KeyName}` | Release key | `{-LControlKey}` |
+| `{!ms}` | Sleep (milliseconds) | `{!500}` |
+| `{{` / `}}` | Literal `{` / `}` | `{{` → `{` |
+| Any character | Type that character | `hello` |
+
+```powershell
+# Type "hello" and press Enter
+auto action add "MyCommand" --plugin KeyboardInput --arg "hello{Enter}"
+
+# Ctrl+C
+auto action add "MyCommand" --plugin KeyboardInput --arg "{+LControlKey}c{-LControlKey}"
+```
+
+Characters like `!`, `@`, `#` etc. can be written directly, the correct modifier keys are applied automatically. `auto record-input` records raw key events, so shifted characters appear as explicit key-down/up sequences (e.g. `{+LShiftKey}1{-LShiftKey}` instead of `!`). Both forms are equivalent. Use `--delay` to also capture timing between keystrokes.
 
 ### Creating a Plugin
 

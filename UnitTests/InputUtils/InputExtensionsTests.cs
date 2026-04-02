@@ -1,4 +1,4 @@
-﻿using Auto.InputUtils;
+using Auto.InputUtils;
 
 namespace UnitTests.InputUtils;
 
@@ -8,11 +8,8 @@ internal class InputExtensionsTests
 	[Test]
 	public void GetTokens_ShouldReturnSingleToken_WhenInputIsSingleCharacter()
 	{
-		// Arrange
-		var input = "a";
-
 		// Act
-		var tokens = input.GetTokens().ToList();
+		var tokens = "a".GetTokens().ToList();
 
 		// Assert
 		Assert.That(tokens, Has.Count.EqualTo(1));
@@ -23,11 +20,8 @@ internal class InputExtensionsTests
 	[Test]
 	public void GetTokens_ShouldReturnMultipleTokens_WhenInputHasMultipleCharacters()
 	{
-		// Arrange
-		var input = "abc";
-
 		// Act
-		var tokens = input.GetTokens().ToList();
+		var tokens = "abc".GetTokens().ToList();
 
 		// Assert
 		Assert.That(tokens, Has.Count.EqualTo(3));
@@ -36,34 +30,69 @@ internal class InputExtensionsTests
 		Assert.That(tokens[2].Value, Is.EqualTo("c"));
 	}
 
-	[TestCase(0, InputAction.Up)]
-	[TestCase(1, InputAction.Down)]
-	public void GetTokens_ShouldReturnTokenWithAction_WhenInputHasBrackets(int action, InputAction expectedAction)
+	[TestCase("-", InputAction.Up)]
+	[TestCase("+", InputAction.Down)]
+	public void GetTokens_ShouldReturnTokenWithAction_WhenInputHasPrefix(string prefix, InputAction expectedAction)
 	{
-		// Arrange
-		var input = $"[{action}:a]";
-
 		// Act
-		var tokens = input.GetTokens().ToList();
+		var tokens = $"{{{prefix}LCtrl}}".GetTokens().ToList();
 
 		// Assert
 		Assert.That(tokens, Has.Count.EqualTo(1));
-		Assert.That(tokens[0].Value, Is.EqualTo("a"));
+		Assert.That(tokens[0].Value, Is.EqualTo("LCtrl"));
 		Assert.That(tokens[0].InputAction, Is.EqualTo(expectedAction));
 	}
 
 	[Test]
-	public void GetTokens_ShouldHandleSleepAction_WhenInputHasSleepAction()
+	public void GetTokens_ShouldHandleSleepAction()
 	{
-		// Arrange 
-		var input = "[!:1000]";
-
 		// Act
-		var tokens = input.GetTokens().ToList();
+		var tokens = "{!1000}".GetTokens().ToList();
 
 		// Assert
 		Assert.That(tokens, Has.Count.EqualTo(1));
 		Assert.That(tokens[0].Value, Is.EqualTo("1000"));
 		Assert.That(tokens[0].InputAction, Is.EqualTo(InputAction.Sleep));
+	}
+
+	[Test]
+	public void GetTokens_ShouldHandleNamedKey()
+	{
+		// Act
+		var tokens = "{Enter}".GetTokens().ToList();
+
+		// Assert
+		Assert.That(tokens, Has.Count.EqualTo(1));
+		Assert.That(tokens[0].Value, Is.EqualTo("Enter"));
+		Assert.That(tokens[0].InputAction, Is.EqualTo(InputAction.NotSet));
+	}
+
+	[Test]
+	public void GetTokens_ShouldHandleEscapedBraces()
+	{
+		// Act
+		var tokens = "{{}}".GetTokens().ToList();
+
+		// Assert
+		Assert.That(tokens, Has.Count.EqualTo(2));
+		Assert.That(tokens[0].Value, Is.EqualTo("{"));
+		Assert.That(tokens[1].Value, Is.EqualTo("}"));
+	}
+
+	[Test]
+	public void GetTokens_ShouldHandleMixedInput()
+	{
+		// Act
+		var tokens = "hello{Enter}{+LCtrl}c{-LCtrl}".GetTokens().ToList();
+
+		// Assert
+		Assert.That(tokens, Has.Count.EqualTo(9));
+		Assert.That(tokens[5].Value, Is.EqualTo("Enter"));
+		Assert.That(tokens[5].InputAction, Is.EqualTo(InputAction.NotSet));
+		Assert.That(tokens[6].Value, Is.EqualTo("LCtrl"));
+		Assert.That(tokens[6].InputAction, Is.EqualTo(InputAction.Down));
+		Assert.That(tokens[7].Value, Is.EqualTo("c"));
+		Assert.That(tokens[8].Value, Is.EqualTo("LCtrl"));
+		Assert.That(tokens[8].InputAction, Is.EqualTo(InputAction.Up));
 	}
 }

@@ -37,6 +37,7 @@ internal static class Program
 
 		var serviceProvider = InitializeCliServiceProvider();
 		var triggerCreator = serviceProvider.GetRequiredService<ITriggerCreator>();
+		var keyRecorder = serviceProvider.GetRequiredService<IKeyRecorder>();
 
 		var rootCommand = new RootCommand("Auto");
 		rootCommand.Options.Add(configDirOption);
@@ -53,6 +54,7 @@ internal static class Program
 		rootCommand.Subcommands.Add(ListPluginsCommand.Create());
 		rootCommand.Subcommands.Add(ListPowerShellCommand.Create());
 		rootCommand.Subcommands.Add(ListKeysCommand.Create());
+		rootCommand.Subcommands.Add(RecordInputCommand.Create(keyRecorder));
 		rootCommand.Subcommands.Add(StartCommand.Create());
 
 		return rootCommand;

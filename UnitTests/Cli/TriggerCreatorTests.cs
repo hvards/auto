@@ -31,14 +31,15 @@ internal class TriggerCreatorTests
 	public void GetCombination_EmptyArray_RecordsCombination()
 	{
 		// Arrange
-		_recorderMock.Setup(r => r.Record(false)).Returns([162, 91, 82]);
+		_recorderMock.Setup(r => r.RecordCombination())
+			.Returns(new HashSet<ushort> { 162, 91, 82 });
 
 		// Act
 		var result = _subject.GetCombination([]);
 
 		// Assert
 		Assert.That(result.SetEquals(new HashSet<ushort> { 162, 91, 82 }));
-		_recorderMock.Verify(r => r.Record(false), Times.Once);
+		_recorderMock.Verify(r => r.RecordCombination(), Times.Once);
 	}
 
 	[Test]
@@ -49,7 +50,7 @@ internal class TriggerCreatorTests
 
 		// Assert
 		Assert.That(result.SetEquals(new HashSet<ushort> { 162, 91, 82 }));
-		_recorderMock.Verify(r => r.Record(It.IsAny<bool>()), Times.Never);
+		_recorderMock.Verify(r => r.RecordCombination(), Times.Never);
 	}
 
 	[Test]
@@ -66,14 +67,14 @@ internal class TriggerCreatorTests
 	public void GetSequence_EmptyArray_RecordsSequence()
 	{
 		// Arrange
-		_recorderMock.Setup(r => r.Record(true)).Returns([65, 83, 70]);
+		_recorderMock.Setup(r => r.RecordSequence()).Returns([65, 83, 70]);
 
 		// Act
 		var result = _subject.GetSequence([]);
 
 		// Assert
 		Assert.That(result, Is.EqualTo(new ushort[] { 65, 83, 70 }));
-		_recorderMock.Verify(r => r.Record(true), Times.Once);
+		_recorderMock.Verify(r => r.RecordSequence(), Times.Once);
 	}
 
 	[Test]
@@ -84,7 +85,7 @@ internal class TriggerCreatorTests
 
 		// Assert
 		Assert.That(result, Is.EqualTo(new ushort[] { 65, 83, 70 }));
-		_recorderMock.Verify(r => r.Record(It.IsAny<bool>()), Times.Never);
+		_recorderMock.Verify(r => r.RecordSequence(), Times.Never);
 	}
 
 	[Test]
@@ -113,8 +114,9 @@ internal class TriggerCreatorTests
 	public void CreateTrigger_EmptyArrays_RecordsBoth()
 	{
 		// Arrange
-		_recorderMock.Setup(r => r.Record(false)).Returns([162, 82]);
-		_recorderMock.Setup(r => r.Record(true)).Returns([65, 83]);
+		_recorderMock.Setup(r => r.RecordCombination())
+			.Returns(new HashSet<ushort> { 162, 82 });
+		_recorderMock.Setup(r => r.RecordSequence()).Returns([65, 83]);
 
 		// Act
 		var result = _subject.CreateTrigger([], []);

@@ -1,27 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
-     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util"
+     xmlns:netfx="http://wixtoolset.org/schemas/v4/wxs/netfx"
      xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
 
     <Package Name="Auto"
              Manufacturer="Auto"
              Version="$(AutoVersion)"
-             UpgradeCode="A1B2C3D4-E5F6-7890-ABCD-EF1234567890"
+             Id="Auto"
              Scope="perMachine"
              InstallerVersion="500">
 
-        <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
-
         <MediaTemplate EmbedCab="yes" />
 
+        <!-- Desktop runtime is the user-facing prerequisite and is sufficient for this app -->
+        <netfx:DotNetCompatibilityCheck Property="DOTNET10DESKTOPCHECKRESULT"
+                                        RuntimeType="desktop"
+                                        Platform="x64"
+                                        Version="10.0.0"
+                                        RollForward="minor" />
+
+        <Launch Condition="Installed OR UILevel >= 5 OR DOTNET10DESKTOPCHECKRESULT = 0"
+                Message=".NET 10 Windows Desktop Runtime (x64) is required. Download: https://dotnet.microsoft.com/download/dotnet/10.0" />
+
         <ui:WixUI Id="WixUI_Minimal" />
-        <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+
+        <Property Id="WixUnelevatedShellExecTarget" Value="https://dotnet.microsoft.com/download/dotnet/10.0" />
+
+        <UI>
+            <Dialog Id="DotNetRuntimeMissingDlg" Width="370" Height="270" Title="Auto Setup">
+                <Control Id="Bitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="234" TabSkip="no" Text="!(loc.WelcomeDlgBitmap)" />
+                <Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="40" Transparent="yes" NoPrefix="yes" Text=".NET Runtime Required" />
+                <Control Id="Description" Type="Text" X="135" Y="70" Width="220" Height="95" Transparent="yes" NoPrefix="yes" Text=".NET 10 Windows Desktop Runtime (x64) required." />
+                <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="373" Height="0" />
+                <Control Id="DownloadRuntime" Type="PushButton" X="192" Y="243" Width="100" Height="17" Text="Download">
+                    <Publish Event="DoAction" Value="Wix4UnelevatedShellExec_X64" />
+                </Control>
+                <Control Id="Exit" Type="PushButton" X="304" Y="243" Width="56" Height="17" Default="yes" Cancel="yes" Text="Exit">
+                    <Publish Event="EndDialog" Value="Exit" />
+                </Control>
+            </Dialog>
+        </UI>
+
+        <!-- Suppress the pre-install EULA dialog; only the finish dialog will be shown -->
+        <InstallUISequence>
+            <Show Dialog="DotNetRuntimeMissingDlg" Before="ProgressDlg" Condition="NOT Installed AND UILevel >= 5 AND DOTNET10DESKTOPCHECKRESULT &lt;&gt; 0" />
+            <Show Dialog="override WelcomeEulaDlg" Before="ProgressDlg" Condition="0" />
+        </InstallUISequence>
 
         <StandardDirectory Id="ProgramFiles64Folder">
             <Directory Id="INSTALLFOLDER" Name="Auto" />
         </StandardDirectory>
 
-        <!-- Harvest all files from publish output into a named component group -->
         <ComponentGroup Id="PublishedFiles" Directory="INSTALLFOLDER">
             <Files Include="!(bindpath.Auto)\**">
                 <Exclude Files="!(bindpath.Auto)\**\*.pdb" />
@@ -43,7 +72,7 @@
             </Component>
         </ComponentGroup>
 
-        <!-- Create scheduled task using XML import (uses BUILTIN\Users group - works on all devices) -->
+        <!-- XML import lets AutoTask.xml own the BUILTIN\Users principal, so it works on all machines without probing local groups -->
         <SetProperty Id="CreateScheduledTask"
                      Value="&quot;schtasks.exe&quot; /Create /TN &quot;Auto $(AutoVersion)&quot; /XML &quot;[INSTALLFOLDER]AutoTask.xml&quot; /F"
                      Before="CreateScheduledTask"
@@ -57,7 +86,6 @@
                       BinaryRef="Wix4UtilCA_X64"
                       DllEntry="WixQuietExec64" />
 
-        <!-- Remove scheduled task on uninstall -->
         <SetProperty Id="RemoveScheduledTask"
                      Value="&quot;schtasks.exe&quot; /Delete /TN &quot;Auto $(AutoVersion)&quot; /F"
                      Before="RemoveScheduledTask"
@@ -71,7 +99,6 @@
                       BinaryRef="Wix4UtilCA_X64"
                       DllEntry="WixQuietExec64" />
 
-        <!-- Kill running Auto.exe before upgrade/uninstall -->
         <SetProperty Id="StopAutoProcess"
                      Value="&quot;taskkill.exe&quot; /F /IM Auto.exe"
                      Before="StopAutoProcess"
@@ -84,18 +111,11 @@
                       BinaryRef="Wix4UtilCA_X64"
                       DllEntry="WixQuietExec64" />
 
-        <!-- Schedule the custom actions -->
         <InstallExecuteSequence>
             <Custom Action="StopAutoProcess" Before="RemoveFiles" />
             <Custom Action="RemoveScheduledTask" Before="RemoveFiles" Condition="REMOVE=&quot;ALL&quot;" />
             <Custom Action="CreateScheduledTask" After="InstallFiles" Condition="NOT Installed" />
         </InstallExecuteSequence>
-
-        <Feature Id="MainFeature" Title="Auto" Level="1">
-            <ComponentGroupRef Id="PublishedFiles" />
-            <ComponentGroupRef Id="ScheduledTaskFiles" />
-            <ComponentGroupRef Id="PathRegistration" />
-        </Feature>
 
     </Package>
 </Wix>

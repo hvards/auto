@@ -2,6 +2,10 @@
 
 Automations triggered by key combinations (pressed together) or a key sequences (pressed in order). When input is detected, one or more actions are executed as C# plugins or PowerShell scripts.
 
+## Requirements
+
+[.NET 10 Windows Desktop Runtime (x64)](https://dotnet.microsoft.com/download/dotnet/10.0)
+
 ## Getting Started
 
 Install with the MSI installer, which adds `Auto.exe` to `PATH` and creates a Windows scheduled task that runs `auto start` at logon. Or build from source with `dotnet build` and add the build output directory to your `PATH`.

@@ -1,6 +1,5 @@
 using Auto.Models;
 using Auto.PluginUtils;
-using Auto.Tasks;
 
 namespace Auto.Commands;
 
@@ -9,7 +8,7 @@ internal interface ICommandExecutor
 	List<string?> ExecuteCommand(Command command, string? clipboard = null, string? highlighted = null);
 }
 
-internal class CommandExecutor(IPluginExecutor pluginExecutor, IPowerShell powerShell) : ICommandExecutor
+internal class CommandExecutor(IPluginExecutor pluginExecutor) : ICommandExecutor
 {
 	public List<string?> ExecuteCommand(Command command, string? clipboard = null, string? highlighted = null)
 	{
@@ -22,12 +21,7 @@ internal class CommandExecutor(IPluginExecutor pluginExecutor, IPowerShell power
 
 		foreach (var action in command.Actions.OrderBy(a => a.Order))
 		{
-			var result = action.Type switch
-			{
-				ActionType.Plugin => ExecutePlugin(action, variables),
-				ActionType.PowerShell => ExecutePowerShell(action, variables),
-				_ => null
-			};
+			var result = ExecutePlugin(action, variables);
 
 			if (action.Variable != null)
 				variables[action.Variable] = result;
@@ -42,14 +36,6 @@ internal class CommandExecutor(IPluginExecutor pluginExecutor, IPowerShell power
 	{
 		var args = ResolveArguments(action.Arguments, variables);
 		return pluginExecutor.ExecutePlugin(action.Target, args);
-	}
-
-	private string? ExecutePowerShell(CommandAction action, Dictionary<string, object?> variables)
-	{
-		var parameters = action.Arguments
-			.Select(a => (a.ParameterName, ResolveArgument(a, variables)?.ToString() ?? string.Empty))
-			.ToList();
-		return powerShell.Execute(action.Target, parameters);
 	}
 
 	private static IEnumerable<object?> ResolveArguments(CommandArgument[] arguments, Dictionary<string, object?> variables)

@@ -25,7 +25,7 @@ internal class ActionValidatorTests
 		{
 			new CommandAction
 			{
-				Type = ActionType.Plugin, Target = "plugin",
+				Target = "plugin",
 				Arguments = [new CommandArgument {
 					Tokens = [new ArgumentToken { Type = ArgumentType.Variable, Value = variableName }]
 				}]
@@ -47,7 +47,7 @@ internal class ActionValidatorTests
 		{
 			new CommandAction
 			{
-				Type = ActionType.Plugin, Target = "pluginA",
+				Target = "pluginA",
 				Arguments = [new CommandArgument {
 					Tokens = [new ArgumentToken { Type = ArgumentType.Variable, Value = "unknown" }]
 				}]
@@ -67,13 +67,13 @@ internal class ActionValidatorTests
 		{
 			new CommandAction
 			{
-				Type = ActionType.Plugin, Target = "pluginA",
+				Target = "pluginA",
 				Variable = "Result",
 				Arguments = []
 			},
 			new CommandAction
 			{
-				Type = ActionType.Plugin, Target = "pluginB",
+				Target = "pluginB",
 				Variable = "Result",
 				Arguments = []
 			}
@@ -92,7 +92,7 @@ internal class ActionValidatorTests
 		{
 			new CommandAction
 			{
-				Type = ActionType.Plugin, Target = "plugin",
+				Target = "plugin",
 				Arguments = [new CommandArgument { Tokens = [new ArgumentToken { Type = ArgumentType.Text, Value = "anything" }] }]
 			}
 		};
@@ -109,12 +109,12 @@ internal class ActionValidatorTests
 		{
 			new CommandAction
 			{
-				Type = ActionType.Plugin, Target = "consumer",
+				Target = "consumer",
 				Arguments = [new CommandArgument { Tokens = [new ArgumentToken { Type = ArgumentType.Variable, Value = "Result" }] }]
 			},
 			new CommandAction
 			{
-				Type = ActionType.Plugin, Target = "producer",
+				Target = "producer",
 				Variable = "Result",
 				Arguments = []
 			}
@@ -135,19 +135,19 @@ internal class ActionValidatorTests
 		{
 			new CommandAction
 			{
-				Type = ActionType.Plugin, Target = "A", Variable = "X",
+				Target = "A", Variable = "X",
 				Arguments = []
 			},
 			new CommandAction
 			{
-				Type = ActionType.Plugin, Target = "B", Variable = "Y",
+				Target = "B", Variable = "Y",
 				Arguments = [
 					new CommandArgument { Tokens = [new ArgumentToken { Type = ArgumentType.Variable, Value = "X" }] }
 				]
 			},
 			new CommandAction
 			{
-				Type = ActionType.Plugin, Target = "C",
+				Target = "C",
 				Arguments = [
 					new CommandArgument { Tokens = [new ArgumentToken { Type = ArgumentType.Variable, Value = "Y" }] }
 				]
@@ -171,13 +171,13 @@ internal class ActionValidatorTests
 		{
 			new CommandAction
 			{
-				Type = ActionType.Plugin, Target = "pluginA",
+				Target = "pluginA",
 				Variable = "Step1",
 				Arguments = []
 			},
 			new CommandAction
 			{
-				Type = ActionType.Plugin, Target = "pluginB",
+				Target = "pluginB",
 				Variable = "Step2",
 				Arguments = [new CommandArgument {
 					Tokens = [new ArgumentToken { Type = ArgumentType.Variable, Value = "Step1" }]
@@ -185,7 +185,7 @@ internal class ActionValidatorTests
 			},
 			new CommandAction
 			{
-				Type = ActionType.Plugin, Target = "pluginC",
+				Target = "pluginC",
 				Arguments = [new CommandArgument {
 					Tokens = [new ArgumentToken { Type = ArgumentType.Variable, Value = "Step2" }]
 				}]
@@ -208,26 +208,26 @@ internal class ActionValidatorTests
 		{
 			new CommandAction
 			{
-				Type = ActionType.Plugin, Target = "A", Variable = "X",
+				Target = "A", Variable = "X",
 				Arguments = []
 			},
 			new CommandAction
 			{
-				Type = ActionType.Plugin, Target = "B", Variable = "Y",
+				Target = "B", Variable = "Y",
 				Arguments = [
 					new CommandArgument { Tokens = [new ArgumentToken { Type = ArgumentType.Variable, Value = "X" }] }
 				]
 			},
 			new CommandAction
 			{
-				Type = ActionType.Plugin, Target = "C", Variable = "Z",
+				Target = "C", Variable = "Z",
 				Arguments = [
 					new CommandArgument { Tokens = [new ArgumentToken { Type = ArgumentType.Variable, Value = "X" }] }
 				]
 			},
 			new CommandAction
 			{
-				Type = ActionType.Plugin, Target = "D",
+				Target = "D",
 				Arguments =
 				[
 					new CommandArgument { Tokens = [new ArgumentToken { Type = ArgumentType.Variable, Value = "Y" }] },
@@ -252,9 +252,9 @@ internal class ActionValidatorTests
 		// Arrange
 		var actions = new[]
 		{
-			new CommandAction { Type = ActionType.Plugin, Target = "A", Arguments = [] },
-			new CommandAction { Type = ActionType.Plugin, Target = "B", Arguments = [] },
-			new CommandAction { Type = ActionType.Plugin, Target = "C", Arguments = [] }
+			new CommandAction { Target = "A", Arguments = [] },
+			new CommandAction { Target = "B", Arguments = [] },
+			new CommandAction { Target = "C", Arguments = [] }
 		};
 
 		// Act
@@ -272,12 +272,12 @@ internal class ActionValidatorTests
 		{
 			new CommandAction
 			{
-				Type = ActionType.Plugin, Target = "A", Variable = "X",
+				Target = "A", Variable = "X",
 				Arguments = []
 			},
 			new CommandAction
 			{
-				Type = ActionType.Plugin, Target = "B",
+				Target = "B",
 				Arguments = [new CommandArgument {
 					Tokens = [new ArgumentToken { Type = ArgumentType.Text, Value = "literal" }]
 				}]

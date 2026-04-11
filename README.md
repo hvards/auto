@@ -1,6 +1,6 @@
 # Auto
 
-Automations triggered by key combinations (pressed together) or a key sequences (pressed in order). When input is detected, one or more actions are executed as C# plugins or PowerShell scripts.
+Automations triggered by key combinations (pressed together) or a key sequences (pressed in order).
 
 ## Requirements
 
@@ -15,7 +15,7 @@ Install with the MSI installer, which adds `Auto.exe` to `PATH` and creates a Wi
 auto add "Open example.com" --combination LCtrl LWin B
 
 # 2) Add an action
-auto action add "Open example.com" --plugin StartProgram --arg "https://www.example.com"
+auto action add "Open example.com" StartProgram --arg "https://www.example.com"
 
 # 3) Inspect the command details
 auto get "Open example.com"
@@ -40,7 +40,7 @@ File:        default.json
 Trigger:
   Combination:     B+LWin+LControlKey
 Actions:
-  [0] Plugin: StartProgram (21092f13-5366-4cba-90df-66bd123e66a5)
+  [0] StartProgram (21092f13-5366-4cba-90df-66bd123e66a5)
     Args:
       https://www.example.com
 ```
@@ -76,9 +76,9 @@ auto add "<name>" --file dev-tools.json --combination LCtrl LShift O
 ### Manage Actions
 
 ```powershell
-# Add plugin or PowerShell actions
-auto action add "<name-or-id>" --plugin StartProgram --arg "https://www.example.com"
-auto action add "<name-or-id>" --powershell "StopProcess.ps1" --arg "devenv.exe"
+# Add plugin actions
+auto action add "<name-or-id>" StartProgram --arg "https://www.example.com"
+auto action add "<name-or-id>" PowerShell --arg "StopProcess.ps1" "Name=devenv.exe"
 
 # Edit or delete by action index (from `auto get`)
 auto action edit "<name-or-id>" 0 --arg "https://example.org"
@@ -106,8 +106,8 @@ auto delete "<name-or-id>"
 Built-in variables can be referenced directly (`%{Clipboard}`, `%{Highlighted}`), and action output can be captured with `--var` and reused later.
 
 ```powershell
-auto action add "Format and Paste" --plugin Formatter --arg "%{Clipboard}" --var Formatted
-auto action add "Format and Paste" --plugin KeyboardInput --arg "%{Formatted}"
+auto action add "Format and Paste" Formatter --arg "%{Clipboard}" --var Formatted
+auto action add "Format and Paste" KeyboardInput --arg "%{Formatted}"
 ```
 
 ### Discovery and Utility Commands
@@ -115,7 +115,6 @@ auto action add "Format and Paste" --plugin KeyboardInput --arg "%{Formatted}"
 | Command | Description |
 |---|---|
 | `auto list-plugins` | List available plugins |
-| `auto list-powershell` | List scripts in `~/.config/auto/powershell/` |
 | `auto list-keys` | List valid key names and aliases for triggers |
 | `auto record-input` | Record `KeyboardInput` syntax (double-tap `Esc` to stop) |
 | `auto start` | Start the background listener |
@@ -126,9 +125,10 @@ auto action add "Format and Paste" --plugin KeyboardInput --arg "%{Formatted}"
 |---|---|
 | **StartProgram** | Launch a program or URL |
 | **KeyboardInput** | Send keyboard input |
+| **PowerShell** | Run a script from `~/.config/auto/powershell/` |
 
 Custom plugins are loaded from `~/.config/auto/plugins/`. Each plugin is a subdirectory containing a `plugin.json` and a .NET assembly implementing `ICommand`.
-PowerShell scripts are loaded from `~/.config/auto/powershell/` and referenced by filename (for example `StopProcess.ps1`).
+`PowerShell` takes script filename as the first argument, followed by optional script arguments (for example `Name=devenv.exe`).
 
 ### Keyboard Input Syntax
 
@@ -145,10 +145,10 @@ The KeyboardInput plugin uses a token syntax for its input argument. Key names u
 
 ```powershell
 # Type "hello" and press Enter
-auto action add "MyCommand" --plugin KeyboardInput --arg "hello{Enter}"
+auto action add "MyCommand" KeyboardInput --arg "hello{Enter}"
 
 # Ctrl+C
-auto action add "MyCommand" --plugin KeyboardInput --arg "{+LControlKey}c{-LControlKey}"
+auto action add "MyCommand" KeyboardInput --arg "{+LControlKey}c{-LControlKey}"
 ```
 
 Characters like `!`, `@`, `#` etc. can be written directly, the correct modifier keys are applied automatically. `auto record-input` records raw key events, so shifted characters appear as explicit key-down/up sequences (e.g. `{+LShiftKey}1{-LShiftKey}` instead of `!`). Both forms are equivalent. Use `--delay` to also capture timing between keystrokes.

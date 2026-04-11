@@ -52,7 +52,6 @@ internal abstract class CliTestBase
 			[
 				new CommandAction
 				{
-					Type = ActionType.Plugin,
 					Target = PluginLoader.ResolvePlugin("StartProgram"),
 					Order = 0,
 					Arguments =

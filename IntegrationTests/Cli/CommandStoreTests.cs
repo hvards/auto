@@ -133,7 +133,6 @@ internal class CommandStoreTests : CliTestBase
 	private static CommandAction PluginAction(string id, int order = 0, string? variable = null,
 		params CommandArgument[] args) => new()
 		{
-			Type = ActionType.Plugin,
 			Target = id,
 			Order = order,
 			Variable = variable,

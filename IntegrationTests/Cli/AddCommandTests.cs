@@ -53,7 +53,7 @@ internal class AddCommandTests : CliTestBase
 
 		var (exit, _, _) = await InvokeAsync(
 			"action", "add", "Test",
-			"--plugin", "StartProgram",
+			"StartProgram",
 			"--arg", "https://example.com");
 
 		// Assert

@@ -1,7 +1,6 @@
 using Auto.Commands;
 using Auto.Models;
 using Auto.PluginUtils;
-using Auto.Tasks;
 
 using Moq;
 
@@ -10,9 +9,8 @@ namespace UnitTests.Commands;
 [TestFixture]
 internal class CommandExecutorTests
 {
-	private Mock<IPluginExecutor> _pluginExecutorMock;
-	private Mock<IPowerShell> _powerShellMock;
-	private CommandExecutor _subject;
+	private Mock<IPluginExecutor> _pluginExecutorMock = null!;
+	private CommandExecutor _subject = null!;
 
 	private static Command GetCommandWithActions(params CommandAction[] actions) => new()
 	{
@@ -23,8 +21,7 @@ internal class CommandExecutorTests
 	public void SetUp()
 	{
 		_pluginExecutorMock = new Mock<IPluginExecutor>();
-		_powerShellMock = new Mock<IPowerShell>();
-		_subject = new CommandExecutor(_pluginExecutorMock.Object, _powerShellMock.Object);
+		_subject = new CommandExecutor(_pluginExecutorMock.Object);
 	}
 
 	[TestCase("Clipboard")]
@@ -34,7 +31,6 @@ internal class CommandExecutorTests
 		// Arrange
 		var command = GetCommandWithActions(new CommandAction
 		{
-			Type = ActionType.Plugin,
 			Target = "plugin",
 			Order = 0,
 			Arguments = [new CommandArgument {
@@ -53,34 +49,11 @@ internal class CommandExecutorTests
 	}
 
 	[Test]
-	public void ExecuteCommand_ShouldExecutePowerShell()
-	{
-		// Arrange
-		var command = GetCommandWithActions(new CommandAction
-		{
-			Type = ActionType.PowerShell,
-			Target = "script",
-			Order = 0,
-			Arguments = []
-		});
-		_powerShellMock.Setup(x => x.Execute("script", It.IsAny<List<(string?, string)>>()))
-			.Returns("powershell result");
-
-		// Act
-		var result = _subject.ExecuteCommand(command);
-
-		// Assert
-		Assert.That(result, Has.Count.EqualTo(1));
-		Assert.That(result[0], Is.EqualTo("powershell result"));
-	}
-
-	[Test]
 	public void ExecuteCommand_ShouldExecutePlugin()
 	{
 		// Arrange
 		var command = GetCommandWithActions(new CommandAction
 		{
-			Type = ActionType.Plugin,
 			Target = "plugin",
 			Order = 0,
 			Arguments = []
@@ -102,7 +75,6 @@ internal class CommandExecutorTests
 		// Arrange
 		var command = GetCommandWithActions(new CommandAction
 		{
-			Type = ActionType.Plugin,
 			Target = "plugin",
 			Order = 0,
 			Arguments = [
@@ -126,7 +98,6 @@ internal class CommandExecutorTests
 		// Arrange
 		var command = GetCommandWithActions(new CommandAction
 		{
-			Type = ActionType.Plugin,
 			Target = "pluginA",
 			Order = 0,
 			Variable = "Step1",
@@ -135,7 +106,6 @@ internal class CommandExecutorTests
 			]
 		}, new CommandAction
 		{
-			Type = ActionType.Plugin,
 			Target = "pluginB",
 			Order = 1,
 			Arguments = [
@@ -162,14 +132,12 @@ internal class CommandExecutorTests
 		// Arrange
 		var command = GetCommandWithActions(new CommandAction
 		{
-			Type = ActionType.Plugin,
 			Target = "pluginA",
 			Order = 0,
 			Variable = "Result",
 			Arguments = []
 		}, new CommandAction
 		{
-			Type = ActionType.Plugin,
 			Target = "pluginB",
 			Order = 1,
 			Arguments = [
@@ -195,8 +163,8 @@ internal class CommandExecutorTests
 		// Arrange
 		var executionOrder = new List<string>();
 		var command = GetCommandWithActions(
-			new CommandAction { Type = ActionType.Plugin, Target = "second", Order = 1, Arguments = [] },
-			new CommandAction { Type = ActionType.Plugin, Target = "first", Order = 0, Arguments = [] }
+			new CommandAction { Target = "second", Order = 1, Arguments = [] },
+			new CommandAction { Target = "first", Order = 0, Arguments = [] }
 		);
 		_pluginExecutorMock.Setup(x => x.ExecutePlugin(It.IsAny<string>(), It.IsAny<IEnumerable<object?>>()))
 			.Callback((string id, IEnumerable<object?> _) => executionOrder.Add(id));

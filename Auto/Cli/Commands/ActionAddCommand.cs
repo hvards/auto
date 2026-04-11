@@ -12,8 +12,7 @@ internal static class ActionAddCommand
 {
 	private record ActionAddInput(
 		string NameOrId,
-		string? Plugin,
-		string? PowerShell,
+		string Plugin,
 		string[] Args,
 		string? Variable
 	);
@@ -22,8 +21,7 @@ internal static class ActionAddCommand
 	{
 		var command = new CliCommand("add") { Description = "Add an action to a command" }
 			.AddArgument<string>("name-or-id", "Command name or ID", out var nameArg)
-			.AddOption<string>("--plugin", "Plugin name or GUID", out var pluginOption)
-			.AddOption<string>("--powershell", "PowerShell script path", out var psOption)
+			.AddArgument<string>("plugin", "Plugin name or GUID", out var pluginArg)
 			.AddOption<string[]>("--arg", "Action arguments", out var argOption)
 			.AddOption<string>("--var", "Output variable name", out var varOption);
 
@@ -31,8 +29,7 @@ internal static class ActionAddCommand
 			resolveStore(pr),
 			new ActionAddInput(
 				pr.GetValue(nameArg) ?? string.Empty,
-				pr.GetValue(pluginOption),
-				pr.GetValue(psOption),
+				pr.GetValue(pluginArg) ?? string.Empty,
 				pr.GetValue(argOption) ?? [],
 				pr.GetValue(varOption)
 			)
@@ -43,12 +40,12 @@ internal static class ActionAddCommand
 
 	private static void Execute(CommandStore store, ActionAddInput input)
 	{
-		if (input.Plugin == null && input.PowerShell == null)
-			throw new ArgumentException("Either --plugin or --powershell is required");
-		if (input.Plugin != null && input.PowerShell != null)
-			throw new ArgumentException("--plugin and --powershell are mutually exclusive");
-
-		var action = BuildAction(input);
+		var action = new CommandAction
+		{
+			Target = PluginLoader.ResolvePlugin(input.Plugin),
+			Arguments = [.. input.Args.Select(ArgParser.ParsePluginArgument)],
+			Variable = input.Variable
+		};
 
 		store.Update(input.NameOrId, target =>
 		{
@@ -59,25 +56,5 @@ internal static class ActionAddCommand
 		});
 
 		Console.WriteLine($"Added action to '{input.NameOrId}'");
-	}
-
-	private static CommandAction BuildAction(ActionAddInput input)
-	{
-		var result = new CommandAction { Variable = input.Variable };
-
-		if (input.Plugin != null)
-		{
-			result.Type = ActionType.Plugin;
-			result.Target = PluginLoader.ResolvePlugin(input.Plugin);
-			result.Arguments = [.. input.Args.Select(ArgParser.ParsePluginArgument)];
-		}
-		else if (input.PowerShell != null)
-		{
-			result.Type = ActionType.PowerShell;
-			result.Target = input.PowerShell;
-			result.Arguments = [.. input.Args.Select(ArgParser.ParsePowerShellArgument)];
-		}
-
-		return result;
 	}
 }

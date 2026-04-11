@@ -14,18 +14,6 @@ internal static partial class ArgParser
 		return new CommandArgument { Tokens = [.. Tokenize(arg)] };
 	}
 
-	internal static CommandArgument ParsePowerShellArgument(string arg)
-	{
-		var eqIdx = arg.IndexOf('=');
-		return eqIdx > 0
-			? new CommandArgument
-			{
-				ParameterName = arg[..eqIdx],
-				Tokens = [.. Tokenize(arg[(eqIdx + 1)..])]
-			}
-			: ParsePluginArgument(arg);
-	}
-
 	private static ArgumentToken[] Tokenize(string raw)
 	{
 		var tokens = new List<ArgumentToken>();

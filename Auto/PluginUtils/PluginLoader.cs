@@ -53,6 +53,7 @@ internal class PluginLoader(IServiceProvider serviceProvider) : IPluginLoader
 	private static IEnumerable<ICommand> GetBuiltInPluginInstances(IServiceProvider? serviceProvider = null)
 	{
 		yield return new KeyboardInputPlugin(serviceProvider);
+		yield return new PowerShellPlugin();
 		yield return new StartProgramPlugin();
 	}
 

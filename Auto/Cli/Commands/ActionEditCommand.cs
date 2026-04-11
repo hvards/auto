@@ -52,9 +52,7 @@ internal static class ActionEditCommand
 
 			if (input.Args != null)
 			{
-				action.Arguments = action.Type == ActionType.PowerShell
-					? [.. input.Args.Select(ArgParser.ParsePowerShellArgument)]
-					: [.. input.Args.Select(ArgParser.ParsePluginArgument)];
+				action.Arguments = [.. input.Args.Select(ArgParser.ParsePluginArgument)];
 			}
 
 			if (input.Variable != null)

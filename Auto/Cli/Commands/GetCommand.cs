@@ -63,9 +63,7 @@ internal static class GetCommand
 			Console.WriteLine("Actions:");
 			foreach (var (action, index) in cmd.Actions.OrderBy(a => a.Order).Select((a, i) => (a, i)))
 			{
-				var actionText = action.Type == ActionType.Plugin
-					? $"Plugin: {PluginLoader.GetPluginName(action.Target)} ({action.Target})"
-					: $"PowerShell: {action.Target}";
+				var actionText = $"{PluginLoader.GetPluginName(action.Target)} ({action.Target})";
 
 				var varSuffix = action.Variable != null ? $" -> {action.Variable}" : "";
 				Console.WriteLine($"  [{index}] {actionText}{varSuffix}");
@@ -75,8 +73,7 @@ internal static class GetCommand
 					Console.WriteLine($"    Args:");
 					foreach (var arg in action.Arguments)
 					{
-						var parameterNamePrefix = arg.ParameterName != null ? arg.ParameterName + " = " : string.Empty;
-						Console.WriteLine($"      {parameterNamePrefix}{FormatTokens(arg.Tokens)}");
+						Console.WriteLine($"      {FormatTokens(arg.Tokens)}");
 					}
 				}
 			}

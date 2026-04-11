@@ -10,8 +10,8 @@ namespace UnitTests.PluginUtils;
 [TestFixture]
 internal class PluginExecutorTests
 {
-	private Mock<IPluginLoader> _pluginLoaderMock;
-	private PluginExecutor _subject;
+	private Mock<IPluginLoader> _pluginLoaderMock = null!;
+	private PluginExecutor _subject = null!;
 
 	[SetUp]
 	public void SetUp()

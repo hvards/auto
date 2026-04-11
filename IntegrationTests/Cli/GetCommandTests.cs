@@ -30,7 +30,7 @@ internal class GetCommandTests : CliTestBase
 			$"Trigger:",
 			$"  Combination:     {trigger}",
 			$"Actions:",
-			$"  [0] Plugin: StartProgram ({startProgramGuid})",
+			$"  [0] StartProgram ({startProgramGuid})",
 			$"    Args:",
 			$"      https://example.com",
 			"");

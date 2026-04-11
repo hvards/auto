@@ -52,7 +52,6 @@ internal static class Program
 		rootCommand.Subcommands.Add(EnableDisableCommand.CreateDisable(ResolveStore));
 		rootCommand.Subcommands.Add(ExecuteCommand.Create(ResolveStore));
 		rootCommand.Subcommands.Add(ListPluginsCommand.Create());
-		rootCommand.Subcommands.Add(ListPowerShellCommand.Create());
 		rootCommand.Subcommands.Add(ListKeysCommand.Create());
 		rootCommand.Subcommands.Add(RecordInputCommand.Create(keyRecorder));
 		rootCommand.Subcommands.Add(StartCommand.Create());
@@ -88,7 +87,6 @@ internal static class Program
 		services.AddSingleton<IPluginLoader, PluginLoader>();
 		services.AddSingleton<IPluginExecutor, PluginExecutor>();
 		services.AddSingleton<Commands.ICommandExecutor, CommandExecutor>();
-		services.AddSingleton<IPowerShell, PowerShell>();
 		return services.BuildServiceProvider();
 	}
 

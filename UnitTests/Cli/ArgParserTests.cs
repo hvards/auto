@@ -15,7 +15,6 @@ internal class ArgParserTests
 		var arg = ArgParser.ParsePluginArgument($"%{{{variableName}}}");
 
 		// Assert
-		Assert.That(arg.ParameterName, Is.Null);
 		Assert.That(arg.Tokens[0].Type, Is.EqualTo(ArgumentType.Variable));
 		Assert.That(arg.Tokens[0].Value, Is.EqualTo(variableName));
 	}
@@ -46,42 +45,6 @@ internal class ArgParserTests
 		Assert.That(arg.Tokens[1].Value, Is.EqualTo("Clipboard"));
 		Assert.That(arg.Tokens[2].Type, Is.EqualTo(ArgumentType.Text));
 		Assert.That(arg.Tokens[2].Value, Is.EqualTo("_suffix"));
-	}
-
-	[Test]
-	public void ParsePowerShellArg_NamedParameter()
-	{
-		// Act
-		var arg = ArgParser.ParsePowerShellArgument("Path=C:\\scripts");
-
-		// Assert
-		Assert.That(arg.ParameterName, Is.EqualTo("Path"));
-		Assert.That(arg.Tokens[0].Type, Is.EqualTo(ArgumentType.Text));
-		Assert.That(arg.Tokens[0].Value, Is.EqualTo("C:\\scripts"));
-	}
-
-	[Test]
-	public void ParsePowerShellArg_VariableValue()
-	{
-		// Act
-		var arg = ArgParser.ParsePowerShellArgument("Input=%{Clipboard}");
-
-		// Assert
-		Assert.That(arg.ParameterName, Is.EqualTo("Input"));
-		Assert.That(arg.Tokens[0].Type, Is.EqualTo(ArgumentType.Variable));
-		Assert.That(arg.Tokens[0].Value, Is.EqualTo("Clipboard"));
-	}
-
-	[Test]
-	public void ParsePowerShellArg_Variable_NoParamName()
-	{
-		// Act
-		var arg = ArgParser.ParsePowerShellArgument("%{Clipboard}");
-
-		// Assert
-		Assert.That(arg.ParameterName, Is.Null);
-		Assert.That(arg.Tokens[0].Type, Is.EqualTo(ArgumentType.Variable));
-		Assert.That(arg.Tokens[0].Value, Is.EqualTo("Clipboard"));
 	}
 
 	[Test]

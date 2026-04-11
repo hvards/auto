@@ -16,7 +16,7 @@ internal class ActionCommandTests : CliTestBase
 		// Act
 		var (exit, stdout, _) = await InvokeAsync(
 			"action", "add", "Test",
-			"--plugin", "StartProgram",
+			"StartProgram",
 			"--arg", "https://example.com");
 
 		// Assert
@@ -38,7 +38,7 @@ internal class ActionCommandTests : CliTestBase
 		// Act
 		var (exit, _, _) = await InvokeAsync(
 			"action", "add", "Test",
-			"--plugin", "StartProgram",
+			"StartProgram",
 			"--arg", "https://example.com",
 			"--var", "TestCommandResult");
 
@@ -55,12 +55,12 @@ internal class ActionCommandTests : CliTestBase
 		// Arrange
 		await InvokeAsync("add", "Test", "--combination", "LCtrl", "T");
 		await InvokeAsync("action", "add", "Test",
-			"--plugin", "StartProgram", "--arg", "https://example.com", "--var", "TestCommandResult");
+			"StartProgram", "--arg", "https://example.com", "--var", "TestCommandResult");
 
 		// Act
 		var (exit, _, _) = await InvokeAsync(
 			"action", "add", "Test",
-			"--plugin", "KeyboardInput",
+			"KeyboardInput",
 			"--arg", "%{TestCommandResult}");
 
 		// Assert
@@ -81,7 +81,7 @@ internal class ActionCommandTests : CliTestBase
 		// Act
 		var (exit, _, stderr) = await InvokeAsync(
 			"action", "add", "Test",
-			"--plugin", "StartProgram",
+			"StartProgram",
 			"--arg", "%{NonExistent}");
 
 		// Assert
@@ -90,7 +90,7 @@ internal class ActionCommandTests : CliTestBase
 	}
 
 	[Test]
-	public async Task ActionAdd_PowerShellWithPsArg()
+	public async Task ActionAdd_PowerShellWithScriptAndArg()
 	{
 		// Arrange
 		await InvokeAsync("add", "Test", "--combination", "LCtrl", "T");
@@ -98,21 +98,20 @@ internal class ActionCommandTests : CliTestBase
 		// Act
 		var (exit, _, _) = await InvokeAsync(
 			"action", "add", "Test",
-			"--powershell", "test.ps1",
-			"--arg", @"Path=C:\scripts");
+			"PowerShell",
+			"--arg", "test.ps1", @"Path=C:\scripts");
 
 		// Assert
 		Assert.That(exit, Is.Zero);
 
 		var cmd = TestCommandStore.GetCommand("Test").Command;
-		Assert.That(cmd.Actions[0].Type, Is.EqualTo(ActionType.PowerShell));
-		Assert.That(cmd.Actions[0].Target, Is.EqualTo("test.ps1"));
-		Assert.That(cmd.Actions[0].Arguments[0].ParameterName, Is.EqualTo("Path"));
-		Assert.That(cmd.Actions[0].Arguments[0].Tokens[0].Value, Is.EqualTo(@"C:\scripts"));
+		Assert.That(cmd.Actions[0].Target, Is.EqualTo(PluginLoader.ResolvePlugin("PowerShell")));
+		Assert.That(cmd.Actions[0].Arguments[0].Tokens[0].Value, Is.EqualTo("test.ps1"));
+		Assert.That(cmd.Actions[0].Arguments[1].Tokens[0].Value, Is.EqualTo(@"Path=C:\scripts"));
 	}
 
 	[Test]
-	public async Task ActionAdd_PowerShellMultiplePsArgs()
+	public async Task ActionAdd_PowerShellMultipleArgs()
 	{
 		// Arrange
 		await InvokeAsync("add", "Test", "--combination", "LCtrl", "T");
@@ -120,21 +119,20 @@ internal class ActionCommandTests : CliTestBase
 		// Act
 		var (exit, _, _) = await InvokeAsync(
 			"action", "add", "Test",
-			"--powershell", "test.ps1",
-			"--arg", @"Path=C:\scripts", "Name=foo");
+			"PowerShell",
+			"--arg", "test.ps1", @"Path=C:\scripts", "Name=foo");
 
 		// Assert
 		Assert.That(exit, Is.Zero);
 
 		var cmd = TestCommandStore.GetCommand("Test").Command;
-		Assert.That(cmd.Actions[0].Arguments, Has.Length.EqualTo(2));
-		Assert.That(cmd.Actions[0].Arguments[0].ParameterName, Is.EqualTo("Path"));
-		Assert.That(cmd.Actions[0].Arguments[1].ParameterName, Is.EqualTo("Name"));
-		Assert.That(cmd.Actions[0].Arguments[1].Tokens[0].Value, Is.EqualTo("foo"));
+		Assert.That(cmd.Actions[0].Arguments, Has.Length.EqualTo(3));
+		Assert.That(cmd.Actions[0].Arguments[1].Tokens[0].Value, Is.EqualTo(@"Path=C:\scripts"));
+		Assert.That(cmd.Actions[0].Arguments[2].Tokens[0].Value, Is.EqualTo("Name=foo"));
 	}
 
 	[Test]
-	public async Task ActionAdd_RequiresPluginOrPowershell()
+	public async Task ActionAdd_RequiresPluginArgument()
 	{
 		// Arrange
 		await InvokeAsync("add", "Test", "--combination", "LCtrl", "T");
@@ -144,24 +142,7 @@ internal class ActionCommandTests : CliTestBase
 
 		// Assert
 		Assert.That(exit, Is.EqualTo(1));
-		Assert.That(stderr, Does.Contain("--plugin").And.Contains("--powershell"));
-	}
-
-	[Test]
-	public async Task ActionAdd_PluginAndPowershell_MutuallyExclusive()
-	{
-		// Arrange
-		await InvokeAsync("add", "Test", "--combination", "LCtrl", "T");
-
-		// Act
-		var (exit, _, stderr) = await InvokeAsync(
-			"action", "add", "Test",
-			"--plugin", "StartProgram",
-			"--powershell", "test.ps1");
-
-		// Assert
-		Assert.That(exit, Is.EqualTo(1));
-		Assert.That(stderr, Does.Contain("mutually exclusive"));
+		Assert.That(stderr, Does.Contain("Required argument missing"));
 	}
 
 	[Test]
@@ -170,9 +151,9 @@ internal class ActionCommandTests : CliTestBase
 		// Arrange
 		await InvokeAsync("add", "Test", "--combination", "LCtrl", "T");
 		await InvokeAsync("action", "add", "Test",
-			"--plugin", "StartProgram", "--arg", "https://example.com", "--var", "Result");
+			"StartProgram", "--arg", "https://example.com", "--var", "Result");
 		await InvokeAsync("action", "add", "Test",
-			"--plugin", "KeyboardInput", "--arg", "%{Result}");
+			"KeyboardInput", "--arg", "%{Result}");
 
 		// Act
 		var (exit, _, stderr) = await InvokeAsync("action", "delete", "Test", "0");
@@ -187,8 +168,8 @@ internal class ActionCommandTests : CliTestBase
 	{
 		// Arrange
 		await InvokeAsync("add", "Test", "--combination", "LCtrl", "T");
-		await InvokeAsync("action", "add", "Test", "--plugin", "StartProgram", "--arg", "a");
-		await InvokeAsync("action", "add", "Test", "--plugin", "StartProgram", "--arg", "b");
+		await InvokeAsync("action", "add", "Test", "StartProgram", "--arg", "a");
+		await InvokeAsync("action", "add", "Test", "StartProgram", "--arg", "b");
 
 		// Act — delete the first action (index 0)
 		var (exit, _, _) = await InvokeAsync("action", "delete", "Test", "0");
@@ -206,7 +187,7 @@ internal class ActionCommandTests : CliTestBase
 	{
 		// Arrange
 		await InvokeAsync("add", "Test", "--combination", "LCtrl", "T");
-		await InvokeAsync("action", "add", "Test", "--plugin", "StartProgram", "--arg", "a");
+		await InvokeAsync("action", "add", "Test", "StartProgram", "--arg", "a");
 
 		// Act
 		var (exit, _, stderr) = await InvokeAsync("action", "delete", "Test", "5");
@@ -221,7 +202,7 @@ internal class ActionCommandTests : CliTestBase
 	{
 		// Arrange
 		await InvokeAsync("add", "Test", "--combination", "LCtrl", "T");
-		await InvokeAsync("action", "add", "Test", "--plugin", "StartProgram", "--arg", "a");
+		await InvokeAsync("action", "add", "Test", "StartProgram", "--arg", "a");
 
 		// Act
 		var (exit, stdout, _) = await InvokeAsync("action", "edit", "Test", "0", "--arg", "b");
@@ -239,7 +220,7 @@ internal class ActionCommandTests : CliTestBase
 	{
 		// Arrange
 		await InvokeAsync("add", "Test", "--combination", "LCtrl", "T");
-		await InvokeAsync("action", "add", "Test", "--plugin", "StartProgram", "--arg", "a");
+		await InvokeAsync("action", "add", "Test", "StartProgram", "--arg", "a");
 
 		// Act
 		var (exit, _, _) = await InvokeAsync("action", "edit", "Test", "0", "--var", "Result");
@@ -256,7 +237,7 @@ internal class ActionCommandTests : CliTestBase
 	{
 		// Arrange
 		await InvokeAsync("add", "Test", "--combination", "LCtrl", "T");
-		await InvokeAsync("action", "add", "Test", "--plugin", "StartProgram", "--arg", "a", "--var", "Result");
+		await InvokeAsync("action", "add", "Test", "StartProgram", "--arg", "a", "--var", "Result");
 
 		// Act
 		var (exit, _, _) = await InvokeAsync("action", "edit", "Test", "0", "--var", "");
@@ -274,9 +255,9 @@ internal class ActionCommandTests : CliTestBase
 		// Arrange
 		await InvokeAsync("add", "Test", "--combination", "LCtrl", "T");
 		await InvokeAsync("action", "add", "Test",
-			"--plugin", "StartProgram", "--arg", "a", "--var", "Result");
+			"StartProgram", "--arg", "a", "--var", "Result");
 		await InvokeAsync("action", "add", "Test",
-			"--plugin", "KeyboardInput", "--arg", "%{Result}");
+			"KeyboardInput", "--arg", "%{Result}");
 
 		// Act
 		var (exit, _, stderr) = await InvokeAsync("action", "edit", "Test", "0", "--var", "");
@@ -291,7 +272,7 @@ internal class ActionCommandTests : CliTestBase
 	{
 		// Arrange
 		await InvokeAsync("add", "Test", "--combination", "LCtrl", "T");
-		await InvokeAsync("action", "add", "Test", "--plugin", "StartProgram", "--arg", "a");
+		await InvokeAsync("action", "add", "Test", "StartProgram", "--arg", "a");
 
 		// Act
 		var (exit, _, stderr) = await InvokeAsync("action", "edit", "Test", "5", "--arg", "b");
@@ -306,7 +287,7 @@ internal class ActionCommandTests : CliTestBase
 	{
 		// Arrange
 		await InvokeAsync("add", "Test", "--combination", "LCtrl", "T");
-		await InvokeAsync("action", "add", "Test", "--plugin", "StartProgram", "--arg", "a");
+		await InvokeAsync("action", "add", "Test", "StartProgram", "--arg", "a");
 
 		// Act
 		var (exit, _, stderr) = await InvokeAsync("action", "edit", "Test", "0");
@@ -327,9 +308,9 @@ internal class ActionCommandTests : CliTestBase
 		await InvokeAsync("add", "Format and Paste", "--file", "cmds.json",
 			"--combination", "LCtrl", "LAlt", "V");
 		await InvokeAsync("action", "add", "Format and Paste",
-			"--plugin", "StartProgram", "--arg", "https://example.com", "--var", "FormattedText");
+			"StartProgram", "--arg", "https://example.com", "--var", "FormattedText");
 		var (exit, _, stderr) = await InvokeAsync("action", "add", "Format and Paste",
-			"--plugin", "KeyboardInput", "--arg", "%{FormattedText}");
+			"KeyboardInput", "--arg", "%{FormattedText}");
 
 		// Assert
 		Assert.That(exit, Is.Zero, () => stderr);

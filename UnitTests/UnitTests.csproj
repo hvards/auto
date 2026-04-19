@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Auto\Auto.csproj" />
+    <ProjectReference Include="..\AutoContracts\AutoContracts.csproj" />
   </ItemGroup>
 
 </Project>

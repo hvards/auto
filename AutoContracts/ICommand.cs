@@ -29,6 +29,18 @@ public interface ICommand
 	List<PluginArgument> ExpectedArguments { get; }
 
 	/// <summary>
+	/// If <c>true</c>, the plugin is executed on a dedicated STA thread owned by this plugin.
+	/// Required for WinForms/WPF UI, single-threaded-apartment COM. The same thread is reused across invocations.
+	/// Blocking delays subsequent calls to this plugin, not others.
+	/// </summary>
+	bool RequiresSta { get; }
+
+	/// <summary>
+	/// Called once, completing before any <c>Execute</c> call.
+	/// </summary>
+	void Init();
+
+	/// <summary>
 	///	Executes plugin and return result.
 	/// </summary>
 	/// <param name="args">Arguments as defined in <c>ExpectedArgument</c>, if correctly configured.</param>

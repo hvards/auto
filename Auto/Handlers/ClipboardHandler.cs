@@ -10,6 +10,7 @@ internal interface IClipboardHandler
 internal class ClipboardHandler(IKeyboardHandler keyboardHandler) : IClipboardHandler
 {
 	private const int COPY_DELAY = 75;
+	private static readonly Guid StaKey = new("7c1e9a2d-4b6f-4a38-9d4a-1f3b5c7e9a02");
 
 	public string GetClipboardText(bool copyHighlightedText = false)
 	{
@@ -19,7 +20,7 @@ internal class ClipboardHandler(IKeyboardHandler keyboardHandler) : IClipboardHa
 			keyboardHandler.CopyHighlightedText();
 		}
 
-		var clipboardText = StaHandler.Execute(RetrieveClipboardText);
+		var clipboardText = StaHandler.Execute(StaKey, RetrieveClipboardText);
 
 		if (copyHighlightedText)
 			DeleteClipboard();
@@ -27,7 +28,7 @@ internal class ClipboardHandler(IKeyboardHandler keyboardHandler) : IClipboardHa
 		return clipboardText?.Trim() ?? string.Empty;
 	}
 
-	private static void DeleteClipboard() => StaHandler.Execute(ResetClipboard);
+	private static void DeleteClipboard() => StaHandler.Execute(StaKey, ResetClipboard);
 
 	private static string RetrieveClipboardText()
 	{

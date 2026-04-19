@@ -8,6 +8,8 @@ using Auto.Plugins;
 
 using AutoContracts;
 
+using Microsoft.Extensions.Logging;
+
 namespace Auto.PluginUtils;
 
 internal record PluginDetail(Guid Id, string Name, string Description, List<PluginArgument> ExpectedArguments);
@@ -17,9 +19,8 @@ internal interface IPluginLoader
 	Dictionary<string, Plugin> CreateCommands();
 }
 
-internal class PluginLoader(IServiceProvider serviceProvider) : IPluginLoader
+internal partial class PluginLoader(IServiceProvider serviceProvider, ILogger<PluginLoader> logger) : IPluginLoader
 {
-
 	private static List<string> GetDllPaths()
 	{
 		var paths = new List<string>();
@@ -62,14 +63,7 @@ internal class PluginLoader(IServiceProvider serviceProvider) : IPluginLoader
 		var result = new Dictionary<string, Plugin>();
 
 		foreach (var command in GetBuiltInPluginInstances(serviceProvider))
-		{
-			result.Add(command.Id.ToString(), new Plugin
-			{
-				Action = command.Execute,
-				ArgumentTypes = [.. command.ExpectedArguments.Select(x => x.Type)],
-				StaThreadRequired = false
-			});
-		}
+			result.Add(command.Id.ToString(), ToPlugin(command));
 
 		return result;
 	}
@@ -81,14 +75,7 @@ internal class PluginLoader(IServiceProvider serviceProvider) : IPluginLoader
 		{
 			try
 			{
-				var staThread = assembly.GetReferencedAssemblies().Any(x => x.Name == "PresentationFramework");
-
-				IEnumerable<(string, Plugin)> GetAssemblyPlugins() => GetPluginsFromAssembly(assembly, staThread);
-				var plugins = staThread
-					? StaHandler.Execute(GetAssemblyPlugins)
-					: GetAssemblyPlugins();
-
-				foreach (var (id, plugin) in plugins ?? [])
+				foreach (var (id, plugin) in GetPluginsFromAssembly(assembly))
 					result.Add(id, plugin);
 			}
 			catch
@@ -100,6 +87,38 @@ internal class PluginLoader(IServiceProvider serviceProvider) : IPluginLoader
 		return result;
 	}
 
+	internal Plugin ToPlugin(ICommand command)
+	{
+		var initTask = RunInitAsync(command);
+
+		return new Plugin
+		{
+			Id = command.Id,
+			Action = args => { initTask.GetAwaiter().GetResult(); return command.Execute(args); },
+			StaThreadRequired = command.RequiresSta,
+			ArgumentTypes = [.. command.ExpectedArguments.Select(x => x.Type)]
+		};
+	}
+
+	private Task RunInitAsync(ICommand command)
+	{
+		void Init()
+		{
+			try { command.Init(); }
+			catch (Exception ex) { LogPluginInitFailed(ex, command.Name); }
+		}
+
+		if (!command.RequiresSta)
+			return Task.Run(Init);
+
+		// STA: Init/Execute order is enforced by the StaThread's FIFO queue, not by this task.
+		StaHandler.Enqueue(command.Id, Init);
+		return Task.CompletedTask;
+	}
+
+	[LoggerMessage(LogLevel.Error, "Plugin {PluginName} Init failed")]
+	private partial void LogPluginInitFailed(Exception ex, string pluginName);
+
 	private static IEnumerable<Assembly> GetDllAssemblies()
 	{
 		foreach (var dllPath in GetDllPaths())
@@ -109,17 +128,20 @@ internal class PluginLoader(IServiceProvider serviceProvider) : IPluginLoader
 		}
 	}
 
-	private static IEnumerable<(string, Plugin)> GetPluginsFromAssembly(Assembly assembly, bool staThread)
+	private IEnumerable<(string, Plugin)> GetPluginsFromAssembly(Assembly assembly)
 	{
-		foreach (var command in GetCommands(assembly))
+		foreach (var type in GetCommandTypes(assembly))
 		{
-			yield return (command.Id.ToString(), new Plugin
-			{
-				Action = command.Execute,
-				StaThreadRequired = staThread,
-				ArgumentTypes = [.. command.ExpectedArguments.Select(x => x.Type)]
-			});
+			if (Activator.CreateInstance(type) is not ICommand command) continue;
+			yield return (command.Id.ToString(), ToPlugin(command));
 		}
+	}
+
+	private static IEnumerable<Type> GetCommandTypes(Assembly assembly)
+	{
+		foreach (var type in assembly.GetTypes())
+			if (typeof(ICommand).IsAssignableFrom(type) && !type.IsAbstract)
+				yield return type;
 	}
 
 	private static IEnumerable<ICommand> GetCommands(Assembly assembly)

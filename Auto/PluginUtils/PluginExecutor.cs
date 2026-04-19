@@ -42,7 +42,7 @@ internal partial class PluginExecutor : IPluginExecutor
 			}
 
 			return plugin.StaThreadRequired
-				? StaHandler.Execute(() => plugin.Action(arguments))
+				? StaHandler.Execute(plugin.Id, () => plugin.Action(arguments))
 				: plugin.Action(arguments);
 		}
 		catch (Exception ex)

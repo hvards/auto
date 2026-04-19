@@ -19,7 +19,12 @@ namespace Auto;
 internal static class Program
 {
 	private static async Task<int> Main(string[] args)
-		=> await BuildCli().Parse(args).InvokeAsync();
+	{
+		Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
+		Application.EnableVisualStyles();
+		Application.SetCompatibleTextRenderingDefault(false);
+		return await BuildCli().Parse(args).InvokeAsync();
+	}
 
 	internal static RootCommand BuildCli()
 	{

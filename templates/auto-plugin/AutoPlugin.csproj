@@ -4,10 +4,11 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     </PropertyGroup>
 
     <ItemGroup>
-        <Reference Include="AutoContracts">
+        <Reference Include="AutoContracts" Private="false">
             <HintPath>lib\AutoContracts.dll</HintPath>
         </Reference>
     </ItemGroup>
@@ -16,8 +17,10 @@
         <PropertyGroup>
             <PluginDir>$([System.Environment]::GetFolderPath(SpecialFolder.UserProfile))/.config/auto/plugins/$(AssemblyName)</PluginDir>
         </PropertyGroup>
-        <MakeDir Directories="$(PluginDir)" />
-        <Copy SourceFiles="$(TargetDir)$(TargetFileName);$(TargetDir)plugin.json" DestinationFolder="$(PluginDir)" />
+        <ItemGroup>
+            <PluginOutput Include="$(TargetDir)**\*" />
+        </ItemGroup>
+        <Copy SourceFiles="@(PluginOutput)" DestinationFiles="@(PluginOutput->'$(PluginDir)/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
     </Target>
 
     <ItemGroup>

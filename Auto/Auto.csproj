@@ -21,20 +21,19 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="System.CommandLine" Version="2.0.5" />
-        <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.5" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.5" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.5" />
+        <PackageReference Include="System.CommandLine" Version="2.0.6" />
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.6" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.6" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.6" />
         <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.6.0" />
+        <PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.6" NoWarn="NU1510" />
         <PackageReference Include="Serilog.Extensions.Logging" Version="10.0.0" />
         <PackageReference Include="Serilog.Settings.Configuration" Version="10.0.0" />
         <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
     </ItemGroup>
 
     <ItemGroup>
-        <Reference Include="AutoContracts">
-            <HintPath>lib\AutoContracts.dll</HintPath>
-        </Reference>
+        <ProjectReference Include="..\AutoContracts\AutoContracts.csproj" />
     </ItemGroup>
 
     <ItemGroup>

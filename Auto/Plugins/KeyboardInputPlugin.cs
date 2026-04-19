@@ -13,6 +13,7 @@ internal class KeyboardInputPlugin(IServiceProvider? serviceProvider) : ICommand
 	public string Description => "Send keyboard input.";
 	public Guid Id { get; } = Guid.Parse("902a5fec-8684-4b83-a959-453d81de5479");
 	public Type ReturnType { get; } = typeof(bool);
+	public bool RequiresSta => false;
 
 	public List<PluginArgument> ExpectedArguments { get; } =
 	[
@@ -22,6 +23,8 @@ internal class KeyboardInputPlugin(IServiceProvider? serviceProvider) : ICommand
 			Type = typeof(string)
 		}
 	];
+
+	public void Init() { }
 
 	public object? Execute(object?[] args)
 	{

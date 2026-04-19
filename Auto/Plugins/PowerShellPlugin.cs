@@ -17,6 +17,7 @@ internal class PowerShellPlugin : ICommand
 	public string Description => "Execute script from ~/.config/auto/powershell/ (additional args are optional).";
 	public Guid Id { get; } = Guid.Parse("a4c9b4d8-9136-4b5b-b656-f1a3af4f6f24");
 	public Type ReturnType { get; } = typeof(string);
+	public bool RequiresSta => false;
 
 	public List<PluginArgument> ExpectedArguments { get; } =
 	[
@@ -32,7 +33,7 @@ internal class PowerShellPlugin : ICommand
 		}
 	];
 
-	static PowerShellPlugin()
+	public void Init()
 	{
 		SessionState.ExecutionPolicy = ExecutionPolicy.Unrestricted;
 	}

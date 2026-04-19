@@ -10,6 +10,7 @@ internal class StartProgramPlugin : ICommand
 	public string Description => "Start program";
 	public Guid Id { get; } = Guid.Parse("21092f13-5366-4cba-90df-66bd123e66a5");
 	public Type ReturnType { get; } = typeof(bool);
+	public bool RequiresSta => false;
 
 	public List<PluginArgument> ExpectedArguments { get; } =
 	[
@@ -24,6 +25,8 @@ internal class StartProgramPlugin : ICommand
 			Type = typeof(string)
 		}
 	];
+
+	public void Init() { }
 
 	public object? Execute(object?[] args)
 	{

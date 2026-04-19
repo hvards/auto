@@ -36,6 +36,7 @@ internal class PluginExecutorTests
 	{
 		var plugin = new Plugin
 		{
+			Id = Guid.Empty,
 			ArgumentTypes = [],
 			Action = _ => "Executed",
 			StaThreadRequired = false
@@ -54,6 +55,7 @@ internal class PluginExecutorTests
 	{
 		var plugin = new Plugin
 		{
+			Id = Guid.Empty,
 			ArgumentTypes = [],
 			Action = _ => throw new Exception("Error"),
 			StaThreadRequired = false

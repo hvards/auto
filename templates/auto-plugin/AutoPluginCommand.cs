@@ -8,6 +8,7 @@ public class AutoPluginCommand : ICommand
     public string Description => "PLUGIN-DESCRIPTION";
     public Guid Id { get; } = Guid.Parse("PLUGIN-GUID");
     public Type ReturnType { get; } = typeof(string);
+    public bool RequiresSta => false;
 
     public List<PluginArgument> ExpectedArguments { get; } =
     [
@@ -17,6 +18,8 @@ public class AutoPluginCommand : ICommand
             Type = typeof(string)
         }
     ];
+
+    public void Init() { }
 
     public object? Execute(object?[] args)
     {

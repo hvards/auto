@@ -1,0 +1,11 @@
+<Solution>
+  <Project Path="Auto/Auto.csproj" />
+  <Project Path="AutoContracts/AutoContracts.csproj" />
+  <Project Path="Benchmarks/Benchmarks.csproj" />
+  <Project Path="Installer/Installer.wixproj">
+    <Platform Project="x64" />
+    <Build />
+  </Project>
+  <Project Path="IntegrationTests/IntegrationTests.csproj" />
+  <Project Path="UnitTests/UnitTests.csproj" />
+</Solution>

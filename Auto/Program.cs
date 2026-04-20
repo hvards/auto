@@ -60,6 +60,7 @@ internal static class Program
 		rootCommand.Subcommands.Add(ListKeysCommand.Create());
 		rootCommand.Subcommands.Add(RecordInputCommand.Create(keyRecorder));
 		rootCommand.Subcommands.Add(StartCommand.Create());
+		rootCommand.Subcommands.Add(StopCommand.Create());
 
 		return rootCommand;
 	}

@@ -1,5 +1,6 @@
 using System.CommandLine;
-using System.Diagnostics;
+
+using Auto.Cli.Services;
 
 using CliCommand = System.CommandLine.Command;
 
@@ -20,31 +21,15 @@ internal static class StartCommand
 
 			if (pr.GetValue(foregroundOption))
 			{
-				KillExistingInstances();
+				BackgroundProcess.Stop();
 				Program.StartService();
 			}
 			else
 			{
-				Process.Start(new ProcessStartInfo
-				{
-					FileName = Environment.ProcessPath,
-					Arguments = "start --foreground",
-					UseShellExecute = false,
-					CreateNoWindow = true,
-				});
+				BackgroundProcess.Start();
 			}
 		});
 
 		return command;
-	}
-
-	private static void KillExistingInstances()
-	{
-		foreach (var process in Process.GetProcessesByName("Auto"))
-		{
-			if (process.Id == Environment.ProcessId) continue;
-			try { process.Kill(); } catch { }
-			process.Dispose();
-		}
 	}
 }

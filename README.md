@@ -118,6 +118,7 @@ auto action add "Format and Paste" KeyboardInput --arg "%{Formatted}"
 | `auto list-keys` | List valid key names and aliases for triggers |
 | `auto record-input` | Record `KeyboardInput` syntax (double-tap `Esc` to stop) |
 | `auto start` | Start the background listener |
+| `auto stop` | Stop the background listener |
 
 ## Plugins
 

@@ -17,6 +17,10 @@ internal record PluginDetail(Guid Id, string Name, string Description, List<Plug
 internal interface IPluginLoader
 {
 	Dictionary<string, Plugin> CreateCommands();
+	IEnumerable<PluginDetail> GetAvailablePluginDetails();
+	string GetPluginName(string guidString);
+	string ResolvePlugin(string nameOrId);
+	string? TryResolvePlugin(string nameOrId);
 }
 
 internal partial class PluginLoader(IServiceProvider serviceProvider, ILogger<PluginLoader> logger) : IPluginLoader
@@ -51,7 +55,7 @@ internal partial class PluginLoader(IServiceProvider serviceProvider, ILogger<Pl
 		return paths;
 	}
 
-	private static IEnumerable<ICommand> GetBuiltInPluginInstances(IServiceProvider? serviceProvider = null)
+	private IEnumerable<ICommand> GetBuiltInPluginInstances()
 	{
 		yield return new KeyboardInputPlugin(serviceProvider);
 		yield return new PowerShellPlugin();
@@ -62,7 +66,7 @@ internal partial class PluginLoader(IServiceProvider serviceProvider, ILogger<Pl
 	{
 		var result = new Dictionary<string, Plugin>();
 
-		foreach (var command in GetBuiltInPluginInstances(serviceProvider))
+		foreach (var command in GetBuiltInPluginInstances())
 			result.Add(command.Id.ToString(), ToPlugin(command));
 
 		return result;
@@ -78,9 +82,9 @@ internal partial class PluginLoader(IServiceProvider serviceProvider, ILogger<Pl
 				foreach (var (id, plugin) in GetPluginsFromAssembly(assembly))
 					result.Add(id, plugin);
 			}
-			catch
+			catch (Exception ex)
 			{
-				// ignored
+				LogPluginAssemblyLoadFailed(ex, assembly.FullName ?? "<unknown>");
 			}
 		}
 
@@ -116,10 +120,7 @@ internal partial class PluginLoader(IServiceProvider serviceProvider, ILogger<Pl
 		return Task.CompletedTask;
 	}
 
-	[LoggerMessage(LogLevel.Error, "Plugin {PluginName} Init failed")]
-	private partial void LogPluginInitFailed(Exception ex, string pluginName);
-
-	private static IEnumerable<Assembly> GetDllAssemblies()
+	private IEnumerable<Assembly> GetDllAssemblies()
 	{
 		foreach (var dllPath in GetDllPaths())
 		{
@@ -154,7 +155,7 @@ internal partial class PluginLoader(IServiceProvider serviceProvider, ILogger<Pl
 		}
 	}
 
-	private static IEnumerable<ICommand> GetAllCommands()
+	private IEnumerable<ICommand> GetAllCommands()
 	{
 		foreach (var command in GetBuiltInPluginInstances())
 			yield return command;
@@ -164,17 +165,17 @@ internal partial class PluginLoader(IServiceProvider serviceProvider, ILogger<Pl
 				yield return command;
 	}
 
-	public static IEnumerable<PluginDetail> GetAvailablePluginDetails()
+	public IEnumerable<PluginDetail> GetAvailablePluginDetails()
 		=> GetAllCommands().Select(c => new PluginDetail(c.Id, c.Name, c.Description, c.ExpectedArguments));
 
-	public static string GetPluginName(string guidString)
+	public string GetPluginName(string guidString)
 	{
 		return !Guid.TryParse(guidString, out var guid)
 			? string.Empty
 			: (GetAllCommands().FirstOrDefault(c => c.Id == guid)?.Name) ?? string.Empty;
 	}
 
-	public static string ResolvePlugin(string nameOrId)
+	public string ResolvePlugin(string nameOrId)
 	{
 		if (Guid.TryParse(nameOrId, out var guid))
 			return guid.ToString();
@@ -183,11 +184,17 @@ internal partial class PluginLoader(IServiceProvider serviceProvider, ILogger<Pl
 			?? throw new ArgumentException($"Unknown plugin: {nameOrId}");
 	}
 
-	public static string? TryResolvePlugin(string nameOrId)
+	public string? TryResolvePlugin(string nameOrId)
 	{
 		if (Guid.TryParse(nameOrId, out var guid))
 			return guid.ToString();
 
 		return GetAllCommands().FirstOrDefault(c => c.Name.Equals(nameOrId))?.Id.ToString();
 	}
+
+	[LoggerMessage(LogLevel.Error, "Plugin {PluginName} Init failed")]
+	private partial void LogPluginInitFailed(Exception ex, string pluginName);
+
+	[LoggerMessage(LogLevel.Warning, "Failed to load plugins from assembly \"{Assembly}\"")]
+	private partial void LogPluginAssemblyLoadFailed(Exception ex, string assembly);
 }

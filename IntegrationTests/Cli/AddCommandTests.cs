@@ -44,7 +44,7 @@ internal class AddCommandTests : CliTestBase
 	public async Task Add_ThenActionAdd_CreatesCommandWithAction()
 	{
 		// Arrange
-		var startProgramGuid = PluginLoader.ResolvePlugin("StartProgram");
+		var startProgramGuid = TestPluginLoader.ResolvePlugin("StartProgram");
 
 		// Act
 		await InvokeAsync(

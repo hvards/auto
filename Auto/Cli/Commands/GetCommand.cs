@@ -13,7 +13,7 @@ internal static class GetCommand
 {
 	private record GetInput(string NameOrId, bool Json);
 
-	public static CliCommand Create(Func<ParseResult, CommandStore> resolveStore)
+	public static CliCommand Create(Func<ParseResult, CommandStore> resolveStore, IPluginLoader pluginLoader)
 	{
 		var command = new CliCommand("get") { Description = "Show command details" }
 			.AddArgument<string>("name-or-id", "Command name or ID", out var nameArg)
@@ -21,6 +21,7 @@ internal static class GetCommand
 
 		command.SetActionWithErrorHandling(pr => Execute(
 			resolveStore(pr),
+			pluginLoader,
 			new GetInput(
 				pr.GetValue(nameArg) ?? string.Empty,
 				pr.GetValue(jsonOption)
@@ -29,7 +30,7 @@ internal static class GetCommand
 		return command;
 	}
 
-	private static void Execute(CommandStore store, GetInput input)
+	private static void Execute(CommandStore store, IPluginLoader pluginLoader, GetInput input)
 	{
 		var (file, cmd) = store.GetCommand(input.NameOrId);
 
@@ -39,15 +40,18 @@ internal static class GetCommand
 		}
 		else
 		{
-			PrintTableCommand(cmd, store.GetRelativePath(file));
+			PrintTableCommand(cmd, pluginLoader, store.GetRelativePath(file));
 		}
 	}
 
 	private static void PrintJsonCommand(CommandEntry cmd)
 		=> Console.WriteLine(CommandSerializer.SerializeSingle(cmd));
 
-	private static void PrintTableCommand(CommandEntry cmd, string filePath)
+	private static void PrintTableCommand(CommandEntry cmd, IPluginLoader pluginLoader, string filePath)
 	{
+		var actionTexts = cmd.Actions.Select(x => x.Target).Distinct()
+			.ToDictionary(x => x, pluginLoader.GetPluginName);
+
 		Console.WriteLine($"Name:        {cmd.Name}");
 		Console.WriteLine($"Description: {cmd.Description}");
 		Console.WriteLine($"Id:          {cmd.Id}");
@@ -63,7 +67,7 @@ internal static class GetCommand
 			Console.WriteLine("Actions:");
 			foreach (var (action, index) in cmd.Actions.OrderBy(a => a.Order).Select((a, i) => (a, i)))
 			{
-				var actionText = $"{PluginLoader.GetPluginName(action.Target)} ({action.Target})";
+				var actionText = $"{actionTexts[action.Target]} ({action.Target})";
 
 				var varSuffix = action.Variable != null ? $" -> {action.Variable}" : "";
 				Console.WriteLine($"  [{index}] {actionText}{varSuffix}");

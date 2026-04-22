@@ -17,7 +17,7 @@ internal static class ActionAddCommand
 		string? Variable
 	);
 
-	public static CliCommand Create(Func<ParseResult, CommandStore> resolveStore)
+	public static CliCommand Create(Func<ParseResult, CommandStore> resolveStore, IPluginLoader pluginLoader)
 	{
 		var command = new CliCommand("add") { Description = "Add an action to a command" }
 			.AddArgument<string>("name-or-id", "Command name or ID", out var nameArg)
@@ -27,6 +27,7 @@ internal static class ActionAddCommand
 
 		command.SetActionWithErrorHandling(pr => Execute(
 			resolveStore(pr),
+			pluginLoader,
 			new ActionAddInput(
 				pr.GetValue(nameArg) ?? string.Empty,
 				pr.GetValue(pluginArg) ?? string.Empty,
@@ -38,11 +39,11 @@ internal static class ActionAddCommand
 		return command;
 	}
 
-	private static void Execute(CommandStore store, ActionAddInput input)
+	private static void Execute(CommandStore store, IPluginLoader pluginLoader, ActionAddInput input)
 	{
 		var action = new CommandAction
 		{
-			Target = PluginLoader.ResolvePlugin(input.Plugin),
+			Target = pluginLoader.ResolvePlugin(input.Plugin),
 			Arguments = [.. input.Args.Select(ArgParser.ParsePluginArgument)],
 			Variable = input.Variable
 		};

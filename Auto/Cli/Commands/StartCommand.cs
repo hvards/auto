@@ -22,6 +22,7 @@ internal static class StartCommand
 			if (pr.GetValue(foregroundOption))
 			{
 				BackgroundProcess.Stop();
+				Program.ConfigureFileLogger();
 				Program.StartService();
 			}
 			else

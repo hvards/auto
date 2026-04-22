@@ -6,11 +6,11 @@ using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli.Commands;
 
-internal static class ListPluginsCommand
+internal class ListPluginsCommand(IPluginLoader pluginLoader) : ICliCommand
 {
 	private static readonly JsonSerializerOptions WriteOptions = new() { WriteIndented = true };
 
-	public static CliCommand Create(IPluginLoader pluginLoader)
+	public CliCommand Build()
 	{
 		var command = new CliCommand("list-plugins") { Description = "List available plugins" }
 			.AddOption<bool>("--json", "Output as JSON", out var jsonOption);

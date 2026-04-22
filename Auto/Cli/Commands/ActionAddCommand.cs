@@ -1,5 +1,3 @@
-using System.CommandLine;
-
 using Auto.Cli.Services;
 using Auto.Models;
 using Auto.PluginUtils;
@@ -8,7 +6,7 @@ using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli.Commands;
 
-internal static class ActionAddCommand
+internal class ActionAddCommand(ICommandStoreFactory storeFactory, IPluginLoader pluginLoader)
 {
 	private record ActionAddInput(
 		string NameOrId,
@@ -17,7 +15,7 @@ internal static class ActionAddCommand
 		string? Variable
 	);
 
-	public static CliCommand Create(Func<ParseResult, CommandStore> resolveStore, IPluginLoader pluginLoader)
+	public CliCommand Build()
 	{
 		var command = new CliCommand("add") { Description = "Add an action to a command" }
 			.AddArgument<string>("name-or-id", "Command name or ID", out var nameArg)
@@ -26,8 +24,7 @@ internal static class ActionAddCommand
 			.AddOption<string>("--var", "Output variable name", out var varOption);
 
 		command.SetActionWithErrorHandling(pr => Execute(
-			resolveStore(pr),
-			pluginLoader,
+			storeFactory.Create(pr),
 			new ActionAddInput(
 				pr.GetValue(nameArg) ?? string.Empty,
 				pr.GetValue(pluginArg) ?? string.Empty,
@@ -39,7 +36,7 @@ internal static class ActionAddCommand
 		return command;
 	}
 
-	private static void Execute(CommandStore store, IPluginLoader pluginLoader, ActionAddInput input)
+	private void Execute(CommandStore store, ActionAddInput input)
 	{
 		var action = new CommandAction
 		{

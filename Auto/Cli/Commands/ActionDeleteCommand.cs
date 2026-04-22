@@ -1,5 +1,3 @@
-using System.CommandLine;
-
 using Auto.Cli.Services;
 using Auto.Models;
 
@@ -7,21 +5,21 @@ using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli.Commands;
 
-internal static class ActionDeleteCommand
+internal class ActionDeleteCommand(ICommandStoreFactory storeFactory)
 {
 	private record Input(
 		string NameOrId,
 		int Index
 	);
 
-	public static CliCommand Create(Func<ParseResult, CommandStore> resolveStore)
+	public CliCommand Build()
 	{
 		var command = new CliCommand("delete") { Description = "Delete an action from a command" }
 			.AddArgument<string>("name-or-id", "Command name or ID", out var nameArg)
 			.AddArgument<int>("Index", "Delete by index", out var indexArg);
 
 		command.SetActionWithErrorHandling(pr => Execute(
-			resolveStore(pr),
+			storeFactory.Create(pr),
 			new Input(
 				pr.GetValue(nameArg) ?? string.Empty,
 				pr.GetValue(indexArg)

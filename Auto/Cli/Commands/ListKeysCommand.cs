@@ -4,9 +4,9 @@ using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli.Commands;
 
-internal static class ListKeysCommand
+internal class ListKeysCommand : ICliCommand
 {
-	public static CliCommand Create()
+	public CliCommand Build()
 	{
 		var command = new CliCommand("list-keys") { Description = "List valid key names for triggers" };
 

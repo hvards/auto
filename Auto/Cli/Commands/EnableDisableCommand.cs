@@ -1,26 +1,21 @@
-using System.CommandLine;
-
 using Auto.Cli.Services;
 
 using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli.Commands;
 
-internal static class EnableDisableCommand
+internal class EnableDisableCommand(ICommandStoreFactory storeFactory, bool enable) : ICliCommand
 {
 	private record EnableDisableInput(string NameOrId, bool Enable);
 
-	public static CliCommand CreateEnable(Func<ParseResult, CommandStore> resolveStore) => Create(resolveStore, true);
-	public static CliCommand CreateDisable(Func<ParseResult, CommandStore> resolveStore) => Create(resolveStore, false);
-
-	private static CliCommand Create(Func<ParseResult, CommandStore> resolveStore, bool enable)
+	public CliCommand Build()
 	{
 		var verb = enable ? "enable" : "disable";
 		var command = new CliCommand(verb) { Description = $"{(enable ? "Enable" : "Disable")} a command" }
 			.AddArgument<string>("name-or-id", "Command name or ID", out var nameArg);
 
 		command.SetActionWithErrorHandling(pr =>
-			Execute(resolveStore(pr), new EnableDisableInput(pr.GetValue(nameArg) ?? string.Empty, enable))
+			Execute(storeFactory.Create(pr), new EnableDisableInput(pr.GetValue(nameArg) ?? string.Empty, enable))
 		);
 
 		return command;

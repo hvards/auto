@@ -1,5 +1,3 @@
-using System.CommandLine;
-
 using Auto.Cli.Services;
 
 using CliCommand = System.CommandLine.Command;
@@ -7,11 +5,11 @@ using ICommandExecutor = Auto.Commands.ICommandExecutor;
 
 namespace Auto.Cli.Commands;
 
-internal static class ExecuteCommand
+internal class ExecuteCommand(ICommandStoreFactory storeFactory, ICommandExecutor commandExecutor) : ICliCommand
 {
 	private record ExecuteInput(string NameOrId, string? Clipboard, string? Highlighted);
 
-	internal static CliCommand Create(Func<ParseResult, CommandStore> resolveStore, ICommandExecutor commandExecutor)
+	public CliCommand Build()
 	{
 		var command = new CliCommand("execute") { Description = "Test execution of command actions" }
 			.AddArgument<string>("name-or-id", "Command name or ID", out var nameArg)
@@ -19,8 +17,7 @@ internal static class ExecuteCommand
 			.AddOption<string>("highlighted", "Highlighted text variable value", out var highlightedText);
 
 		command.SetActionWithErrorHandling(pr => Execute(
-			resolveStore(pr),
-			commandExecutor,
+			storeFactory.Create(pr),
 			new ExecuteInput(
 				pr.GetValue(nameArg) ?? string.Empty,
 				pr.GetValue(clipboardText),
@@ -31,7 +28,7 @@ internal static class ExecuteCommand
 		return command;
 	}
 
-	private static void Execute(CommandStore store, ICommandExecutor commandExecutor, ExecuteInput input)
+	private void Execute(CommandStore store, ExecuteInput input)
 	{
 		var (_, commandEntry) = store.GetCommand(input.NameOrId);
 		var command = new Models.Command

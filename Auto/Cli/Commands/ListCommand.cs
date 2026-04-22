@@ -1,5 +1,3 @@
-using System.CommandLine;
-
 using Auto.Cli.Serialization;
 using Auto.Cli.Services;
 
@@ -7,10 +5,11 @@ using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli.Commands;
 
-internal static class ListCommand
+internal class ListCommand(ICommandStoreFactory storeFactory) : ICliCommand
 {
 	private record ListInput(string? File, bool Enabled, bool Disabled, string? Search, bool Json);
-	public static CliCommand Create(Func<ParseResult, CommandStore> resolveStore)
+
+	public CliCommand Build()
 	{
 		var command = new CliCommand("list") { Description = "List all commands" }
 			.AddOption<string>("--file", "Filter by file path", out var fileOption)
@@ -20,7 +19,7 @@ internal static class ListCommand
 			.AddOption<bool>("--json", "Output as JSON", out var jsonOption);
 
 		command.SetActionWithErrorHandling(pr => Execute(
-			resolveStore(pr),
+			storeFactory.Create(pr),
 			new ListInput(
 				pr.GetValue(fileOption),
 				pr.GetValue(enabledOption),

@@ -1,14 +1,12 @@
-using System.CommandLine;
-
 using Auto.Cli.Services;
 
 using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli.Commands;
 
-internal static class StopCommand
+internal class StopCommand : ICliCommand
 {
-	public static CliCommand Create()
+	public CliCommand Build()
 	{
 		var command = new CliCommand("stop", "Stop the background service");
 

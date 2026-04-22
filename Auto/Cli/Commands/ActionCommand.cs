@@ -1,20 +1,18 @@
-using System.CommandLine;
-
-using Auto.Cli.Services;
-using Auto.PluginUtils;
-
 using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli.Commands;
 
-internal static class ActionCommand
+internal class ActionCommand(
+	ActionAddCommand addCmd,
+	ActionEditCommand editCmd,
+	ActionDeleteCommand deleteCmd) : ICliCommand
 {
-	public static CliCommand Create(Func<ParseResult, CommandStore> resolveStore, IPluginLoader pluginLoader)
+	public CliCommand Build()
 	{
 		var command = new CliCommand("action") { Description = "Manage command actions" };
-		command.Subcommands.Add(ActionAddCommand.Create(resolveStore, pluginLoader));
-		command.Subcommands.Add(ActionEditCommand.Create(resolveStore));
-		command.Subcommands.Add(ActionDeleteCommand.Create(resolveStore));
+		command.Subcommands.Add(addCmd.Build());
+		command.Subcommands.Add(editCmd.Build());
+		command.Subcommands.Add(deleteCmd.Build());
 		return command;
 	}
 }

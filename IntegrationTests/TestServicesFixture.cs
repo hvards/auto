@@ -1,4 +1,5 @@
 using Auto;
+using Auto.Cli;
 using Auto.PluginUtils;
 
 using IntegrationTests.Stubs;
@@ -17,6 +18,7 @@ internal class TestServicesFixture
 	public void OneTimeSetUp()
 	{
 		Services = Program.CreateServiceCollection()
+			.AddCliCommands()
 			.Replace(ServiceDescriptor.Singleton<IPluginLoader, PluginLoaderStub>())
 			.BuildServiceProvider();
 	}

@@ -1,5 +1,3 @@
-using System.CommandLine;
-
 using Auto.Cli.Serialization;
 using Auto.Cli.Services;
 using Auto.Models;
@@ -9,19 +7,18 @@ using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli.Commands;
 
-internal static class GetCommand
+internal class GetCommand(ICommandStoreFactory storeFactory, IPluginLoader pluginLoader) : ICliCommand
 {
 	private record GetInput(string NameOrId, bool Json);
 
-	public static CliCommand Create(Func<ParseResult, CommandStore> resolveStore, IPluginLoader pluginLoader)
+	public CliCommand Build()
 	{
 		var command = new CliCommand("get") { Description = "Show command details" }
 			.AddArgument<string>("name-or-id", "Command name or ID", out var nameArg)
 			.AddOption<bool>("--json", "Output as JSON", out var jsonOption);
 
 		command.SetActionWithErrorHandling(pr => Execute(
-			resolveStore(pr),
-			pluginLoader,
+			storeFactory.Create(pr),
 			new GetInput(
 				pr.GetValue(nameArg) ?? string.Empty,
 				pr.GetValue(jsonOption)
@@ -30,7 +27,7 @@ internal static class GetCommand
 		return command;
 	}
 
-	private static void Execute(CommandStore store, IPluginLoader pluginLoader, GetInput input)
+	private void Execute(CommandStore store, GetInput input)
 	{
 		var (file, cmd) = store.GetCommand(input.NameOrId);
 
@@ -40,14 +37,14 @@ internal static class GetCommand
 		}
 		else
 		{
-			PrintTableCommand(cmd, pluginLoader, store.GetRelativePath(file));
+			PrintTableCommand(cmd, store.GetRelativePath(file));
 		}
 	}
 
 	private static void PrintJsonCommand(CommandEntry cmd)
 		=> Console.WriteLine(CommandSerializer.SerializeSingle(cmd));
 
-	private static void PrintTableCommand(CommandEntry cmd, IPluginLoader pluginLoader, string filePath)
+	private void PrintTableCommand(CommandEntry cmd, string filePath)
 	{
 		var actionTexts = cmd.Actions.Select(x => x.Target).Distinct()
 			.ToDictionary(x => x, pluginLoader.GetPluginName);

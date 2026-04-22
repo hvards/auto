@@ -1,4 +1,3 @@
-using System.CommandLine;
 using System.IO;
 
 using Auto.Cli.Services;
@@ -8,7 +7,7 @@ using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli.Commands;
 
-internal static class AddCommand
+internal class AddCommand(ICommandStoreFactory storeFactory, ITriggerCreator triggerCreator) : ICliCommand
 {
 	private record AddInput(
 		string Name,
@@ -19,7 +18,7 @@ internal static class AddCommand
 		string[]? Sequence
 	);
 
-	public static CliCommand Create(Func<ParseResult, CommandStore> resolveStore, ITriggerCreator triggerCreator)
+	public CliCommand Build()
 	{
 		var command = new CliCommand("add") { Description = "Create a new command" }
 			.AddArgument<string>("name", "Command name", out var nameArg)
@@ -33,8 +32,7 @@ internal static class AddCommand
 			.AddOption<bool>("--disabled", "Create as disabled", out var disabledOption);
 
 		command.SetActionWithErrorHandling(pr => Execute(
-			resolveStore(pr),
-			triggerCreator,
+			storeFactory.Create(pr),
 			new AddInput(
 				pr.GetValue(nameArg) ?? string.Empty,
 				pr.GetValue(fileOption) ?? string.Empty,
@@ -48,7 +46,7 @@ internal static class AddCommand
 		return command;
 	}
 
-	private static void Execute(CommandStore store, ITriggerCreator triggerCreator, AddInput input)
+	private void Execute(CommandStore store, AddInput input)
 	{
 		var path = store.ResolvePath(input.File);
 

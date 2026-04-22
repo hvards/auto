@@ -1,5 +1,3 @@
-using System.CommandLine;
-
 using Auto.Cli.Services;
 using Auto.Models;
 
@@ -7,7 +5,7 @@ using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli.Commands;
 
-internal static class ActionEditCommand
+internal class ActionEditCommand(ICommandStoreFactory storeFactory)
 {
 	private record Input(
 		string NameOrId,
@@ -16,7 +14,7 @@ internal static class ActionEditCommand
 		string? Variable
 	);
 
-	public static CliCommand Create(Func<ParseResult, CommandStore> resolveStore)
+	public CliCommand Build()
 	{
 		var command = new CliCommand("edit") { Description = "Edit an existing action in a command" }
 			.AddArgument<string>("name-or-id", "Command name or ID", out var nameArg)
@@ -25,7 +23,7 @@ internal static class ActionEditCommand
 			.AddOption<string>("--var", "Updated output variable name", out var varOption);
 
 		command.SetActionWithErrorHandling(pr => Execute(
-			resolveStore(pr),
+			storeFactory.Create(pr),
 			new Input(
 				pr.GetValue(nameArg) ?? string.Empty,
 				pr.GetValue(indexArg),

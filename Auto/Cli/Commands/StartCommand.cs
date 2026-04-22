@@ -6,9 +6,9 @@ using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli.Commands;
 
-internal static class StartCommand
+internal class StartCommand : ICliCommand
 {
-	public static CliCommand Create()
+	public CliCommand Build()
 	{
 		var foregroundOption = new Option<bool>("--foreground") { Hidden = true };
 

@@ -1,12 +1,10 @@
-using System.CommandLine;
-
 using Auto.Cli.Services;
 
 using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli.Commands;
 
-internal static class EditCommand
+internal class EditCommand(ICommandStoreFactory storeFactory, ITriggerCreator triggerCreator) : ICliCommand
 {
 	private record EditInput(
 		string NameOrId,
@@ -16,9 +14,7 @@ internal static class EditCommand
 		string? NewName
 	);
 
-	public static CliCommand Create(
-		Func<ParseResult, CommandStore> resolveStore,
-		ITriggerCreator triggerCreator)
+	public CliCommand Build()
 	{
 		var command = new CliCommand("edit") { Description = "Modify an existing command" }
 			.AddArgument<string>("name-or-id", "Command name or ID", out var nameArg)
@@ -30,8 +26,7 @@ internal static class EditCommand
 			.AddOption<string>("--name", "New name", out var renameOption);
 
 		command.SetActionWithErrorHandling(pr => Execute(
-			resolveStore(pr),
-			triggerCreator,
+			storeFactory.Create(pr),
 			new EditInput(
 				pr.GetValue(nameArg) ?? string.Empty,
 				pr.GetResult(combinationOption) != null ? pr.GetValue(combinationOption) : null,
@@ -44,7 +39,7 @@ internal static class EditCommand
 		return command;
 	}
 
-	private static void Execute(CommandStore store, ITriggerCreator triggerCreator, EditInput input)
+	private void Execute(CommandStore store, EditInput input)
 	{
 		var cmd = store.Update(input.NameOrId, target =>
 		{

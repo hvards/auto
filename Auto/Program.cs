@@ -1,7 +1,6 @@
 using System.CommandLine;
-using System.IO;
 
-using Auto.Cli.Commands;
+using Auto.Cli;
 using Auto.Cli.Services;
 using Auto.Commands;
 using Auto.Handlers;
@@ -25,7 +24,8 @@ internal static class Program
 		Application.EnableVisualStyles();
 		Application.SetCompatibleTextRenderingDefault(false);
 		ConfigureConsoleLogger();
-		return await BuildCli(InitializeServiceProvider()).Parse(args).InvokeAsync();
+		var serviceProvider = CreateServiceCollection().AddCliCommands().BuildServiceProvider();
+		return await BuildCli(serviceProvider).Parse(args).InvokeAsync();
 	}
 
 	internal static void ConfigureConsoleLogger()
@@ -52,53 +52,21 @@ internal static class Program
 
 	internal static RootCommand BuildCli(IServiceProvider serviceProvider)
 	{
-		var configDirOption = new Option<string>("--config-dir")
-		{
-			DefaultValueFactory = _ => Path.Combine(
-				Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "auto"),
-			Description = "Configuration directory path",
-			Recursive = true,
-			Hidden = true
-		};
-
-		CommandStore ResolveStore(ParseResult pr) =>
-			new(pr.GetValue(configDirOption) ?? string.Empty);
-
-		var triggerCreator = serviceProvider.GetRequiredService<ITriggerCreator>();
-		var keyRecorder = serviceProvider.GetRequiredService<IKeyRecorder>();
-		var pluginLoader = serviceProvider.GetRequiredService<IPluginLoader>();
-		var commandExecutor = serviceProvider.GetRequiredService<Commands.ICommandExecutor>();
-
 		var rootCommand = new RootCommand("Auto");
-		rootCommand.Options.Add(configDirOption);
+		rootCommand.Options.Add(serviceProvider.GetRequiredService<ICommandStoreFactory>().ConfigDirOption);
 
-		rootCommand.Subcommands.Add(ListCommand.Create(ResolveStore));
-		rootCommand.Subcommands.Add(GetCommand.Create(ResolveStore, pluginLoader));
-		rootCommand.Subcommands.Add(AddCommand.Create(ResolveStore, triggerCreator));
-		rootCommand.Subcommands.Add(EditCommand.Create(ResolveStore, triggerCreator));
-		rootCommand.Subcommands.Add(ActionCommand.Create(ResolveStore, pluginLoader));
-		rootCommand.Subcommands.Add(DeleteCommand.Create(ResolveStore));
-		rootCommand.Subcommands.Add(EnableDisableCommand.CreateEnable(ResolveStore));
-		rootCommand.Subcommands.Add(EnableDisableCommand.CreateDisable(ResolveStore));
-		rootCommand.Subcommands.Add(ExecuteCommand.Create(ResolveStore, commandExecutor));
-		rootCommand.Subcommands.Add(ListPluginsCommand.Create(pluginLoader));
-		rootCommand.Subcommands.Add(ListKeysCommand.Create());
-		rootCommand.Subcommands.Add(RecordInputCommand.Create(keyRecorder));
-		rootCommand.Subcommands.Add(StartCommand.Create());
-		rootCommand.Subcommands.Add(StopCommand.Create());
+		foreach (var cliCommand in serviceProvider.GetServices<ICliCommand>())
+			rootCommand.Subcommands.Add(cliCommand.Build());
 
 		return rootCommand;
 	}
 
 	internal static void StartService()
 	{
-		var serviceProvider = InitializeServiceProvider();
+		var serviceProvider = CreateServiceCollection().BuildServiceProvider();
 		_ = serviceProvider.GetRequiredService<KeyListener>();
 		Application.Run();
 	}
-
-	internal static IServiceProvider InitializeServiceProvider()
-		=> CreateServiceCollection().BuildServiceProvider();
 
 	internal static IServiceCollection CreateServiceCollection()
 	{

@@ -10,14 +10,14 @@ internal static class ListPluginsCommand
 {
 	private static readonly JsonSerializerOptions WriteOptions = new() { WriteIndented = true };
 
-	public static CliCommand Create()
+	public static CliCommand Create(IPluginLoader pluginLoader)
 	{
 		var command = new CliCommand("list-plugins") { Description = "List available plugins" }
 			.AddOption<bool>("--json", "Output as JSON", out var jsonOption);
 
 		command.SetActionWithErrorHandling(pr =>
 		{
-			var plugins = PluginLoader.GetAvailablePluginDetails();
+			var plugins = pluginLoader.GetAvailablePluginDetails().ToList();
 			if (pr.GetValue(jsonOption))
 			{
 				PrintJsonResult(plugins);

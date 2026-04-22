@@ -25,7 +25,7 @@ internal class ActionCommandTests : CliTestBase
 
 		var cmd = TestCommandStore.GetCommand("Test").Command;
 		Assert.That(cmd.Actions, Has.Length.EqualTo(1));
-		Assert.That(cmd.Actions[0].Target, Is.EqualTo(PluginLoader.ResolvePlugin("StartProgram")));
+		Assert.That(cmd.Actions[0].Target, Is.EqualTo(TestPluginLoader.ResolvePlugin("StartProgram")));
 		Assert.That(cmd.Actions[0].Arguments[0].Tokens[0].Value, Is.EqualTo("https://example.com"));
 	}
 
@@ -105,7 +105,7 @@ internal class ActionCommandTests : CliTestBase
 		Assert.That(exit, Is.Zero);
 
 		var cmd = TestCommandStore.GetCommand("Test").Command;
-		Assert.That(cmd.Actions[0].Target, Is.EqualTo(PluginLoader.ResolvePlugin("PowerShell")));
+		Assert.That(cmd.Actions[0].Target, Is.EqualTo(TestPluginLoader.ResolvePlugin("PowerShell")));
 		Assert.That(cmd.Actions[0].Arguments[0].Tokens[0].Value, Is.EqualTo("test.ps1"));
 		Assert.That(cmd.Actions[0].Arguments[1].Tokens[0].Value, Is.EqualTo(@"Path=C:\scripts"));
 	}
@@ -301,8 +301,8 @@ internal class ActionCommandTests : CliTestBase
 	public async Task FullPipeline_MultipleActions()
 	{
 		// Arrange
-		var startProgramGuid = PluginLoader.ResolvePlugin("StartProgram");
-		var keyboardInputGuid = PluginLoader.ResolvePlugin("KeyboardInput");
+		var startProgramGuid = TestPluginLoader.ResolvePlugin("StartProgram");
+		var keyboardInputGuid = TestPluginLoader.ResolvePlugin("KeyboardInput");
 
 		// Act
 		await InvokeAsync("add", "Format and Paste", "--file", "cmds.json",

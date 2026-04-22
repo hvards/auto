@@ -3,12 +3,16 @@ using Auto.Cli.Services;
 using Auto.Models;
 using Auto.PluginUtils;
 
+using Microsoft.Extensions.DependencyInjection;
+
 namespace IntegrationTests.Cli;
 
 internal abstract class CliTestBase
 {
 	private string _tempDir = null!;
 	protected CommandStore TestCommandStore => new(_tempDir);
+
+	protected static IPluginLoader TestPluginLoader => TestServicesFixture.Services.GetRequiredService<IPluginLoader>();
 
 	[SetUp]
 	public void SetUp()
@@ -25,7 +29,7 @@ internal abstract class CliTestBase
 
 	protected async Task<(int ExitCode, string Stdout, string Stderr)> InvokeAsync(params string[] args)
 	{
-		var root = Program.BuildCli();
+		var root = Program.BuildCli(TestServicesFixture.Services);
 		var fullArgs = new List<string>(args) { "--config-dir", _tempDir };
 
 		var stdOut = new StringWriter();
@@ -52,7 +56,7 @@ internal abstract class CliTestBase
 			[
 				new CommandAction
 				{
-					Target = PluginLoader.ResolvePlugin("StartProgram"),
+					Target = TestPluginLoader.ResolvePlugin("StartProgram"),
 					Order = 0,
 					Arguments =
 					[

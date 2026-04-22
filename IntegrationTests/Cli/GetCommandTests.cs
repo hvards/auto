@@ -20,7 +20,7 @@ internal class GetCommandTests : CliTestBase
 		// Assert
 		Assert.That(exit, Is.Zero);
 		var trigger = KeyNameResolver.FormatCombination(cmd.Trigger.Combination);
-		var startProgramGuid = PluginLoader.ResolvePlugin("StartProgram");
+		var startProgramGuid = TestPluginLoader.ResolvePlugin("StartProgram");
 		var expected = string.Join(Environment.NewLine,
 			$"Name:        Test",
 			$"Description: Test description",

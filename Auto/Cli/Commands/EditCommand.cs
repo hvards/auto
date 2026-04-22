@@ -11,7 +11,8 @@ internal class EditCommand(ICommandStoreFactory storeFactory, ITriggerCreator tr
 		string[]? Combination,
 		string[]? Sequence,
 		string? Description,
-		string? NewName
+		string? NewName,
+		bool? Enabled
 	);
 
 	public CliCommand Build()
@@ -23,7 +24,8 @@ internal class EditCommand(ICommandStoreFactory storeFactory, ITriggerCreator tr
 			.AddOption<string[]>("--sequence", "New key sequence, or omit value to record interactively",
 				out var sequenceOption, argumentRequired: false)
 			.AddOption<string>("--description", "New description", out var descOption)
-			.AddOption<string>("--name", "New name", out var renameOption);
+			.AddOption<string>("--name", "New name", out var renameOption)
+			.AddOption<bool>("--enabled", "Enable (true) or disable (false) the command", out var enabledOption);
 
 		command.SetActionWithErrorHandling(pr => Execute(
 			storeFactory.Create(pr),
@@ -32,7 +34,8 @@ internal class EditCommand(ICommandStoreFactory storeFactory, ITriggerCreator tr
 				pr.GetResult(combinationOption) != null ? pr.GetValue(combinationOption) : null,
 				pr.GetResult(sequenceOption) != null ? pr.GetValue(sequenceOption) : null,
 				pr.GetValue(descOption),
-				pr.GetValue(renameOption)
+				pr.GetValue(renameOption),
+				pr.GetResult(enabledOption) != null ? pr.GetValue(enabledOption) : null
 			)
 		));
 
@@ -54,6 +57,9 @@ internal class EditCommand(ICommandStoreFactory storeFactory, ITriggerCreator tr
 
 			target.Description = input.Description ?? target.Description;
 			target.Name = input.NewName ?? target.Name;
+
+			if (input.Enabled.HasValue)
+				target.Enabled = input.Enabled.Value;
 		});
 
 		Console.WriteLine($"Updated '{cmd.Name}'");

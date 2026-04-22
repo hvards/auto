@@ -15,8 +15,6 @@ internal static class CliServiceCollectionExtensions
 		services.AddSingleton<ICliCommand, GetCommand>();
 		services.AddSingleton<ICliCommand, AddCommand>();
 		services.AddSingleton<ICliCommand, EditCommand>();
-		services.AddSingleton<ICliCommand>(sp => new EnableDisableCommand(sp.GetRequiredService<ICommandStoreFactory>(), enable: true));
-		services.AddSingleton<ICliCommand>(sp => new EnableDisableCommand(sp.GetRequiredService<ICommandStoreFactory>(), enable: false));
 		services.AddSingleton<ICliCommand, ActionCommand>();
 		services.AddSingleton<ICliCommand, DeleteCommand>();
 		services.AddSingleton<ICliCommand, ExecuteCommand>();

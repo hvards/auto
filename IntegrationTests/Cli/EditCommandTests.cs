@@ -54,4 +54,34 @@ internal class EditCommandTests : CliTestBase
 		Assert.That(exit, Is.Zero);
 		Assert.That(TestCommandStore.Find("Test")!.Value.Command.Description, Is.EqualTo("New desc"));
 	}
+
+	[Test]
+	public async Task Edit_EnablesCommand()
+	{
+		// Arrange
+		SeedCommand(enabled: false);
+
+		// Act
+		var (exit, stdout, _) = await InvokeAsync("edit", "Test", "--enabled", "true");
+
+		// Assert
+		Assert.That(exit, Is.Zero);
+		Assert.That(stdout.TrimEnd(), Is.EqualTo("Updated 'Test'"));
+		Assert.That(TestCommandStore.Find("Test")!.Value.Command.Enabled, Is.True);
+	}
+
+	[Test]
+	public async Task Edit_DisablesCommand()
+	{
+		// Arrange
+		SeedCommand(enabled: true);
+
+		// Act
+		var (exit, stdout, _) = await InvokeAsync("edit", "Test", "--enabled", "false");
+
+		// Assert
+		Assert.That(exit, Is.Zero);
+		Assert.That(stdout.TrimEnd(), Is.EqualTo("Updated 'Test'"));
+		Assert.That(TestCommandStore.Find("Test")!.Value.Command.Enabled, Is.False);
+	}
 }

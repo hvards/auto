@@ -96,8 +96,8 @@ auto execute "<name-or-id>"
 
 auto edit "<name-or-id>" --name "New name" --description "Updated description"
 auto edit "<name-or-id>" --combination  # Record interactively
-auto disable "<name-or-id>"
-auto enable "<name-or-id>"
+auto edit "<name-or-id>" --enabled false
+auto edit "<name-or-id>" --enabled true
 auto delete "<name-or-id>"
 ```
 

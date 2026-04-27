@@ -12,20 +12,7 @@ internal interface ISendInput
 
 internal class SendInput(IKeyboardHandler keyboardHandler) : ISendInput
 {
-	public static bool BlockInput { get; private set; }
-
-	public void Keyboard(string input)
-	{
-		BlockInput = true;
-		try
-		{
-			SendKeyboardTokens(input);
-		}
-		finally
-		{
-			BlockInput = false;
-		}
-	}
+	public void Keyboard(string input) => SendKeyboardTokens(input);
 
 	private void SendKeyboardTokens(string input)
 	{

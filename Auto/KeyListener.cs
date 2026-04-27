@@ -1,6 +1,5 @@
-﻿using Auto.Commands;
+using Auto.Commands;
 using Auto.Native;
-using Auto.Tasks;
 
 using static Auto.Native.Constants;
 
@@ -12,8 +11,9 @@ internal class KeyListener
 	private readonly IExecute _execute;
 	private readonly INativeMethods _nativeMethods;
 
-	private static nint _hookId = nint.Zero;
-	private static readonly HashSet<ushort> PressedKeys = [];
+	private nint _hookId = nint.Zero;
+	private readonly HashSet<ushort> _pressedKeys = [];
+	private readonly HashSet<ushort> _suppressedRepeats = [];
 
 	public KeyListener(ICommandProvider commandProvider, IExecute execute, INativeMethods nativeMethods)
 	{
@@ -33,21 +33,31 @@ internal class KeyListener
 	private nint KeyboardHookCallback(int nCode, nint wParam, ref KeyboardInput lParam)
 	{
 		var keyDown = wParam is WM_KEYDOWN or WM_SYSKEYDOWN;
-		var keyUp = wParam is WM_KEYUP or WM_SYSKEYUP;
 		var vkCode = lParam.wVk;
-		if (SendInput.BlockInput && (int)lParam.dwExtraInfo != IGNORE_INPUT)
-			return 1;
 
-		if (keyUp)
-			PressedKeys.Clear();
-
-		if (SendInput.BlockInput || (int)lParam.dwExtraInfo == IGNORE_INPUT || nCode != 0 || !keyDown)
+		if ((int)lParam.dwExtraInfo == IGNORE_INPUT || nCode != 0)
 			return _nativeMethods.CallNextHook(_hookId, nCode, wParam, lParam);
 
-		PressedKeys.Add(vkCode);
+		if (!keyDown)
+		{
+			_pressedKeys.Remove(vkCode);
+			_suppressedRepeats.Remove(vkCode);
+			return _nativeMethods.CallNextHook(_hookId, nCode, wParam, lParam);
+		}
 
-		return _commandProvider.TryGetCommand(PressedKeys, vkCode, out var command)
-			? _execute.QueueCommand(command!)
-			: _nativeMethods.CallNextHook(_hookId, nCode, wParam, lParam);
+		// Check _pressedKeys key state in case of missing key up events
+		_pressedKeys.RemoveWhere(k => k != vkCode && !_nativeMethods.IsKeyPressed(k));
+		_suppressedRepeats.IntersectWith(_pressedKeys);
+
+		if (_suppressedRepeats.Contains(vkCode))
+			return 1;
+
+		_pressedKeys.Add(vkCode);
+
+		if (!_commandProvider.TryGetCommand(_pressedKeys, vkCode, out var command))
+			return _nativeMethods.CallNextHook(_hookId, nCode, wParam, lParam);
+
+		_suppressedRepeats.UnionWith(_pressedKeys);
+		return _execute.QueueCommand(command!);
 	}
 }

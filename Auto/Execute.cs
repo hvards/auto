@@ -15,14 +15,17 @@ internal partial class Execute : IExecute
 {
 	private readonly IClipboardHandler _clipboardHandler;
 	private readonly IKeyboardHandler _keyboardHandler;
-	private readonly Auto.Commands.ICommandExecutor _commandExecutor;
+	private readonly Commands.ICommandExecutor _commandExecutor;
 	private readonly ILogger<Execute> _logger;
 
 	private readonly Thread _executeThread;
-	private static readonly BlockingCollection<Models.Command> MessageQueue = [];
+	private readonly BlockingCollection<Models.Command> _messageQueue = [];
 
-	public Execute(IClipboardHandler clipboardHandler, IKeyboardHandler keyboardHandler,
-		Auto.Commands.ICommandExecutor commandExecutor, ILogger<Execute> logger)
+	public Execute(
+		IClipboardHandler clipboardHandler,
+		IKeyboardHandler keyboardHandler,
+		Commands.ICommandExecutor commandExecutor,
+		ILogger<Execute> logger)
 	{
 		_clipboardHandler = clipboardHandler;
 		_keyboardHandler = keyboardHandler;
@@ -35,7 +38,7 @@ internal partial class Execute : IExecute
 
 	public nint QueueCommand(Models.Command s)
 	{
-		MessageQueue.Add(s);
+		_messageQueue.Add(s);
 		return 1;
 	}
 
@@ -45,7 +48,7 @@ internal partial class Execute : IExecute
 		{
 			try
 			{
-				var command = MessageQueue.Take();
+				var command = _messageQueue.Take();
 				for (var i = 0; command.Trigger.MacroTriggered && i < command.Trigger.Sequence.Length - 1; i++)
 					_keyboardHandler.ClickKey((ushort)Keys.Back, null);
 
@@ -61,11 +64,6 @@ internal partial class Execute : IExecute
 			catch (Exception ex)
 			{
 				LogErrorExecutingCommand(ex);
-			}
-			finally
-			{
-				// To avoid keypresses from trigger to interfere with execution
-				Thread.Sleep(500);
 			}
 		}
 	}

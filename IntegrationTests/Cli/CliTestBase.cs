@@ -3,6 +3,8 @@ using Auto.Cli.Services;
 using Auto.Models;
 using Auto.PluginUtils;
 
+using IntegrationTests.Stubs;
+
 using Microsoft.Extensions.DependencyInjection;
 
 namespace IntegrationTests.Cli;
@@ -13,6 +15,7 @@ internal abstract class CliTestBase
 	protected CommandStore TestCommandStore => new(_tempDir);
 
 	protected static IPluginLoader TestPluginLoader => TestServicesFixture.Services.GetRequiredService<IPluginLoader>();
+	protected static KeyRecorderStub TestKeyRecorder => (KeyRecorderStub)TestServicesFixture.Services.GetRequiredService<IKeyRecorder>();
 
 	[SetUp]
 	public void SetUp()
@@ -25,6 +28,7 @@ internal abstract class CliTestBase
 	public void TearDown()
 	{
 		if (Directory.Exists(_tempDir)) Directory.Delete(_tempDir, true);
+		TestKeyRecorder.Reset();
 	}
 
 	protected async Task<(int ExitCode, string Stdout, string Stderr)> InvokeAsync(params string[] args)
@@ -40,7 +44,12 @@ internal abstract class CliTestBase
 		return (exitCode, stdOut.ToString(), stdErr.ToString());
 	}
 
-	protected static CommandEntry GetCommand(string name = "Test", bool enabled = true, Guid? id = null)
+	protected static CommandEntry GetCommand(
+		string name = "Test",
+		bool enabled = true,
+		Guid? id = null,
+		string[]? combination = null,
+		string[]? sequence = null)
 		=> new()
 		{
 			Id = id ?? Guid.NewGuid(),
@@ -49,8 +58,8 @@ internal abstract class CliTestBase
 			Enabled = enabled,
 			Trigger = new Trigger
 			{
-				Combination = [.. KeyNameResolver.ParseInput(["LCtrl", "LWin", "T"])],
-				Sequence = []
+				Combination = [.. KeyNameResolver.ParseInput(combination ?? ["LCtrl", "LWin", "T"])],
+				Sequence = sequence != null ? [.. KeyNameResolver.ParseInput(sequence)] : []
 			},
 			Actions =
 			[
@@ -69,11 +78,19 @@ internal abstract class CliTestBase
 			]
 		};
 
-	protected CommandEntry SeedCommand(string name = "Test", bool enabled = true)
+	protected CommandEntry SeedCommand(
+		string name = "Test",
+		bool enabled = true,
+		string[]? combination = null,
+		string[]? sequence = null,
+		string file = "test.json")
 	{
-		var cmd = GetCommand(name, enabled);
+		var cmd = GetCommand(name, enabled, combination: combination, sequence: sequence);
 		var store = new CommandStore(_tempDir);
-		CommandStore.SaveFile(store.ResolvePath("test.json"), [cmd]);
+		var path = store.ResolvePath(file);
+		var existing = File.Exists(path) ? CommandStore.LoadFile(path) : [];
+		existing.Add(cmd);
+		CommandStore.SaveFile(path, existing);
 		return cmd;
 	}
 }

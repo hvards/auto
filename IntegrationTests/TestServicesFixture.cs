@@ -1,5 +1,6 @@
 using Auto;
 using Auto.Cli;
+using Auto.Cli.Services;
 using Auto.PluginUtils;
 
 using IntegrationTests.Stubs;
@@ -20,6 +21,7 @@ internal class TestServicesFixture
 		Services = Program.CreateServiceCollection()
 			.AddCliCommands()
 			.Replace(ServiceDescriptor.Singleton<IPluginLoader, PluginLoaderStub>())
+			.Replace(ServiceDescriptor.Singleton<IKeyRecorder, KeyRecorderStub>())
 			.BuildServiceProvider();
 	}
 

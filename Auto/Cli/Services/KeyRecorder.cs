@@ -36,9 +36,7 @@ internal class KeyRecorder(INativeMethods nativeMethods) : IKeyRecorder
 	public ushort[] RecordSequence()
 	{
 		Record(RecordMode.Sequence);
-		var keys = _events.Where(e => e.Type == EventType.Down).Select(e => e.VkCode).ToList();
-		keys.RemoveAt(keys.Count - 1);
-		return [.. keys];
+		return [.. _events.Where(e => e.Type == EventType.Down).Select(e => e.VkCode)];
 	}
 
 	public string RecordInput(bool recordDelay = false)

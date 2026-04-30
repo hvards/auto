@@ -91,6 +91,8 @@ auto action delete "<name-or-id>" 0
 
 ```powershell
 auto list
+auto list --combination LCtrl LWin B   # Filter by trigger combination, omit combination to record interactively
+auto list --sequence S T O P           # Filter by trigger sequence, omit sequence to record interactively
 auto get "<name-or-id>"
 auto execute "<name-or-id>"
 

@@ -5,9 +5,16 @@ using CliCommand = System.CommandLine.Command;
 
 namespace Auto.Cli.Commands;
 
-internal class ListCommand(ICommandStoreFactory storeFactory) : ICliCommand
+internal class ListCommand(ICommandStoreFactory storeFactory, ITriggerCreator triggerCreator) : ICliCommand
 {
-	private record ListInput(string? File, bool Enabled, bool Disabled, string? Search, bool Json);
+	private record ListInput(
+		string? File,
+		bool Enabled,
+		bool Disabled,
+		string? Search,
+		string[]? Combination,
+		string[]? Sequence,
+		bool Json);
 
 	public CliCommand Build()
 	{
@@ -16,6 +23,10 @@ internal class ListCommand(ICommandStoreFactory storeFactory) : ICliCommand
 			.AddOption<bool>("--enabled", "Show only enabled commands", out var enabledOption)
 			.AddOption<bool>("--disabled", "Show only disabled commands", out var disabledOption)
 			.AddOption<string>("--search", "Filter by name/description", out var searchOption)
+			.AddOption<string[]>("--combination", "Filter by key combination, or omit value to record interactively",
+				out var combinationOption, argumentRequired: false)
+			.AddOption<string[]>("--sequence", "Filter by key sequence, or omit value to record interactively",
+				out var sequenceOption, argumentRequired: false)
 			.AddOption<bool>("--json", "Output as JSON", out var jsonOption);
 
 		command.SetActionWithErrorHandling(pr => Execute(
@@ -25,6 +36,8 @@ internal class ListCommand(ICommandStoreFactory storeFactory) : ICliCommand
 				pr.GetValue(enabledOption),
 				pr.GetValue(disabledOption),
 				pr.GetValue(searchOption),
+				pr.GetResult(combinationOption) != null ? pr.GetValue(combinationOption) : null,
+				pr.GetResult(sequenceOption) != null ? pr.GetValue(sequenceOption) : null,
 				pr.GetValue(jsonOption)
 			)
 		));
@@ -32,7 +45,7 @@ internal class ListCommand(ICommandStoreFactory storeFactory) : ICliCommand
 		return command;
 	}
 
-	private static void Execute(CommandStore store, ListInput input)
+	private void Execute(CommandStore store, ListInput input)
 	{
 		var all = store.LoadAll();
 
@@ -42,11 +55,25 @@ internal class ListCommand(ICommandStoreFactory storeFactory) : ICliCommand
 			all = [.. all.Where(x => x.File.Equals(resolved, StringComparison.OrdinalIgnoreCase))];
 		}
 		if (input.Enabled || input.Disabled)
+		{
 			all = [.. all.Where(x => (input.Enabled && x.Command.Enabled) || (input.Disabled && !x.Command.Enabled))];
+		}
 		if (input.Search != null)
+		{
 			all = [.. all.Where(x =>
 				x.Command.Name.Contains(input.Search, StringComparison.OrdinalIgnoreCase) ||
 				x.Command.Description.Contains(input.Search, StringComparison.OrdinalIgnoreCase))];
+		}
+		if (input.Combination != null)
+		{
+			var target = triggerCreator.GetCombination(input.Combination);
+			all = [.. all.Where(x => x.Command.Trigger.Combination.SetEquals(target))];
+		}
+		if (input.Sequence != null)
+		{
+			var target = triggerCreator.GetSequence(input.Sequence);
+			all = [.. all.Where(x => x.Command.Trigger.Sequence.SequenceEqual(target))];
+		}
 
 		var sorted = all.OrderBy(x => x.Command.Name).ToList();
 
